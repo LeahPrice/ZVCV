@@ -1,0 +1,6 @@
+^NEWS$
+^README\.Rmd$
+^README\.md$
+^README\.html$
+^.*\.Rproj$
+^\.Rproj\.user$

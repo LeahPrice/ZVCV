@@ -2,15 +2,58 @@
 # #' @rdname zvcv
 getX <- function(samples, derivatives, polyorder){
 	
+	N <- NROW(samples)
+	d <- NCOL(samples)
+	
+	if (d==1 | (polyorder %in% c(1,2,3,4) & polyorder <= d)){
+		return (getX_fast(samples,derivatives,polyorder))
+	}
+	
+	Z <- -0.5*derivatives
+	
+	if (d==1){
+		samples <- array(samples,c(N,d))
+		Z <- array(Z,c(N,d))
+	}
+	
+	X <- matrix(,nrow=N,ncol=0)
+	for (mypol in 1:polyorder){
+		alpha <- compositions(mypol,d) # from library(partitions)
+		num_monos <- NCOL(alpha)
+		for (k in 1:num_monos){
+			term <- 0
+			# First order derivatives wrt parameter j
+			for (j in 1:d){
+				# my_set_diff <- setdiff(c(1:d),j)
+				# term <- term + max(alpha[j,k],0)*samples[,j]^(alpha[j,k] - 1)*Z[,j]  * apply(samples[,my_set_diff]^alpha[my_set_diff,k],1,prod)
+				myprod <- max(alpha[j,k],0)*samples[,j]^(alpha[j,k] - 1)*Z[,j]
+				for (jj in setdiff(c(1:d),j)){
+					myprod <- myprod*samples[,jj]^alpha[jj,k]
+				}
+				term <- term + myprod
+			}
+			# Second order derivatives wrt parameter j
+			for (j in 1:d){
+				# my_set_diff <- setdiff(c(1:d),j)
+				# term <- term + -0.5*max((alpha[j,k])*(alpha[j,k]-1),0)*samples[,j]^(alpha[j,k] - 2) * apply(samples[,my_set_diff]^alpha[my_set_diff,k],1,prod)
+				myprod <- max((alpha[j,k])*(alpha[j,k]-1),0)*samples[,j]^(alpha[j,k] - 2)
+				for (jj in setdiff(c(1:d),j)){
+					myprod <- myprod*samples[,jj]^alpha[jj,k]
+				}
+				term <- term + -0.5*myprod
+			}
+			X <- cbind(X,term)
+		}
+	}
+	
+	return (X)
+	
+}
+
+getX_fast <- function(samples, derivatives, polyorder){
+	
     N <- NROW(samples)
 	n_theta <- NCOL(samples)
-    
-    if (polyorder>n_theta){
-		stop('Currently the polynomial order can only be larger than the dimension of the parameters if the dimension of the parameters is one.')
-	}
-    if (!(polyorder %in% c(1,2,3,4))){
-		stop('The polynomial orders implemented in this package are 1, 2, 3 and 4.')
-	}
 	
 	Z <- -0.5*derivatives
     

@@ -25,7 +25,7 @@ zvcv(integrand, samples, derivatives, log_weight, integrand_logged = FALSE,
 
 \item{options}{A list of control variate specifications. This can be a single list containing the elements below (the defaults are used for elements which are not specified). Alternatively, it can be a list of lists containing any or all of the elements below. Where the latter is used, the function \code{zvcv} automatically selects the best performing option based on cross-validation. 
 \itemize{
-\item \code{polyorder}:   The order of the polynomial, with a default of 2. Implementations of polynomial orders 1, 2, 3 and 4 are available. The implementation here is based on the polynomial order being no larger than the dimension of the parameters.
+\item \code{polyorder}:   The order of the polynomial, with a default of 2. Fast implementations of polynomial orders 1, 2, 3 and 4 are available but higher order polynomials are also possible.
 \item \code{regul_reg}:   A flag for whether regularised regression is to be used. The default is TRUE, i.e. regularised regression is used.
 \item \code{alpha_elnet}:   The alpha parameter for elastic net. The default is 1, which correponds to LASSO. A value of 0 would correspond to ridge regression.
 \item \code{nfolds}:   The number of folds used in cross-validation to select lambda for LASSO or elastic net. The default is 10.
@@ -74,8 +74,9 @@ sprintf("\%.15f",zvcv(integrand,samples,derivatives)$expectation) # 2nd order po
 sprintf("\%.15f",zvcv(integrand,samples,derivatives,options = list(polyorder = 2, regul_reg = FALSE))$expectation) # 2nd order polynomial with OLS
 
 # ZV-CV with cross validation
-myopts <- list(list(polyorder = 2, regul_reg = FALSE),list(polyorder = 2)) # Choose between second order polynomial with or without LASSO
+myopts <- list(list(polyorder = Inf, regul_reg = FALSE),list(polyorder = Inf)) # Choose between OLS and LASSO, with the order selected using cross validation
 temp <- zvcv(integrand,samples,derivatives,options = myopts) 
+temp$polyorder # The chosen control variate order
 sprintf("\%.15f",temp$expectation) # The expectation based on the minimum MSE control variate
 temp$regul_reg # Flag for if the chosen control variate uses regularisation
 

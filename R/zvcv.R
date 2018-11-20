@@ -11,7 +11,7 @@
 #' @param obs_estim     (optional) The indices of the samples to be used in evaluating the integrand. If this is missing or \code{NULL} then the full data set is used for both estimating the polynomial and evaluating the integrand. Otherwise, the samples from \code{obs_estim} are used in evaluating the integral and the remainder are used in estimating the polynomial. 
 #' @param options       A list of control variate specifications. This can be a single list containing the elements below (the defaults are used for elements which are not specified). Alternatively, it can be a list of lists containing any or all of the elements below. Where the latter is used, the function \code{zvcv} automatically selects the best performing option based on cross-validation. 
 #' \itemize{
-#' \item \code{polyorder}:   The order of the polynomial, with a default of 2. Implementations of polynomial orders 1, 2, 3 and 4 are available. The implementation here is based on the polynomial order being no larger than the dimension of the parameters.
+#' \item \code{polyorder}:   The order of the polynomial, with a default of 2. Fast implementations of polynomial orders 1, 2, 3 and 4 are available but higher order polynomials are also possible.
 #' \item \code{regul_reg}:   A flag for whether regularised regression is to be used. The default is TRUE, i.e. regularised regression is used.
 #' \item \code{alpha_elnet}:   The alpha parameter for elastic net. The default is 1, which correponds to LASSO. A value of 0 would correspond to ridge regression.
 #' \item \code{nfolds}:   The number of folds used in cross-validation to select lambda for LASSO or elastic net. The default is 10.
@@ -56,8 +56,9 @@
 #' sprintf("%.15f",zvcv(integrand,samples,derivatives,options = list(polyorder = 2, regul_reg = FALSE))$expectation) # 2nd order polynomial with OLS
 #' 
 #' # ZV-CV with cross validation
-#' myopts <- list(list(polyorder = 2, regul_reg = FALSE),list(polyorder = 2)) # Choose between second order polynomial with or without LASSO
+#' myopts <- list(list(polyorder = Inf, regul_reg = FALSE),list(polyorder = Inf)) # Choose between OLS and LASSO, with the order selected using cross validation
 #' temp <- zvcv(integrand,samples,derivatives,options = myopts) 
+#' temp$polyorder # The chosen control variate order
 #' sprintf("%.15f",temp$expectation) # The expectation based on the minimum MSE control variate
 #' temp$regul_reg # Flag for if the chosen control variate uses regularisation
 #' 
@@ -78,7 +79,7 @@ zvcv <- function(integrand, samples, derivatives, log_weight, integrand_logged =
 	N <- NROW(integrand)
 	d <- NCOL(samples)
 	
-    if (missing(log_weight)) { log_weight <- rep(0,N) } # weights are normalised in another function
+	if (missing(log_weight)) { log_weight <- rep(0,N) } # weights are normalised in another function
 	if (missing(obs_estim_choose) & num_options>1) { obs_estim_choose = 1:which.min(abs(cumsum(exp(log_weight - logsumexp(log_weight)))-0.1)) } # gets 10% of the samples (taking into account weighting)
 	if (missing(obs_estim)) { obs_estim <- NULL }
 	for (i in 1:num_options){
@@ -95,7 +96,25 @@ zvcv <- function(integrand, samples, derivatives, log_weight, integrand_logged =
 		res <- list()
 		mse <- rep(0,num_options)
 		for (i in 1:num_options){
-			res[[i]] <- zv(integrand, samples, derivatives, log_weight, integrand_logged, obs_estim = obs_estim_choose, options[[i]]$polyorder, options[[i]]$regul_reg, options[[i]]$alpha_elnet, options[[i]]$nfolds, options[[i]]$apriori, options[[i]]$intercept)
+			# If polyorder is infinity then keep increasing polynomial order until mse stops decreasing
+			if (is.infinite(options[[i]]$polyorder)){
+				polyorder_curr <- -1
+				ret_curr <- list(mse = Inf)
+				mse_diff <- -Inf
+				while (mse_diff<0){
+					ret_old <- ret_curr
+					polyorder_curr <- polyorder_curr + 1
+					ret_curr <- zv(integrand, samples, derivatives, log_weight, integrand_logged, obs_estim = obs_estim_choose, polyorder_curr, options[[i]]$regul_reg, options[[i]]$alpha_elnet, options[[i]]$nfolds, options[[i]]$apriori, options[[i]]$intercept)
+					mse_diff <- ret_curr$mse - ret_old$mse
+					if (is.na(mse_diff)){
+						mse_diff <- Inf # stop if get a NA fit
+					}
+				}
+				res[[i]] <- ret_old
+				options[[i]]$polyorder <- polyorder_curr - 1
+			} else{
+				res[[i]] <- zv(integrand, samples, derivatives, log_weight, integrand_logged, obs_estim = obs_estim_choose, options[[i]]$polyorder, options[[i]]$regul_reg, options[[i]]$alpha_elnet, options[[i]]$nfolds, options[[i]]$apriori, options[[i]]$intercept)
+			}
 			mse[i] <- res[[i]]$mse
 		}
 		

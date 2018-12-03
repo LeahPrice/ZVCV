@@ -8,3 +8,7 @@
 
 * Allows for any order polynomial (with fast implementations available for polynomial orders Q = 1-4 or dimension d = 1)
 * A cross validation method which chooses the polynomial order starting at 0 and going to infinity is now implemented (this new method could allow for super-root-N convergence)
+
+# ZVCV 0.1.2
+
+* Speeding up the higher order polynomial matrix getter using C++

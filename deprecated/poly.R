@@ -5,41 +5,66 @@ getX <- function(samples, derivatives, polyorder){
 	N <- NROW(samples)
 	d <- NCOL(samples)
 	
-	# The actual form for polynomial orders less than 4 or any polynomial order
-	# with dimension d = 1 is coded in getX_fast
 	if (d==1 | (polyorder %in% c(1,2,3,4) & polyorder <= d)){
 		return (getX_fast(samples,derivatives,polyorder))
 	}
 	
-	alpha <- list()
-	for (i in 1:polyorder){
-		alpha[[i]] <- compositions(i,d)
-	}
+	Z <- -0.5*derivatives
 	
 	if (d==1){
 		samples <- array(samples,c(N,d))
 		Z <- array(Z,c(N,d))
 	}
 	
-	return (getPoly(samples,derivatives,alpha))
+	X <- matrix(,nrow=N,ncol=0)
+	for (mypol in 1:polyorder){
+		alpha <- compositions(mypol,d) # from library(partitions)
+		num_monos <- NCOL(alpha)
+		for (k in 1:num_monos){
+			term <- 0
+			# First order derivatives wrt parameter j
+			for (j in 1:d){
+				# my_set_diff <- setdiff(c(1:d),j)
+				# term <- term + max(alpha[j,k],0)*samples[,j]^(alpha[j,k] - 1)*Z[,j]  * apply(samples[,my_set_diff]^alpha[my_set_diff,k],1,prod)
+				myprod <- max(alpha[j,k],0)*samples[,j]^(alpha[j,k] - 1)*Z[,j]
+				for (jj in setdiff(c(1:d),j)){
+					myprod <- myprod*samples[,jj]^alpha[jj,k]
+				}
+				term <- term + myprod
+			}
+			# Second order derivatives wrt parameter j
+			for (j in 1:d){
+				# my_set_diff <- setdiff(c(1:d),j)
+				# term <- term + -0.5*max((alpha[j,k])*(alpha[j,k]-1),0)*samples[,j]^(alpha[j,k] - 2) * apply(samples[,my_set_diff]^alpha[my_set_diff,k],1,prod)
+				myprod <- max((alpha[j,k])*(alpha[j,k]-1),0)*samples[,j]^(alpha[j,k] - 2)
+				for (jj in setdiff(c(1:d),j)){
+					myprod <- myprod*samples[,jj]^alpha[jj,k]
+				}
+				term <- term + -0.5*myprod
+			}
+			X <- cbind(X,term)
+		}
+	}
+	
+	return (X)
 	
 }
 
 getX_fast <- function(samples, derivatives, polyorder){
 	
-	N <- NROW(samples)
+    N <- NROW(samples)
 	n_theta <- NCOL(samples)
 	
 	Z <- -0.5*derivatives
-	
-	if (n_theta==1){
-		X <- matrix(,nrow=N,ncol=0)
-		for (i in 1:polyorder){
-			X <- cbind(X,i*samples^(i-1)*Z-0.5*i*(i-1)*samples^(i-2))
-		}	
-		return (X)
-	}
-	
+    
+    if (n_theta==1){
+        X <- matrix(,nrow=N,ncol=0)
+        for (i in 1:polyorder){
+            X <- cbind(X,i*samples^(i-1)*Z-0.5*i*(i-1)*samples^(i-2))
+        }	
+        return (X)
+    }
+    
 	if (polyorder==1){
 		return (Z)
 	}

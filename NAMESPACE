@@ -1,7 +1,10 @@
+useDynLib("ZVCV", .registration=TRUE)
+
 import(glmnet)
 import(abind)
 import("partitions")
 importFrom(mvtnorm,"rmvnorm")
+importFrom("Rcpp", "evalCpp")
 
 export("zvcv",
 "getX",
@@ -10,5 +13,3 @@ export("zvcv",
 "evidence_CTI",
 "evidence_SMC"
 )
-
-

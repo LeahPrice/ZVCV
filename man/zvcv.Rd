@@ -25,7 +25,7 @@ zvcv(integrand, samples, derivatives, log_weight, integrand_logged = FALSE,
 
 \item{options}{A list of control variate specifications. This can be a single list containing the elements below (the defaults are used for elements which are not specified). Alternatively, it can be a list of lists containing any or all of the elements below. Where the latter is used, the function \code{zvcv} automatically selects the best performing option based on cross-validation. 
 \itemize{
-\item \code{polyorder}:   The order of the polynomial, with a default of 2. Fast implementations of polynomial orders 1, 2, 3 and 4 are available but higher order polynomials are also possible.
+\item \code{polyorder}:   The order of the polynomial, with a default of 2. A value of \code{Inf} will get the cross-validation method to choose between orders.
 \item \code{regul_reg}:   A flag for whether regularised regression is to be used. The default is TRUE, i.e. regularised regression is used.
 \item \code{alpha_elnet}:   The alpha parameter for elastic net. The default is 1, which correponds to LASSO. A value of 0 would correspond to ridge regression.
 \item \code{nfolds}:   The number of folds used in cross-validation to select lambda for LASSO or elastic net. The default is 10.

@@ -17,6 +17,6 @@ Details of the ZV-CV method can be found in:
 
 Mira, A., Solgi, R., & Imparato, D. (2013). *Zero variance Markov chain Monte Carlo for Bayesian estimators*. Statistics and Computing, 23(5), 653-662.
 
-The regularised ZV-CV method is described in the following paper which will appear on arXiv within the next few days:
+The regularised ZV-CV method is described in the following paper on arxiv
 
-South, L. F., Mira, A., & Drovandi, C. (2018). *Regularised zero variance control variates*.
+South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2018). *Regularised zero variance control variates*. https://arxiv.org/abs/1811.05073

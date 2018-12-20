@@ -27,7 +27,7 @@
 #' South, L. F., Mira, A., & Drovandi, C. (2018). Regularised zero variance control variates.
 #' 
 #' @author  Leah F. South
-#' @seealso See \code{\link{Expand_Temperatures}} for a function that can be used to find stricter (or less stricter) temperature schedules based on the conditional effective sample size. See \link{ZVCV} for more package details.
+#' @seealso See \code{\link{Expand_Temperatures}} for a function that can be used to find stricter (or less stricter) temperature schedules based on the conditional effective sample size. See \link{ZVCV_package} for more package details.
 #' 
 #' @name evidence
 evidence_CTI <- function(samples, loglike, der_loglike, der_logprior, gammavar, gammavar_all, most_recent, obs_estim_choose, obs_estim, options = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds = 10, apriori, intercept = TRUE)){

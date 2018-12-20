@@ -5,7 +5,7 @@
 #' @return 				The stable result of log(sum(exp(x)))
 #'
 #' @name helper_functions
-#' @seealso See \link{ZVCV} for more package details.
+#' @seealso See \link{ZVCV_package} for more package details.
 logsumexp <- function(x){
 	myMax <- max(x)
 	x <- x - myMax

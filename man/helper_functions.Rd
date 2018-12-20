@@ -16,3 +16,6 @@ The stable result of log(sum(exp(x)))
 \description{
 A stable function for computing log(sum(exp(x)))
 }
+\seealso{
+See \link{ZVCV_package} for more package details.
+}

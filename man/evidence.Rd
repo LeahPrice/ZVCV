@@ -63,7 +63,7 @@ Mira, A., Solgi, R., & Imparato, D. (2013). Zero variance Markov chain Monte Car
 South, L. F., Mira, A., & Drovandi, C. (2018). Regularised zero variance control variates.
 }
 \seealso{
-See \code{\link{Expand_Temperatures}} for a function that can be used to find stricter (or less stricter) temperature schedules based on the conditional effective sample size.
+See \code{\link{Expand_Temperatures}} for a function that can be used to find stricter (or less stricter) temperature schedules based on the conditional effective sample size. See \link{ZVCV_package} for more package details.
 }
 \author{
 Leah F. South

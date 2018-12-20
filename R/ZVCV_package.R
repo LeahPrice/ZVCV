@@ -23,6 +23,6 @@
 #' South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2018). Regularised zero variance control variates. https://arxiv.org/abs/1811.05073
 #'
 #' @author Leah F. South
-#' @name ZVCV
+#' @name ZVCV_package
 "_PACKAGE"
 #> [1] "_PACKAGE"

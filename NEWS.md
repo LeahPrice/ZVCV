@@ -12,3 +12,7 @@
 # ZVCV 0.1.2
 
 * Speeding up the higher order polynomial matrix getter using C++
+
+# ZVCV 0.1.3
+
+* Adding k-fold cross validation to select the polynomial order and doing some documentation improvements

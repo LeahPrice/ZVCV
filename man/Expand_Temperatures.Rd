@@ -30,6 +30,9 @@ This function is used to adjust the temperature schedule so that it is more (or 
 \references{
 South, L. F., Mira, A., & Drovandi, C. (2018). Regularised zero variance control variates.
 }
+\seealso{
+See \code{\link{evidence}} for functions to estimate the evidence and \link{ZVCV_package} for more package details.
+}
 \author{
 Leah F. South
 }

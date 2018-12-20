@@ -18,6 +18,7 @@
 #' South, L. F., Mira, A., & Drovandi, C. (2018). Regularised zero variance control variates.
 #'
 #' @author Leah F. South
+#' @seealso See \code{\link{evidence}} for functions to estimate the evidence and \link{ZVCV} for more package details.
 Expand_Temperatures  <- function(gammavar, loglike, alpha, bisec_tol = .Machine$double.eps^0.25){
 # This function can be used to add extra temperatures based on a more
 # strict ESS schedule than the move.

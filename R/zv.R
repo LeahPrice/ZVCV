@@ -12,14 +12,14 @@ zv <- function(integrand, samples, derivatives, log_weight, integrand_logged, ob
 		max_integrand <- max(integrand)
 		integrand <- exp(integrand - max_integrand)
 	}
-    
+	
 	# Setting default weight
 	if (missing(log_weight)){
 		log_weight <- -log(N)*rep(1,N)
 	}
-    
-    # Here onwards depends on options
-    
+	
+	# Here onwards depends on options
+	
 	if (is.null(obs_estim)){
 		obs_estim <- 1:N
 		obs_fit <- 1:N
@@ -79,11 +79,7 @@ zv <- function(integrand, samples, derivatives, log_weight, integrand_logged, ob
 				fit <- cv.glmnet(X_fit, y_fit, intercept = FALSE, family = 'gaussian', alpha = alpha_elnet, weights = weight_fit, lambda=myseq, nfolds = nfolds)
 			}
 			
-			R2 <- fit$glmnet.fit$dev.ratio[which(fit$glmnet.fit$lambda == fit$lambda.min)]
-			adjR2 <- 1 - (1-R2)*(length(y_fit) - 1)/(length(y_fit) - NCOL(X_fit) - 1)
-			
 			coefs <- coef(fit,s = "lambda.min")
-			
 			num_select <- unname(fit$nzero[which(fit$lambda == fit$lambda.min)])
 			
 		} else {
@@ -133,5 +129,5 @@ zv <- function(integrand, samples, derivatives, log_weight, integrand_logged, ob
 	
 	
 	return(list(expectation = expectation, num_select = num_select, mse = mse,
-    integrand_logged = integrand_logged, obs_estim = obs_estim, polyorder = polyorder, regul_reg = regul_reg, alpha_elnet = alpha_elnet, nfolds = nfolds, apriori = apriori, intercept = intercept))
+							integrand_logged = integrand_logged, obs_estim = obs_estim, polyorder = polyorder, regul_reg = regul_reg, alpha_elnet = alpha_elnet, nfolds = nfolds, apriori = apriori, intercept = intercept))
 }

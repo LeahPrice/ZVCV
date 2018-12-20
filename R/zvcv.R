@@ -16,8 +16,9 @@
 #' \item \code{alpha_elnet}:   The alpha parameter for elastic net. The default is 1, which correponds to LASSO. A value of 0 would correspond to ridge regression.
 #' \item \code{nfolds}:   The number of folds used in cross-validation to select lambda for LASSO or elastic net. The default is 10.
 #' \item \code{apriori}:   The indices of the parameters to use in the polynomial. The default is to use all parameters \eqn{1:d} where \eqn{d} is the dimension of the target. If only the first and third derivatives should be used, then this would be specified by using \code{apriori} = c(1,3) (alternatively, this can be done by only using the relevant columns in \code{samples} and \code{derivatives}).
-#' \item \code{intercept}:   A flag for whether the intercept should be estimated or fixed to 0. The default is to include an intercept (\code{intercept = TRUE}) as this tends to lead to better variance reductions. Note that an \code{intercept = TRUE} flag may be changed to \code{intercept = FALSE} within the function if \code{integrand_logged = TRUE} and a \code{NaN} is encountered. See South et al. (2018) for further details.
+#' \item \code{intercept}:   A flag for whether the intercept should be estimated or fixed to the empirical mean of the integrand in the estimation set. The default is to include an intercept (\code{intercept = TRUE}) as this tends to lead to better variance reductions. Note that an \code{intercept = TRUE} flag may be changed to \code{intercept = FALSE} within the function if \code{integrand_logged = TRUE} and a \code{NaN} is encountered. See South et al. (2018) for further details.
 #' }
+#' @param folds_choose  The number of folds used in k-fold cross-validation for selecting the optimal control variate. Depending on the \code{options}, this may include selection of the optimal polynomial order, regression type and subset of parameters in the polynomial.
 #' 
 #' @return 				A list is returned, containing the following components:
 #' \itemize{
@@ -68,9 +69,9 @@
 #' South, L. F., Mira, A., & Drovandi, C. (2018). Regularised zero variance control variates.
 #'
 #' @author 								Leah F. South
-#' @seealso 							See \code{\link{evidence}} for functions which use \code{zvcv} to estimate the normalising constant of the posterior
+#' @seealso 							See \code{\link{evidence}} for functions which use \code{zvcv} to estimate the normalising constant of the posterior. See \link{ZVCV} for more package details.
 #' @export zvcv
-zvcv <- function(integrand, samples, derivatives, log_weight, integrand_logged = FALSE, obs_estim_choose, obs_estim, options = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds = 10, apriori = (1:NCOL(samples)), intercept = TRUE)) {
+zvcv <- function(integrand, samples, derivatives, log_weight, integrand_logged = FALSE, obs_estim_choose, obs_estim, options = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds = 10, apriori = (1:NCOL(samples)), intercept = TRUE), folds_choose = 5) {
 	
 	if (any(c("polyorder","regul_reg","alpha_elnet","nfolds","apriori","intercept") %in% names(options))){
 		options <- rep(list(options),1)
@@ -81,6 +82,7 @@ zvcv <- function(integrand, samples, derivatives, log_weight, integrand_logged =
 	
 	if (missing(log_weight)) { log_weight <- rep(0,N) } # weights are normalised in another function
 	if (missing(obs_estim_choose) & num_options>1) { obs_estim_choose = 1:which.min(abs(cumsum(exp(log_weight - logsumexp(log_weight)))-0.1)) } # gets 10% of the samples (taking into account weighting)
+	if (missing(obs_estim_choose) & (num_options>1 | is.infinite(options[[1]]$polyorder))) {  obs_estim_choose <- split(sample(1:N),rep(1:folds_choose, ceiling(N/folds_choose),length.out = N))  }
 	if (missing(obs_estim)) { obs_estim <- NULL }
 	for (i in 1:num_options){
 		if (!("polyorder" %in% names(options[[i]]))) { options[[i]]$polyorder <- 2 }
@@ -92,30 +94,37 @@ zvcv <- function(integrand, samples, derivatives, log_weight, integrand_logged =
 	}
 	
 	
-	if (num_options>1){
-		res <- list()
+	if (num_options>1 | is.infinite(options[[1]]$polyorder)){
 		mse <- rep(0,num_options)
 		for (i in 1:num_options){
 			# If polyorder is infinity then keep increasing polynomial order until mse stops decreasing
 			if (is.infinite(options[[i]]$polyorder)){
-				polyorder_curr <- -1
-				ret_curr <- list(mse = Inf)
-				mse_diff <- -Inf
-				while (mse_diff<0){
-					ret_old <- ret_curr
+				polyorder_curr <- 0
+				mse_old <- 0
+				mse_new <- Inf
+				while (mse_new - mse_old < 0 | polyorder_curr<1){
+					mse_old <- mse_new
 					polyorder_curr <- polyorder_curr + 1
-					ret_curr <- zv(integrand, samples, derivatives, log_weight, integrand_logged, obs_estim = obs_estim_choose, polyorder_curr, options[[i]]$regul_reg, options[[i]]$alpha_elnet, options[[i]]$nfolds, options[[i]]$apriori, options[[i]]$intercept)
-					mse_diff <- ret_curr$mse - ret_old$mse
-					if (is.na(mse_diff)){
-						mse_diff <- Inf # stop if get a NA fit
+					mse_temp <- rep(0,folds_choose)
+					for (k in 1:folds_choose){
+						res_curr <- zv(integrand, samples, derivatives, log_weight, integrand_logged, obs_estim = obs_estim_choose[[k]], polyorder_curr, options[[i]]$regul_reg, options[[i]]$alpha_elnet, options[[i]]$nfolds, options[[i]]$apriori, options[[i]]$intercept)
+						mse_temp[k] <- res_curr$mse
+						if (is.na(mse_temp[k])){
+							mse_temp[k] <- Inf # stop if get a NA fit
+						}
 					}
+					mse_new <- mean(mse_temp)
 				}
-				res[[i]] <- ret_old
 				options[[i]]$polyorder <- polyorder_curr - 1
+				mse[i] <- mse_old
 			} else{
-				res[[i]] <- zv(integrand, samples, derivatives, log_weight, integrand_logged, obs_estim = obs_estim_choose, options[[i]]$polyorder, options[[i]]$regul_reg, options[[i]]$alpha_elnet, options[[i]]$nfolds, options[[i]]$apriori, options[[i]]$intercept)
+				mse_temp <- rep(0,folds_choose)
+				for (k in 1:folds_choose){
+					res <- zv(integrand, samples, derivatives, log_weight, integrand_logged, obs_estim = obs_estim_choose[[k]], options[[i]]$polyorder, options[[i]]$regul_reg, options[[i]]$alpha_elnet, options[[i]]$nfolds, options[[i]]$apriori, options[[i]]$intercept)
+					mse_temp[k] <- res$mse
+				}
+				mse[i] <- mean(mse_temp)
 			}
-			mse[i] <- res[[i]]$mse
 		}
 		
 		i <- which.min(mse)

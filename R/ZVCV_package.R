@@ -7,7 +7,7 @@
 #' The main functionality is available through
 #'
 #' \itemize{
-#'      \item \code{\link{zvcv}}: The main function to estimate expectations using (regularised) ZV-CV. This function uses a single set of \eqn{N} samples along with the associated derivatives with respect to the target distribution and evaluations of the function of interest.
+#'      \item \code{\link{zvcv}}: The main function to estimate expectations using (regularised) ZV-CV. This function uses a set of \eqn{N} samples along with the associated derivatives of the log target and evaluations of the function of interest.
 #'      \item \code{\link{evidence_CTI}}: A function to estimate the evidence using the controlled thermodynamic integration (CTI) identity, with samples from a set of \eqn{T} power posteriors.
 #'      \item \code{\link{evidence_SMC}}: A function to estimate the evidence using ZV-CV on the SMC evidence identity, with samples from a set of \eqn{T} power posteriors.
 #'}
@@ -20,8 +20,9 @@
 #' @references
 #' Mira, A., Solgi, R., & Imparato, D. (2013). Zero variance Markov chain Monte Carlo for Bayesian estimators. Statistics and Computing, 23(5), 653-662.
 #'
-#' South, L. F., Mira, A., & Drovandi, C. (2018). Regularised zero variance control variates.
+#' South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2018). Regularised zero variance control variates. https://arxiv.org/abs/1811.05073
 #'
 #' @author Leah F. South
+#' @name ZVCV
 "_PACKAGE"
 #> [1] "_PACKAGE"

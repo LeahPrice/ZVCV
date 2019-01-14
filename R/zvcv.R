@@ -81,7 +81,6 @@ zvcv <- function(integrand, samples, derivatives, log_weight, integrand_logged =
 	d <- NCOL(samples)
 	
 	if (missing(log_weight)) { log_weight <- rep(0,N) } # weights are normalised in another function
-	if (missing(obs_estim_choose) & num_options>1) { obs_estim_choose = 1:which.min(abs(cumsum(exp(log_weight - logsumexp(log_weight)))-0.1)) } # gets 10% of the samples (taking into account weighting)
 	if (missing(obs_estim_choose) & (num_options>1 | is.infinite(options[[1]]$polyorder))) {  obs_estim_choose <- split(sample(1:N),rep(1:folds_choose, ceiling(N/folds_choose),length.out = N))  }
 	if (missing(obs_estim)) { obs_estim <- NULL }
 	for (i in 1:num_options){

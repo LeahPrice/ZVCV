@@ -4,10 +4,11 @@
 \alias{zvcv}
 \title{ZV-CV for general expectations}
 \usage{
-zvcv(integrand, samples, derivatives, log_weight, integrand_logged = FALSE,
-  obs_estim_choose, obs_estim, options = list(polyorder = 2, regul_reg = TRUE,
-  alpha_elnet = 1, nfolds = 10, apriori = (1:NCOL(samples)), intercept = TRUE,
-  polyorder_max = Inf), folds_choose = 5)
+zvcv(integrand, samples, derivatives, log_weight,
+  integrand_logged = FALSE, obs_estim_choose, obs_estim,
+  options = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds
+  = 10, apriori = (1:NCOL(samples)), intercept = TRUE, polyorder_max =
+  Inf), folds_choose = 5)
 }
 \arguments{
 \item{integrand}{The integrand, i.e. a set of \eqn{N} evaluations of the function of interest.}
@@ -97,7 +98,7 @@ temp$regul_reg # Flag for if the chosen control variate uses regularisation
 \references{
 Mira, A., Solgi, R., & Imparato, D. (2013). Zero variance Markov chain Monte Carlo for Bayesian estimators. Statistics and Computing, 23(5), 653-662.
 
-South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2019). Regularised zero variance control variates for high-dimensional variance reduction.
+South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2019). Regularised zero variance control variates for high-dimensional variance reduction. \url{https://arxiv.org/abs/1811.05073}
 }
 \seealso{
 See \code{\link{evidence}} for functions which use \code{zvcv} to estimate the normalising constant of the posterior. See an example at \code{\link{VDP}} and see \link{ZVCV} for more package details.

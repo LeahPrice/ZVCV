@@ -76,7 +76,7 @@
 #' @references
 #' Mira, A., Solgi, R., & Imparato, D. (2013). Zero variance Markov chain Monte Carlo for Bayesian estimators. Statistics and Computing, 23(5), 653-662.
 #'
-#' South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2019). Regularised zero variance control variates for high-dimensional variance reduction.
+#' South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2019). Regularised zero variance control variates for high-dimensional variance reduction. \url{https://arxiv.org/abs/1811.05073}
 #'
 #' @author 								Leah F. South
 #' @seealso 							See \code{\link{evidence}} for functions which use \code{zvcv} to estimate the normalising constant of the posterior. See an example at \code{\link{VDP}} and see \link{ZVCV} for more package details.

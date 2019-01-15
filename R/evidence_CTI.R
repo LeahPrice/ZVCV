@@ -24,7 +24,7 @@
 #' @references
 #' Mira, A., Solgi, R., & Imparato, D. (2013). Zero variance Markov chain Monte Carlo for Bayesian estimators. Statistics and Computing, 23(5), 653-662.
 #'
-#' South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2019). Regularised zero variance control variates for high-dimensional variance reduction.
+#' South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2019). Regularised zero variance control variates for high-dimensional variance reduction. \url{https://arxiv.org/abs/1811.05073}
 #' 
 #' @author  Leah F. South
 #' @seealso See \code{\link{Expand_Temperatures}} for a function that can be used to find stricter (or less stricter) temperature schedules based on the conditional effective sample size. See an example at \code{\link{VDP}} and see \link{ZVCV} for more package details.

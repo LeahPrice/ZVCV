@@ -50,10 +50,19 @@ posterior$polyorder # The selected polynomial order
 # Evidence estimation - The true logged evidence is 10.36 to 2 decimal places
 ##############################
 
+\dontrun{
 # Getting additional temperatures based on maintaing a CESS of 0.99N rather than 0.9N
 temp <- Expand_Temperatures(VDP$temperatures, VDP$loglike, 0.99)
 VDP$temperatures_new <- temp$temperatures_all # the new temperatures
 VDP$most_recent <- temp$relevant_samples # the samples associated with the new temperatures
+}
+
+\dontshow{
+# Getting additional temperatures based on maintaing a CESS of 0.91N rather than 0.9N
+temp <- Expand_Temperatures(VDP$temperatures, VDP$loglike, 0.91)
+VDP$temperatures_new <- temp$temperatures_all # the new temperatures
+VDP$most_recent <- temp$relevant_samples # the samples associated with the new temperatures
+}
 
 # Evidence estimation using the SMC identity
 Z_SMC <- evidence_SMC(VDP$samples, VDP$loglike, VDP$der_loglike, VDP$der_logprior,
@@ -64,6 +73,7 @@ Z_SMC$log_evidence
 Z_CTI <- evidence_CTI(VDP$samples, VDP$loglike, VDP$der_loglike, VDP$der_logprior,
 VDP$temperatures, VDP$temperatures_new, VDP$most_recent, options = options)
 Z_CTI$log_evidence_PS2
+}
 }
 \references{ 
 Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.

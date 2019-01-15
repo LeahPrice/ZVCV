@@ -25,7 +25,7 @@ An example of estimation posterior expectations and the evidence from SMC sample
 \references{
 Mira, A., Solgi, R., & Imparato, D. (2013). Zero variance Markov chain Monte Carlo for Bayesian estimators. Statistics and Computing, 23(5), 653-662.
 
-South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2018). Regularised zero variance control variates. https://arxiv.org/abs/1811.05073
+South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2018). Regularised zero variance control variates. \url{https://arxiv.org/abs/1811.05073}
 }
 \author{
 Leah F. South

@@ -28,7 +28,7 @@ A list is returned, containing the following components:
 This function is used to adjust the temperature schedule so that it is more (or less) strict than the original.
 }
 \references{
-South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2019). Regularised zero variance control variates for high-dimensional variance reduction.
+South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2019). Regularised zero variance control variates for high-dimensional variance reduction. \url{https://arxiv.org/abs/1811.05073}
 }
 \seealso{
 See \code{\link{evidence}} for functions to estimate the evidence, \code{\link{VDP}} for an example and \link{ZVCV} for more package details.

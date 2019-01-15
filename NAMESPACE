@@ -5,6 +5,7 @@ import(abind)
 import("partitions")
 importFrom(mvtnorm,"rmvnorm")
 importFrom("Rcpp", "evalCpp")
+importFrom("stats", "coef", "lm", "uniroot")
 
 export("zvcv",
 "getX",

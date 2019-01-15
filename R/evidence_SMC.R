@@ -7,17 +7,17 @@
 #' }
 #' 
 #' @rdname evidence
-evidence_SMC <- function(samples, loglike, der_loglike, der_logprior, gammavar, gammavar_all, most_recent, obs_estim_choose, obs_estim, options = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds = 10, apriori, intercept = TRUE)){
+evidence_SMC <- function(samples, loglike, der_loglike, der_logprior, temperatures, temperatures_all, most_recent, obs_estim_choose, obs_estim, options){# = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds = 10, apriori, intercept = TRUE)){
 	# Stepping stone identity for evidence.
 	
 	N <- NROW(samples)
 	d <- NCOL(samples)
-	TT <- length(gammavar_all)
+	TT <- length(temperatures_all)
 	
 	log_weights <- matrix(,nrow=N,ncol=TT)
 	log_weights[,1] <- -log(N)*rep(1,N)
 	for (tt in 2:TT){
-		log_weights[,tt] <- (gammavar_all[tt] - gammavar[most_recent[tt]])*loglike[,most_recent[tt]]
+		log_weights[,tt] <- (temperatures_all[tt] - temperatures[most_recent[tt]])*loglike[,most_recent[tt]]
 		log_weights[,tt] <- log_weights[,tt] - logsumexp(log_weights[,tt])
 	}
 	
@@ -30,10 +30,10 @@ evidence_SMC <- function(samples, loglike, der_loglike, der_logprior, gammavar, 
 	expectation_SMC <- rep(0,TT-1)
 	regression_SMC <- list()	
 	for (tt in 1:(TT-1)){
-		derivatives <- gammavar_all[tt]*der_loglike[,,tt] + der_logprior[,,tt]
+		derivatives <- temperatures_all[tt]*der_loglike[,,tt] + der_logprior[,,tt]
 		
-		#log_integrand <- log_weights[,tt] + loglike[,tt]*(gammavar_all[tt+1]-gammavar_all[tt])
-		log_integrand <- loglike[,tt]*(gammavar_all[tt+1]-gammavar_all[tt])
+		#log_integrand <- log_weights[,tt] + loglike[,tt]*(temperatures_all[tt+1]-temperatures_all[tt])
+		log_integrand <- loglike[,tt]*(temperatures_all[tt+1]-temperatures_all[tt])
 		
 		regression_SMC[[tt]] <- zvcv(log_integrand, samples[,,tt], derivatives, log_weights[,tt], integrand_logged = TRUE, obs_estim_choose = obs_estim_choose, obs_estim = obs_estim, options = options)
 		expectation_SMC[tt] <- regression_SMC[[tt]]$expectation

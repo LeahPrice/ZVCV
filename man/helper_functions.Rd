@@ -3,7 +3,7 @@
 \name{helper_functions}
 \alias{helper_functions}
 \alias{logsumexp}
-\title{A stable function for computing log(sum(exp(x)))}
+\title{Useful helper functions}
 \usage{
 logsumexp(x)
 }
@@ -14,8 +14,8 @@ logsumexp(x)
 The stable result of log(sum(exp(x)))
 }
 \description{
-A stable function for computing log(sum(exp(x)))
+The function \code{logsumexp} is used for stable computation of log(sum(exp(x))), which is useful when summing weights for example.
 }
 \seealso{
-See \link{ZVCV_package} for more package details.
+See \link{ZVCV} for more package details.
 }

@@ -18,10 +18,9 @@ The main functionality is available through
      \item \code{\link{evidence_SMC}}: A function to estimate the evidence using ZV-CV on the SMC evidence identity, with samples from a set of \eqn{T} power posteriors.
 }
 
-Some additional helper functions are available. See \code{\link{Expand_Temperatures}} and \code{\link{helper_functions}} for furhter details.
+Some additional helper functions are available. See \code{\link{Expand_Temperatures}} and \code{\link{helper_functions}} for further details.
 
-
-Extensions to this package are planned.
+An example of estimation posterior expectations and the evidence from SMC samples is available at \link{VDP}.
 }
 \references{
 Mira, A., Solgi, R., & Imparato, D. (2013). Zero variance Markov chain Monte Carlo for Bayesian estimators. Statistics and Computing, 23(5), 653-662.

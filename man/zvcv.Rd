@@ -6,8 +6,8 @@
 \usage{
 zvcv(integrand, samples, derivatives, log_weight, integrand_logged = FALSE,
   obs_estim_choose, obs_estim, options = list(polyorder = 2, regul_reg = TRUE,
-  alpha_elnet = 1, nfolds = 10, apriori = (1:NCOL(samples)), intercept = TRUE),
-  folds_choose = 5)
+  alpha_elnet = 1, nfolds = 10, apriori = (1:NCOL(samples)), intercept = TRUE,
+  polyorder_max = Inf), folds_choose = 5)
 }
 \arguments{
 \item{integrand}{The integrand, i.e. a set of \eqn{N} evaluations of the function of interest.}
@@ -32,6 +32,7 @@ zvcv(integrand, samples, derivatives, log_weight, integrand_logged = FALSE,
 \item \code{nfolds}:   The number of folds used in cross-validation to select lambda for LASSO or elastic net. The default is 10.
 \item \code{apriori}:   The indices of the parameters to use in the polynomial. The default is to use all parameters \eqn{1:d} where \eqn{d} is the dimension of the target. If only the first and third derivatives should be used, then this would be specified by using \code{apriori} = c(1,3) (alternatively, this can be done by only using the relevant columns in \code{samples} and \code{derivatives}).
 \item \code{intercept}:   A flag for whether the intercept should be estimated or fixed to the empirical mean of the integrand in the estimation set. The default is to include an intercept (\code{intercept = TRUE}) as this tends to lead to better variance reductions. Note that an \code{intercept = TRUE} flag may be changed to \code{intercept = FALSE} within the function if \code{integrand_logged = TRUE} and a \code{NaN} is encountered. See South et al. (2018) for further details.
+\item \code{polyorder_max}:   The maximum polynomial order. This may be used to prevent memory issues in the case that the polynomial order is selected automatically. A warning will be given if the selected polynomial order results in a design matrix with more than ten million elements.
 }}
 
 \item{folds_choose}{The number of folds used in k-fold cross-validation for selecting the optimal control variate. Depending on the \code{options}, this may include selection of the optimal polynomial order, regression type and subset of parameters in the polynomial. The default is five.}
@@ -60,24 +61,33 @@ The function \code{zvcv} is used to perform (regularised) ZV-CV given a set of s
 mymean <- c(1,2)
 mycov <- matrix(c(1,0.5,0.5,2),nrow=2)
 
-# Perfect draws from the target distribution (could be replaced with approximate draws from e.g. MCMC or SMC)
+# Perfect draws from the target distribution (could be replaced with
+# approximate draws from e.g. MCMC or SMC)
 N <- 50
 require(mvtnorm)
 set.seed(1)
 samples <- rmvnorm(N, mean = mymean, sigma = mycov)
 integrand <- samples[,1]
-derivatives <- t( apply(samples,1,function(x) -solve(mycov)\%*\%(x - mymean)) ) # derivatives of Gaussian wrt x
+
+# derivatives of Gaussian wrt x
+derivatives <- t( apply(samples,1,function(x) -solve(mycov)\%*\%(x - mymean)) ) 
 
 # Estimates without ZV-CV (i.e. vanilla Monte Carlo integration)
-mean(integrand) # Without the ZVCV package
-zvcv(integrand,samples,derivatives,options = list(polyorder = 0))$expectation # With the ZVCV package
+# Without the ZVCV package
+mean(integrand)
+# With the ZVCV package
+zvcv(integrand,samples,derivatives,options = list(polyorder = 0))$expectation
 
 # ZV-CV with fixed specifications
-sprintf("\%.15f",zvcv(integrand,samples,derivatives)$expectation) # 2nd order polynomial with LASSO
-sprintf("\%.15f",zvcv(integrand,samples,derivatives,options = list(polyorder = 2, regul_reg = FALSE))$expectation) # 2nd order polynomial with OLS
+# 2nd order polynomial with LASSO
+sprintf("\%.15f",zvcv(integrand, samples, derivatives)$expectation)
+# 2nd order polynomial with OLS
+sprintf("\%.15f",zvcv(integrand, samples, derivatives,
+options = list(polyorder = 2, regul_reg = FALSE))$expectation) 
 
 # ZV-CV with cross validation
-myopts <- list(list(polyorder = Inf, regul_reg = FALSE),list(polyorder = Inf)) # Choose between OLS and LASSO, with the order selected using cross validation
+# Choose between OLS and LASSO, with the order selected using cross validation
+myopts <- list(list(polyorder = Inf, regul_reg = FALSE),list(polyorder = Inf)) 
 temp <- zvcv(integrand,samples,derivatives,options = myopts) 
 temp$polyorder # The chosen control variate order
 sprintf("\%.15f",temp$expectation) # The expectation based on the minimum MSE control variate
@@ -87,10 +97,10 @@ temp$regul_reg # Flag for if the chosen control variate uses regularisation
 \references{
 Mira, A., Solgi, R., & Imparato, D. (2013). Zero variance Markov chain Monte Carlo for Bayesian estimators. Statistics and Computing, 23(5), 653-662.
 
-South, L. F., Mira, A., & Drovandi, C. (2018). Regularised zero variance control variates.
+South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2019). Regularised zero variance control variates for high-dimensional variance reduction.
 }
 \seealso{
-See \code{\link{evidence}} for functions which use \code{zvcv} to estimate the normalising constant of the posterior. See \link{ZVCV_package} for more package details.
+See \code{\link{evidence}} for functions which use \code{zvcv} to estimate the normalising constant of the posterior. See an example at \code{\link{VDP}} and see \link{ZVCV} for more package details.
 }
 \author{
 Leah F. South

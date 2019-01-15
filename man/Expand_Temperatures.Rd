@@ -4,22 +4,22 @@
 \alias{Expand_Temperatures}
 \title{Adjusting the temperature schedule}
 \usage{
-Expand_Temperatures(gammavar, loglike, alpha,
+Expand_Temperatures(temperatures, loglike, rho,
   bisec_tol = .Machine$double.eps^0.25)
 }
 \arguments{
-\item{gammavar}{A vector of length \eqn{T} temperatures for the power posterior temperatures.}
+\item{temperatures}{A vector of length \eqn{T} temperatures for the power posterior temperatures.}
 
 \item{loglike}{An \eqn{N} by \eqn{T} matrix of log likelihood values corresponding to \code{samples}.}
 
-\item{alpha}{The tolerance for the new temperatures, which are selected so that the CESS at each temperature is \eqn{\alpha*N} where \eqn{N} is the population size.}
+\item{rho}{The tolerance for the new temperatures, which are selected so that the CESS at each temperature is \eqn{\rho*N} where \eqn{N} is the population size.}
 
 \item{bisec_tol}{The tolerance for the bisection method used in selecting temperatures. The default is \code{.Machine$double.eps^0.25}}
 }
 \value{
 A list is returned, containing the following components:
 \itemize{
-\item \code{gammavar_all}: The new set of temperatures of length \eqn{tau}.
+\item \code{temperatures_all}: The new set of temperatures of length \eqn{tau}.
 \item \code{relevant_samples}: A vector of length \eqn{tau} containinng indices to show which particle sets the new temperatures are based on.
 \item \code{logw}: An \eqn{N} by \eqn{tau} matrix of log normalised weights of the particles
 }
@@ -28,10 +28,10 @@ A list is returned, containing the following components:
 This function is used to adjust the temperature schedule so that it is more (or less) strict than the original.
 }
 \references{
-South, L. F., Mira, A., & Drovandi, C. (2018). Regularised zero variance control variates.
+South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2019). Regularised zero variance control variates for high-dimensional variance reduction.
 }
 \seealso{
-See \code{\link{evidence}} for functions to estimate the evidence and \link{ZVCV_package} for more package details.
+See \code{\link{evidence}} for functions to estimate the evidence, \code{\link{VDP}} for an example and \link{ZVCV} for more package details.
 }
 \author{
 Leah F. South

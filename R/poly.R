@@ -1,5 +1,11 @@
-# #' The function getX is used to get the matrix of covariates for the regression based on a specified polynomial order
-# #' @rdname zvcv
+#' The function \code{getX} is used to get the matrix of covariates for the regression based on a specified polynomial order.
+#' 
+#' @param samples       An \eqn{N} by \eqn{d} matrix of samples from the target
+#' @param derivatives	An \eqn{N} by \eqn{d} matrix of derivatives of the log target with respect to the parameters
+#' @param polyorder     The order of the polynomial.
+#' 
+#' @return 			    The design matrix for the regression.
+# #' @rdname helper_functions
 getX <- function(samples, derivatives, polyorder){
 	
 	N <- NROW(samples)

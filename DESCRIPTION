@@ -1,12 +1,13 @@
 Package: ZVCV
 Type: Package
-Title: Zero-variance control variates
+Title: Zero-Variance Control Variates
 Version: 0.1.3
 Date: 2018-12-20
 Authors@R: c(person("Leah F.","South",role=c("aut","cre"),email="leah.south@hdr.qut.edu.au",comment = c(ORCID = "0000-0002-5646-2963")))
 Description: Zero-variance control variates (ZV-CV, Mira et al. (2013) <doi:10.1007/s11222-012-9344-6>) is a post-processing method to reduce the variance of Monte Carlo estimators of expectations using the derivatives of the log target. Once the derivatives are available, the only additional computational effort is in solving a linear regression problem. Recently, this method has been extended to higher dimensions using regularisation (South et al., 2018). This package can be used to easily perform ZV-CV or regularised ZV-CV when a set of samples, derivatives and function evaluations are available. Additional functions for applying ZV-CV to two estimators for the normalising constant of the posterior distribution in Bayesian statistics are also supplied.
+License: GPL (>= 2)
 LazyLoad: yes
-Imports: Rcpp (>= 0.11.0), glmnet, abind, mvtnorm, partitions
+Imports: Rcpp (>= 0.11.0), glmnet, abind, mvtnorm, partitions, stats
 LinkingTo: Rcpp, RcppArmadillo
 LazyData: true
 RoxygenNote: 6.0.1

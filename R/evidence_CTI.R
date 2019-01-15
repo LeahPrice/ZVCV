@@ -6,8 +6,8 @@
 #' @param loglike       An \eqn{N} by \eqn{T} matrix of log likelihood values corresponding to \code{samples}
 #' @param der_loglike   An \eqn{N} by \eqn{d} by \eqn{T} matrix of the derivatives of the log likelihood with respect to the parameters, with parameter values corresponding to \code{samples}
 #' @param der_logprior   An \eqn{N} by \eqn{d} by \eqn{T} matrix of the derivatives of the log prior with respect to the parameters, with parameter values corresponding to \code{samples}
-#' @param gammavar      A vector of length \eqn{T} of temperatures for the power posterior temperatures
-#' @param gammavar_all  An adjusted vector of length \eqn{tau} of temperatures. Better performance should be obtained with a more conservative temperature schedule. See \code{\link{Expand_Temperatures}} for a function to adjust the temperatures.
+#' @param temperatures      A vector of length \eqn{T} of temperatures for the power posterior temperatures
+#' @param temperatures_all  An adjusted vector of length \eqn{tau} of temperatures. Better performance should be obtained with a more conservative temperature schedule. See \code{\link{Expand_Temperatures}} for a function to adjust the temperatures.
 #' @param most_recent   A vector of length \eqn{tau} which gives the indices in the original temperatures that the new temperatures correspond to.
 #' @param obs_estim_choose See \code{\link{zvcv}}.
 #' @param obs_estim     See \code{\link{zvcv}}.
@@ -24,23 +24,23 @@
 #' @references
 #' Mira, A., Solgi, R., & Imparato, D. (2013). Zero variance Markov chain Monte Carlo for Bayesian estimators. Statistics and Computing, 23(5), 653-662.
 #'
-#' South, L. F., Mira, A., & Drovandi, C. (2018). Regularised zero variance control variates.
+#' South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2019). Regularised zero variance control variates for high-dimensional variance reduction.
 #' 
 #' @author  Leah F. South
-#' @seealso See \code{\link{Expand_Temperatures}} for a function that can be used to find stricter (or less stricter) temperature schedules based on the conditional effective sample size. See \link{ZVCV_package} for more package details.
+#' @seealso See \code{\link{Expand_Temperatures}} for a function that can be used to find stricter (or less stricter) temperature schedules based on the conditional effective sample size. See an example at \code{\link{VDP}} and see \link{ZVCV} for more package details.
 #' 
 #' @name evidence
-evidence_CTI <- function(samples, loglike, der_loglike, der_logprior, gammavar, gammavar_all, most_recent, obs_estim_choose, obs_estim, options = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds = 10, apriori, intercept = TRUE)){
+evidence_CTI <- function(samples, loglike, der_loglike, der_logprior, temperatures, temperatures_all, most_recent, obs_estim_choose, obs_estim, options){# =  = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds = 10, apriori, intercept = TRUE)){
 	# Stepping stone identity for evidence.
 	
 	N <- NROW(samples)
 	d <- NCOL(samples)
-	TT <- length(gammavar_all)
+	TT <- length(temperatures_all)
 	
 	log_weights <- matrix(,nrow=N,ncol=TT)
 	log_weights[,1] <- -log(N)*rep(1,N)
 	for (tt in 2:TT){
-		log_weights[,tt] <- (gammavar_all[tt] - gammavar[most_recent[tt]])*loglike[,most_recent[tt]]
+		log_weights[,tt] <- (temperatures_all[tt] - temperatures[most_recent[tt]])*loglike[,most_recent[tt]]
 		log_weights[,tt] <- log_weights[,tt] - logsumexp(log_weights[,tt])
 	}
 	
@@ -56,7 +56,7 @@ evidence_CTI <- function(samples, loglike, der_loglike, der_logprior, gammavar, 
 	expectation_vLL <- rep(0,TT)
 	
 	for (tt in 1:TT){
-		derivatives <- gammavar_all[tt]*der_loglike[,,tt] + der_logprior[,,tt]
+		derivatives <- temperatures_all[tt]*der_loglike[,,tt] + der_logprior[,,tt]
 		
 		integrand <- loglike[,tt]
 		
@@ -72,8 +72,8 @@ evidence_CTI <- function(samples, loglike, der_loglike, der_logprior, gammavar, 
 		}
 	}
 	
-	log_evidence_PS1 <- sum( quad1(gammavar_all,expectation_LL) )
-	log_evidence_PS2 <- log_evidence_PS1 - sum( quad2(gammavar_all,expectation_vLL) )
+	log_evidence_PS1 <- sum( quad1(temperatures_all,expectation_LL) ) # first order approximation
+	log_evidence_PS2 <- log_evidence_PS1 - sum( quad2(temperatures_all,expectation_vLL) ) # full second order approximation
 	
 	return(list(log_evidence_PS1 = log_evidence_PS1, log_evidence_PS2 = log_evidence_PS2, 
 							regression_LL = regression_LL, regression_vLL = regression_vLL))
@@ -81,20 +81,20 @@ evidence_CTI <- function(samples, loglike, der_loglike, der_logprior, gammavar, 
 }
 
 
-quad1 <- function(gammavar,means){
+quad1 <- function(temperatures,means){
 	# Quadrature first order approximation
 	
-	TT <- length(gammavar)
-	temp <- (gammavar[2:TT]-gammavar[1:(TT-1)])/2*(means[1:(TT-1)]+means[2:TT])
+	TT <- length(temperatures)
+	temp <- (temperatures[2:TT]-temperatures[1:(TT-1)])/2*(means[1:(TT-1)]+means[2:TT])
 	return(temp)
 }
 
 
-quad2 <- function(gammavar,vars){
+quad2 <- function(temperatures,vars){
 	# Quadrature second order approximation
 	
-	TT <- length(gammavar)
-	temp <- (gammavar[2:TT]-gammavar[1:(TT-1)])^2/12*(vars[2:TT]-vars[1:(TT-1)])
+	TT <- length(temperatures)
+	temp <- (temperatures[2:TT]-temperatures[1:(TT-1)])^2/12*(vars[2:TT]-vars[1:(TT-1)])
 	return(temp)
 }
 

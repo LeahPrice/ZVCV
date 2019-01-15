@@ -6,15 +6,11 @@
 \alias{evidence_SMC}
 \title{Evidence estimation with ZV-CV}
 \usage{
-evidence_CTI(samples, loglike, der_loglike, der_logprior, gammavar,
-  gammavar_all, most_recent, obs_estim_choose, obs_estim,
-  options = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds =
-  10, apriori, intercept = TRUE))
+evidence_CTI(samples, loglike, der_loglike, der_logprior, temperatures,
+  temperatures_all, most_recent, obs_estim_choose, obs_estim, options)
 
-evidence_SMC(samples, loglike, der_loglike, der_logprior, gammavar,
-  gammavar_all, most_recent, obs_estim_choose, obs_estim,
-  options = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds =
-  10, apriori, intercept = TRUE))
+evidence_SMC(samples, loglike, der_loglike, der_logprior, temperatures,
+  temperatures_all, most_recent, obs_estim_choose, obs_estim, options)
 }
 \arguments{
 \item{samples}{An \eqn{N} by \eqn{d} by \eqn{T} matrix of samples from the \eqn{T} power posteriors, where \eqn{N} is the number of samples and \eqn{d} is the dimension of the target distribution}
@@ -25,9 +21,9 @@ evidence_SMC(samples, loglike, der_loglike, der_logprior, gammavar,
 
 \item{der_logprior}{An \eqn{N} by \eqn{d} by \eqn{T} matrix of the derivatives of the log prior with respect to the parameters, with parameter values corresponding to \code{samples}}
 
-\item{gammavar}{A vector of length \eqn{T} of temperatures for the power posterior temperatures}
+\item{temperatures}{A vector of length \eqn{T} of temperatures for the power posterior temperatures}
 
-\item{gammavar_all}{An adjusted vector of length \eqn{tau} of temperatures. Better performance should be obtained with a more conservative temperature schedule. See \code{\link{Expand_Temperatures}} for a function to adjust the temperatures.}
+\item{temperatures_all}{An adjusted vector of length \eqn{tau} of temperatures. Better performance should be obtained with a more conservative temperature schedule. See \code{\link{Expand_Temperatures}} for a function to adjust the temperatures.}
 
 \item{most_recent}{A vector of length \eqn{tau} which gives the indices in the original temperatures that the new temperatures correspond to.}
 
@@ -60,10 +56,10 @@ The function \code{evidence_SMC} uses ZV-CV on the SMC estimator for the normali
 \references{
 Mira, A., Solgi, R., & Imparato, D. (2013). Zero variance Markov chain Monte Carlo for Bayesian estimators. Statistics and Computing, 23(5), 653-662.
 
-South, L. F., Mira, A., & Drovandi, C. (2018). Regularised zero variance control variates.
+South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2019). Regularised zero variance control variates for high-dimensional variance reduction.
 }
 \seealso{
-See \code{\link{Expand_Temperatures}} for a function that can be used to find stricter (or less stricter) temperature schedules based on the conditional effective sample size. See \link{ZVCV_package} for more package details.
+See \code{\link{Expand_Temperatures}} for a function that can be used to find stricter (or less stricter) temperature schedules based on the conditional effective sample size. See an example at \code{\link{VDP}} and see \link{ZVCV} for more package details.
 }
 \author{
 Leah F. South

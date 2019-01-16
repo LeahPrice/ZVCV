@@ -74,7 +74,6 @@ Z_CTI <- evidence_CTI(VDP$samples, VDP$loglike, VDP$der_loglike, VDP$der_logprio
 VDP$temperatures, VDP$temperatures_new, VDP$most_recent, options = options)
 Z_CTI$log_evidence_PS2
 }
-}
 \references{ 
 Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.
 

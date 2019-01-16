@@ -14,6 +14,8 @@ evidence_SMC <- function(samples, loglike, der_loglike, der_logprior, temperatur
 	d <- NCOL(samples)
 	TT <- length(temperatures_all)
 	
+	options <- clean_options(options,N,d)
+	
 	log_weights <- matrix(,nrow=N,ncol=TT)
 	log_weights[,1] <- -log(N)*rep(1,N)
 	for (tt in 2:TT){

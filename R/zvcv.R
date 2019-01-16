@@ -17,7 +17,7 @@
 #' \item \code{nfolds}:   The number of folds used in cross-validation to select lambda for LASSO or elastic net. The default is 10.
 #' \item \code{apriori}:   The indices of the parameters to use in the polynomial. The default is to use all parameters \eqn{1:d} where \eqn{d} is the dimension of the target. If only the first and third derivatives should be used, then this would be specified by using \code{apriori} = c(1,3) (alternatively, this can be done by only using the relevant columns in \code{samples} and \code{derivatives}).
 #' \item \code{intercept}:   A flag for whether the intercept should be estimated or fixed to the empirical mean of the integrand in the estimation set. The default is to include an intercept (\code{intercept = TRUE}) as this tends to lead to better variance reductions. Note that an \code{intercept = TRUE} flag may be changed to \code{intercept = FALSE} within the function if \code{integrand_logged = TRUE} and a \code{NaN} is encountered. See South et al. (2018) for further details.
-#' \item \code{polyorder_max}:   The maximum polynomial order. This may be used to prevent memory issues in the case that the polynomial order is selected automatically. A warning will be given if the selected polynomial order results in a design matrix with more than ten million elements.
+#' \item \code{polyorder_max}:   The maximum polynomial order. This may be used to prevent memory issues in the case that the polynomial order is selected automatically. You will be prompted to see if you wish to continue if the selected polynomial order results in a design matrix with more than ten million elements. A default maximum polynomial order will be selected if the \code{polyorder} is infinite and in this case a warning will be given. Recall that setting your default R settings to \code{options(warn=1)} will ensure that you receive these warnings in real time.
 #' }
 #' @param folds_choose  The number of folds used in k-fold cross-validation for selecting the optimal control variate. Depending on the \code{options}, this may include selection of the optimal polynomial order, regression type and subset of parameters in the polynomial. The default is five.
 #' 
@@ -83,41 +83,15 @@
 #' @export zvcv
 zvcv <- function(integrand, samples, derivatives, log_weight, integrand_logged = FALSE, obs_estim_choose, obs_estim, options = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds = 10, apriori = (1:NCOL(samples)), intercept = TRUE, polyorder_max = Inf), folds_choose = 5) {
 	
-	if (any(c("polyorder","regul_reg","alpha_elnet","nfolds","apriori","intercept") %in% names(options))){
-		options <- rep(list(options),1)
-	}
-	num_options <- length(options)
 	N <- NROW(integrand)
 	d <- NCOL(samples)
+	
+	options <- clean_options(options,N,d)
+	num_options <- length(options)
 	
 	if (missing(log_weight)) { log_weight <- rep(0,N) } # weights are normalised in another function
 	if (missing(obs_estim_choose) & (num_options>1 | is.infinite(options[[1]]$polyorder))) {  obs_estim_choose <- split(sample(1:N),rep(1:folds_choose, ceiling(N/folds_choose),length.out = N))  }
 	if (missing(obs_estim)) { obs_estim <- NULL }
-	for (i in 1:num_options){
-		if (!("polyorder" %in% names(options[[i]]))) { options[[i]]$polyorder <- 2 }
-		if (!("regul_reg" %in% names(options[[i]]))) { options[[i]]$regul_reg <- TRUE }
-		if (!("alpha_elnet" %in% names(options[[i]]))) { options[[i]]$alpha_elnet <- 1 }
-		if (!("nfolds" %in% names(options[[i]]))) { options[[i]]$nfolds <- 10 }
-		if (!("apriori" %in% names(options[[i]]))) { options[[i]]$apriori <- 1:d }
-		if (!("intercept" %in% names(options[[i]]))) { options[[i]]$intercept <- TRUE}
-		d <- length(options[[i]]$apriori)
-		if (d==1 & !("polyorder_max" %in% names(options[[i]]))){
-			options[[i]]$polyorder_max <- Inf
-		} else if (d > 1){ # Check for potentially large design matrices when d>1
-			temp_max_polyorder <- 1 # identify the largest polynomial order such that the regression design matrix has no more than 10^6 elements
-			while (N*choose(d + temp_max_polyorder,d)<10^7){ 
-				temp_max_polyorder <- temp_max_polyorder + 1
-			}
-			
-			if (is.infinite(options[[i]]$polyorder) & !("polyorder_max" %in% names(options[[i]]))) { # Tell users about maximum polynomial orders
-				options[[i]]$polyorder_max <- temp_max_polyorder
-				warning(sprintf("To prevent memory issues, the maximum polynomial order for option %d has been set to %d.\n",i,temp_max_polyorder))
-			} else if (!is.infinite(options[[i]]$polyorder) & temp_max_polyorder < options[[i]]$polyorder){
-				warning(sprintf("The polynomial order for option %d will result in a design matrix of size %d by %d. Consider reducing the polynomial order or using a subset through the apriori option.\n",N,choose(d+options[[i]]$polyorder,d),i))
-			}
-		}
-	}
-	
 	
 	if (num_options>1 | is.infinite(options[[1]]$polyorder)){
 		mse <- rep(0,num_options)

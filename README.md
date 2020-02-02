@@ -1,5 +1,5 @@
 # ZVCV
-R package for Regularised Zero-Variance Control Variates
+R package for derivative-based variance reduction
 
 To download this package, use the following R code:
 ```{r}
@@ -11,12 +11,10 @@ library(ZVCV)
 ?ZVCV # use this to navigate through the documentation. ?zvcv has some example code
 ```
 
-I plan to add more details about the ZV-CV method to the documentation. I also need to add more details about the evidence estimators and give an example of evidence estimation with the package.
 
-Details of the ZV-CV method can be found in:
+Details of the methods in this package can be found at:
 
-Mira, A., Solgi, R., & Imparato, D. (2013). *Zero variance Markov chain Monte Carlo for Bayesian estimators*. Statistics and Computing, 23(5), 653-662.
-
-The regularised ZV-CV method is described in the following paper on arxiv
-
-South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2018). *Regularised zero variance control variates*. https://arxiv.org/abs/1811.05073
+* Mira, A., Solgi, R., & Imparato, D. (2013). *Zero variance Markov chain Monte Carlo for Bayesian estimators*. Statistics and Computing, 23(5), 653-662.
+* Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.
+* South, L. F., Karvonen, T., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  https://arxiv.org/
+* South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2018). *Regularised zero variance control variates*. https://arxiv.org/abs/1811.05073

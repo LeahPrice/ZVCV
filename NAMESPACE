@@ -6,11 +6,18 @@ import(partitions)
 importFrom(mvtnorm,"rmvnorm")
 importFrom("Rcpp", "evalCpp")
 importFrom("stats", "coef", "lm", "uniroot")
+#import(BH)
+importFrom("stats", "coef", "lm", "uniroot")
+importFrom("Rlinsolve","lsolve.cg")
 
 export("zvcv",
 "getX",
 "logsumexp",
 "Expand_Temperatures",
 "evidence_CTI",
-"evidence_SMC"
+"evidence_SMC",
+"squareNorm","Phi_fn","K0_fn","medianTune","nearPD",
+"SECF","SECF_crossval","aSECF","aSECF_crossval",
+"CF","CF_crossval"
 )
+

@@ -7,25 +7,140 @@
 \alias{ZVCV_package-package}
 \title{Zero-Variance Control Variates}
 \description{
-Zero-variance control variates (ZV-CV, Mira et al. (2013) <doi:10.1007/s11222-012-9344-6>) is a post-processing method to reduce the variance of Monte Carlo estimators of expectations using the derivatives of the log target. Once the derivatives are available, the only additional computational effort is in solving a linear regression problem. Recently, this method has been extended to higher dimensions using regularisation (South et al., 2018).
-This package can be used to easily perform ZV-CV or regularised ZV-CV when a set of samples, derivatives and function evaluations are available. Additional functions for applying ZV-CV to two estimators for the normalising constant of the posterior distribution (also known as the evidence) are also supplied.
-
-The main functionality is available through
+This package can be used to perform post-hoc variance reduction of Monte Carlo estimators when the derivatives of the log target are available.
+The main functionality is available through the following functions. 
+All of these use a set of \eqn{N} \eqn{d}-dimensional samples along with the associated derivatives of the log target. 
+You can evaluate posterior expectations of \eqn{k} functions (except ZV-CV which is currently restricted to \eqn{k=1}).
 
 \itemize{
-     \item \code{\link{zvcv}}: The main function to estimate expectations using (regularised) ZV-CV. This function uses a set of \eqn{N} samples along with the associated derivatives of the log target and evaluations of the function of interest.
+     \item \code{\link{zvcv}}: For estimating expectations using (regularised) zero-variance control variates (ZV-CV, Mira et al, 2013; South et al, 2018).
+     This function also allows for cross-validation, using a separate function argument design to the remaining functions (a potential job for a future release).
+     \item \code{\link{CF}}: For estimating expectations using control functionals (CF, Oates et al, 2017). 
+     \item \code{\link{SECF}}: For estimating expectations using semi-exact control functionals (SECF, South et al, 2020).
+     \item \code{\link{aSECF}}: For estimating expectations using approximate semi-exact control functionals (aSECF, South et al, 2020). 
+     \item \code{\link{CF_crossval}}: CF with cross-validation tuning.
+     \item \code{\link{SECF_crossval}}: SECF with cross-validation tuning.
+     \item \code{\link{aSECF_crossval}}: aSECF with cross-validation tuning.
+}
+
+ZV-CV is exact for polynomials of order at most \code{polyorder} under Gaussian targets and is fast for large \eqn{N} (although
+setting a limit on \code{polyorder} through \code{polyorder_max} is recommended for large \eqn{N}).
+CF is a non-parametric approach that offers better than the standard Monte Carlo convergence rates. 
+SECF has both a parametric and a non-parametric component and it offers the advantages of both for an additional computational cost. The cost of
+SECF is reduced in aSECF using nystrom approximations and conjugate gradient.
+}
+\section{Helper functions}{
+
+\itemize{
+     \item \code{\link{getX}}: Calculates the design matrix for ZV-CV (without the column of 1's for the intercept)
+     \item \code{\link{medianTune}}: Calculates the median heuristic for use in e.g. the Gaussian, Matern and rational quadratic kernels. Using the median heuristic is an alternative to cross-validation.
+     \item \code{\link{K0_fn}}: Calculates the \eqn{K_0} matrix. The output of this function can be used as an argument to \code{\link{CF}}, \code{\link{CF_crossval}},
+     \code{\link{SECF}}, \code{\link{SECF_crossval}}, \code{\link{aSECF}} and \code{\link{aSECF_crossval}}.
+     The kernel matrix is automatically computed in all of the above methods, but it is faster to calculate
+     in advance when using more than one of the above functions and when using any of the crossval functions.
+     \item \code{\link{Phi_fn}}: Calculates the Phi matrix for SECF and aSECF (similar to \code{getX} but with different arguments and it includes the column of 1's)
+     \item \code{\link{squareNorm}}: Gets the matrix of square norms which is needed for the Gaussian, Matern and rational quadratic kernels.
+     Calculating this can help to save time if you are also interested in calculating the median heuristic, handling multiple tuning parameters or trying other kernels in this group.
+     \item \code{\link{nearPD}}: Finds the nearest symmetric positive definite matrix to the given matrix, for handling numerical issues.
+     \item \code{\link{logsumexp}}: Performs stable computation of the log sum of exponential (useful when handling the sum of weights)
+     }
+}
+
+\section{Evidence estimation}{
+
+The following functions are used to estimate the evidence (the normalisiing constant of the posterior) as described in South et al (2018). They are relevant when
+sequential Monte Carlo with an annealing schedule has been used to collect the samples, and therefore are not of interest to those who are interested in
+variance reduction based on vanilla MCMC.
+\itemize{
      \item \code{\link{evidence_CTI}}: A function to estimate the evidence using the controlled thermodynamic integration (CTI) identity, with samples from a set of \eqn{T} power posteriors.
      \item \code{\link{evidence_SMC}}: A function to estimate the evidence using ZV-CV on the SMC evidence identity, with samples from a set of \eqn{T} power posteriors.
 }
 
-Some additional helper functions are available. See \code{\link{Expand_Temperatures}} and \code{\link{helper_functions}} for further details.
+The function \code{\link{Expand_Temperatures}} can be used to adjust the temperature schedule so that it is more (or less) strict than the original schedule of \eqn{T} temperatures.
+}
 
-An example of estimation posterior expectations and the evidence from SMC samples is available at \link{VDP}.
+\examples{
+
+# A real data example using ZV-CV is available at \\link{VDP}. This involves estimating posterior expectations and the evidence from SMC samples.
+
+# The remainder of this section is duplicating (albeit with a different random seed) Figure 2a of South et al. (2020).
+
+N_repeats <- 10 # For speed, the actual code uses 100 
+N_all <- c(25,50,100) # For speed, the actual code uses c(10,25,50,100,250,500,1000) 
+sigma_list <- list(10^(-1.5),10^(-1),10^(-0.5),1,10^(0.5),10)
+folds <- 5
+d <- 4
+
+integrand_fn <- function(x){ return (1 + x[,2] + 0.1*x[,1]*x[,2]*x[,3] + sin(x[,1])*exp(-(x[,2]*x[,3])^2)) }
+
+results <- data.frame()
+for (N in N_all){
+  MC <- ZV1 <- ZV2 <- ZVchoose <- CF <- SECF1 <- aSECF1 <- SECF2 <- aSECF2 <- rep(NaN,N_repeats)
+  for (i in 1:N_repeats){     
+    x <- matrix(rnorm(N*d),ncol=d)
+    u <- -x
+    f <- integrand_fn(x)
+    
+    MC[i] <- mean(f)
+    ZV1[i] <- zvcv(f,x,u,options=list(polyorder=1,regul_reg=FALSE))$expectation
+    if (N > choose(d+2,d)){  # Checking if the sample size is large enough to accommodation a second order polynomial with cross-validation
+      ZV2[i] <- zvcv(f,x,u,options=list(polyorder=2,regul_reg=FALSE))$expectation
+    }
+    ZVchoose[i] <- zvcv(f,x,u,options=list(list(polyorder=Inf,regul_reg=FALSE,polyorder_max=30),list(polyorder=Inf,regul_reg=TRUE,polyorder_max=30)))$expectation
+    
+    # Calculating the kernel matrix in advance for CF and SECF
+    K0_list <- list()
+    for (j in 1:length(sigma_list)){
+      K0_list[[j]] <- K0_fn(x,u,sigma_list[[j]],steinOrder=2,kernel_function="RQ")
+    }
+    
+    CF[i] <- CF_crossval(f,x,u,K0_list=K0_list)$expectation
+    SECF1[i] <- SECF_crossval(f,x,u,K0_list=K0_list)$expectation
+    aSECF1[i] <- aSECF_crossval(f,x,u,steinOrder=2,kernel_function="RQ",sigma_list=sigma_list,reltol=10e-05)$expectation
+    if ((0.8*N) > choose(d+2,d)){ # Checking if the sample size is large enough to accommodation a second order polynomial with cross-validation
+      SECF2[i] <- SECF_crossval(f,x,u,polyorder=2,K0_list=K0_list)$expectation
+      aSECF2[i] <- aSECF_crossval(f,x,u,polyorder=2,steinOrder=2,kernel_function="RQ",sigma_list=sigma_list,reltol=10e-05)$expectation
+    }
+    
+    print(sprintf("--\%d",i))
+  }
+  # Adding the results to a data frame
+  MSE_crude <- mean((MC - 1)^2)
+  results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = 1, type = "MC")) 
+  results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = MSE_crude/mean((ZV1 - 1)^2), type = "ZV")) 
+  results <- rbind(results,data.frame(N=N, order = "2", efficiency = MSE_crude/mean((ZV2 - 1)^2), type = "ZV")) 
+  results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = MSE_crude/mean((ZVchoose - 1)^2), type = "ZVchoose")) 
+  results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = MSE_crude/mean((CF - 1)^2), type = "CF")) 
+  results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = MSE_crude/mean((SECF1 - 1)^2), type = "SECF")) 
+  results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = MSE_crude/mean((aSECF1 - 1)^2), type = "aSECF")) 
+  if ((0.8*N) > choose(d+2,d)){
+    results <- rbind(results,data.frame(N=N, order = "2", efficiency = MSE_crude/mean((SECF2 - 1)^2), type = "SECF")) 
+    results <- rbind(results,data.frame(N=N, order = "2", efficiency = MSE_crude/mean((aSECF2 - 1)^2), type = "aSECF")) 
+  }
+  print(N)
+}
+
+
+# Plotting
+library(ggplot)
+library(ggthemes)
+library(ggpubr)
+a <- ggplot(data=results,
+            aes(x=N,y=efficiency,col=type,linetype=order)) + scale_color_pander() + 
+  ggtitle("") + geom_line(size=1.5) + scale_x_log10() + scale_y_log10() + 
+  annotation_logticks(base=10) + labs(x="N",y="Efficiency",color="Method",linetype="Polynomial Order") + theme_minimal(base_size = 15) +
+  theme(legend.key.size = unit(0.5, "cm"),legend.key.width =  unit(1, "cm")) +
+  guides(linetype = guide_legend(override.aes = list(size=1),title.position = "top"), color = guide_legend(override.aes = list(size=1),title.position = "top"))
+print(a)
+
+
 }
 \references{
 Mira, A., Solgi, R., & Imparato, D. (2013). Zero variance Markov chain Monte Carlo for Bayesian estimators. Statistics and Computing, 23(5), 653-662.
 
-South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2018). Regularised zero variance control variates. \url{https://arxiv.org/abs/1811.05073}
+South, L. F., Karvonen, T., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/}
+
+South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2018). Regularised zero-variance control variates for high-dimensional variance reduction. \url{https://arxiv.org/abs/1811.05073}
 }
 \author{
 Leah F. South

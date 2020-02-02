@@ -16,3 +16,7 @@
 # ZVCV 0.1.3
 
 * Adding k-fold cross validation to select the polynomial order and doing some documentation improvements
+
+# ZVCV 1.1.0
+
+* Added control functionals, semi-exact control functionals and approximate semi-exact control functionals

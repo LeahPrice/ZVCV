@@ -1,11 +1,13 @@
+#' ZV-CV design matrix
+#'
 #' The function \code{getX} is used to get the matrix of covariates for the regression based on a specified polynomial order.
 #' 
 #' @param samples       An \eqn{N} by \eqn{d} matrix of samples from the target
 #' @param derivatives	An \eqn{N} by \eqn{d} matrix of derivatives of the log target with respect to the parameters
 #' @param polyorder     The order of the polynomial.
 #' 
-#' @return 			    The design matrix for the regression.
-# #' @rdname helper_functions
+#' @return 			    The design matrix for the regression (except for the column of 1's for the intercept).
+#' @seealso				\code{\link{Phi_fn}} for a very similar function for use in semi-exact control functionals. The function \code{\link{Phi_fn}} essentially gets the same matrix but with a column of ones added.
 getX <- function(samples, derivatives, polyorder){
 	
 	N <- NROW(samples)

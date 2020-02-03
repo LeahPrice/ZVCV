@@ -6,8 +6,9 @@
 \usage{
 aSECF_crossval(integrands, samples, derivatives, polyorder = NULL,
   steinOrder = NULL, kernel_function = NULL, sigma_list = NULL,
-  subset = NULL, folds = NULL, conjugate_gradient = TRUE,
-  reltol = 0.01, est_inds = NULL, diagnostics = FALSE)
+  est_inds = NULL, subset = NULL, num_nystrom = NULL,
+  conjugate_gradient = TRUE, reltol = 0.01, folds = NULL,
+  diagnostics = FALSE)
 }
 \arguments{
 \item{samples}{An \eqn{N} by \eqn{d} matrix of samples from the target}
@@ -22,16 +23,18 @@ aSECF_crossval(integrands, samples, derivatives, polyorder = NULL,
 
 \item{sigma_list}{(optional between this and \code{K0_list})            A list of tuning parameters for the specified kernel. This involves a list of single length-scale parameter in "gaussian" and "RQ", a list of vectors containing length-scale and smoothness parameters in "matern" and a list of vectors of the two parameters in "product" and "prodsim". See below for further details. When \code{sigma_list} is specified and not \code{K0_list}, the \eqn{K0} matrix is computed twice for each selected tuning parameter.}
 
+\item{est_inds}{(optional) The default is to perform estimation and evaluation using the full set of samples. This argument lets you specify that the \code{est_inds} indices are used for estimation only and the remaining samples are used for evaluation only. This can be used to reduce bias from adaption and also to make computation feasible for very large sample sizes (small \code{est_inds} is faster).}
+
 \item{subset}{(optional) The subset of parameters to be used in the polynomial. Typically this argument would only be used if the dimension of the problem is very large.}
 
-\item{folds}{(optional) The number of folds for cross-validation. The default is five.}
+\item{num_nystrom}{(optional) The number of samples to use in the Nystrom approximation, with a default of ceiling(sqrt(N)). The nystrom indices cannot be passed in here because of the way the cross-validation has been set up.}
 
 \item{conjugate_gradient}{(optional) A flag for whether to perform conjugate gradient to further speed up the nystrom approximation (the default is true).}
 
 \item{reltol}{(optional) The relative tolerance for choosing when the stop conjugate gradient iterations (the default is 1e-02).
 using \code{\link{squareNorm}}, as long as the \code{nystrom_inds} are \code{NULL}.}
 
-\item{est_inds}{(optional) The default is to perform estimation and evaluation using the full set of samples. This argument lets you specify that the \code{est_inds} indices are used for estimation only and the remaining samples are used for evaluation only. This can be used to reduce bias from adaption and also to make computation feasible for very large sample sizes (small \code{est_inds} is faster).}
+\item{folds}{(optional) The number of folds for cross-validation. The default is five.}
 
 \item{diagnostics}{(optional) A flag for whether to return the necessary outputs for plotting or estimating using the fitted model. The default is \code{false} since this requires some additional computation when \code{est_inds} is \code{NULL}.}
 

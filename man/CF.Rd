@@ -43,6 +43,11 @@ A list with the following elements:
 This function performs control functionals as described in Oates et al (2017).
 To choose between different kernels using cross-validation, use \code{\link{CF_crossval}}.
 }
+\section{Warning}{
+
+Solving the linear system in CF has \eqn{O(N^3)} complexity and is therefore not suited to large \eqn{N}. Using \eqn{est_inds} will instead have an \eqn{O(N_0^3)} cost in solving the linear system and an \eqn{O((N-N_0)^2)} cost in handling the remaining samples, where \eqn{N_0} is the length of \eqn{est_inds}. This can be much cheaper for large \eqn{N}.
+}
+
 \section{On the choice of \eqn{\sigma}, the kernel and the Stein order}{
 
 The kernel in Stein-based kernel methods is \eqn{L_x L_y k(x,y)} where \eqn{L_x} is a first or second order Stein operator in \eqn{x} and \eqn{k(x,y)} is some generic kernel to be specified.

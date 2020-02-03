@@ -4,10 +4,10 @@
 \alias{aSECF}
 \title{Approximate semi-exact control functionals (aSECF)}
 \usage{
-aSECF(integrands, samples, derivatives, polyorder = NULL, sigma = NULL,
-  steinOrder = NULL, kernel_function = NULL, subset = NULL,
-  K0 = NULL, nystrom_inds = NULL, conjugate_gradient = TRUE,
-  reltol = 0.01, est_inds = NULL, diagnostics = FALSE)
+aSECF(integrands, samples, derivatives, polyorder = NULL,
+  steinOrder = NULL, kernel_function = NULL, sigma = NULL,
+  K0 = NULL, nystrom_inds = NULL, est_inds = NULL, subset = NULL,
+  conjugate_gradient = TRUE, reltol = 0.01, diagnostics = FALSE)
 }
 \arguments{
 \item{samples}{An \eqn{N} by \eqn{d} matrix of samples from the target}
@@ -16,24 +16,24 @@ aSECF(integrands, samples, derivatives, polyorder = NULL, sigma = NULL,
 
 \item{polyorder}{(optional)        The order of the polynomial to be used in the parametric component, with a default of \eqn{1}. We recommend keeping this value low (e.g. only 1-2).}
 
-\item{sigma}{(optional)            The tuning parameters of the specified kernel. This involves a single length-scale parameter in "gaussian" and "RQ", a length-scale and a smoothness parameter in "matern" and two parameters in "product" and "prodsim". See below for further details.}
-
 \item{steinOrder}{(optional)    This is the order of the Stein operator. The default is \code{1} in the control functionals paper (Oates et al, 2017) and \code{2} in the semi-exact control functionals paper (South et al, 2020).  The following values are currently available: \code{1} for all kernels and \code{2} for "gaussian", "matern" and "RQ". See below for further details.}
 
 \item{kernel_function}{(optional)        Choose between "gaussian", "matern", "RQ", "product" or "prodsim". See below for further details.}
 
-\item{subset}{(optional) The subset of parameters to be used in the polynomial. Typically this argument would only be used if the dimension of the problem is very large.}
+\item{sigma}{(optional)            The tuning parameters of the specified kernel. This involves a single length-scale parameter in "gaussian" and "RQ", a length-scale and a smoothness parameter in "matern" and two parameters in "product" and "prodsim". See below for further details.}
 
 \item{K0}{(optional) The kernel matrix. One can specify either this or all of \code{sigma}, \code{steinOrder} and \code{kernel_function}. The former involves pre-computing the kernel matrix using \code{\link{K0_fn}} and is more efficient when using multiple estimators out of \code{\link{CF}}, \code{\link{SECF}} and  \code{\link{aSECF}} or when using the cross-validation functions.}
 
-\item{nystrom_inds}{(optional) The sample indices to be used in the Nystrom approximation (for when using approximate semi-exact control functionals).}
+\item{nystrom_inds}{(optional) The sample indices to be used in the Nystrom approximation.}
+
+\item{est_inds}{(optional) The default is to perform estimation and evaluation using the full set of samples. This argument lets you specify that the \code{est_inds} indices are used for estimation only and the remaining samples are used for evaluation only. This can be used to reduce bias from adaption and also to make computation feasible for very large sample sizes (small \code{est_inds} is faster).}
+
+\item{subset}{(optional) The subset of parameters to be used in the polynomial. Typically this argument would only be used if the dimension of the problem is very large.}
 
 \item{conjugate_gradient}{(optional) A flag for whether to perform conjugate gradient to further speed up the nystrom approximation (the default is true).}
 
 \item{reltol}{(optional) The relative tolerance for choosing when the stop conjugate gradient iterations (the default is 1e-02).
 using \code{\link{squareNorm}}, as long as the \code{nystrom_inds} are \code{NULL}.}
-
-\item{est_inds}{(optional) The default is to perform estimation and evaluation using the full set of samples. This argument lets you specify that the \code{est_inds} indices are used for estimation only and the remaining samples are used for evaluation only. This can be used to reduce bias from adaption and also to make computation feasible for very large sample sizes (small \code{est_inds} is faster).}
 
 \item{diagnostics}{(optional) A flag for whether to return the necessary outputs for plotting or estimating using the fitted model. The default is \code{false} since this requires some additional computation when \code{est_inds} is \code{NULL}.}
 

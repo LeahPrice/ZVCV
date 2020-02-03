@@ -3,14 +3,14 @@
 
 #' Squared norm matrix calculation
 #' 
-#' This function gets the matrix of square norms which is needed for the Gaussian, Matern and rational quadratic kernels.
+#' This function gets the matrix of square norms which is needed for all kernels.
 #' Calculating this can help to save time if you are also interested in calculating the median heuristic, handling multiple tuning parameters
-#' or trying other kernels in this group.
+#' or trying other kernels.
 #'
 #' @param samples An \eqn{N} by \eqn{d} matrix of samples from the target
-#' @param nystrom_inds The (optional) sample indices to be used in the Nystrom approximation (for when using approximate SECF).
+#' @param nystrom_inds The (optional) sample indices to be used in the Nystrom approximation (for when using aSECF).
 #'
-#' @return An \eqn{N} by \eqn{N} matrix of squared norms between samples (or \eqn{N} by \eqn{k} where \eqn{k} is the length of \code{nystrom_inds}).
+#' @return An \eqn{N} by \eqn{N} matrix of squared norms between samples (or \eqn{N} by \eqn{m} where \eqn{m} is the length of \code{nystrom_inds}).
 #'
 #' @author Leah F. South
 #' @seealso See \code{\link{medianTune}} and \code{\link{K0_fn}} for functions which use this.
@@ -51,10 +51,10 @@ medianTune <- function(samples, Z = NULL) {
 #' @param sigma			The tuning parameters of the specified kernel. This involves a single length-scale parameter in "gaussian" and "RQ", a length-scale and a smoothness parameter in "matern" and two parameters in "product" and "prodsim". See below for further details.
 #' @param steinOrder	This is the order of the Stein operator. The default is \code{1} in the control functionals paper (Oates et al, 2017) and \code{2} in the semi-exact control functionals paper (South et al, 2020).  The following values are currently available: \code{1} for all kernels and \code{2} for "gaussian", "matern" and "RQ". See below for further details.
 #' @param kernel_function		Choose between "gaussian", "matern", "RQ", "product" or "prodsim". See below for further details.
-#' @param Z (optional) An \eqn{N} by \eqn{N} (or \eqn{N} by \eqn{k} where \eqn{k} is the length of \code{nystrom_inds}). This can be calculated using \code{\link{squareNorm}}.
-#' @param nystrom_inds (optional) The sample indices to be used in the Nystrom approximation (for when using approximate semi-exact control functionals).
+#' @param Z (optional) An \eqn{N} by \eqn{N} (or \eqn{N} by \eqn{m} where \eqn{m} is the length of \code{nystrom_inds}). This can be calculated using \code{\link{squareNorm}}.
+#' @param nystrom_inds (optional) The sample indices to be used in the Nystrom approximation (for when using aSECF).
 #'
-#' @return An \eqn{N} by \eqn{N} kernel matrix (or \eqn{N} by \eqn{k} where \eqn{k} is the length of \code{nystrom_inds}).
+#' @return An \eqn{N} by \eqn{N} kernel matrix (or \eqn{N} by \eqn{m} where \eqn{m} is the length of \code{nystrom_inds}).
 #'
 #' @section On the choice of \eqn{\sigma}, the kernel and the Stein order:
 #' The kernel in Stein-based kernel methods is \eqn{L_x L_y k(x,y)} where \eqn{L_x} is a first or second order Stein operator in \eqn{x} and \eqn{k(x,y)} is some generic kernel to be specified.
@@ -147,8 +147,8 @@ aSECF_unbiased_cpp_prep <- function(integrands, samples, derivatives, est_inds, 
     .Call(`_ZVCV_aSECF_unbiased_cpp_prep`, integrands, samples, derivatives, est_inds, getX, aSECF_mse_linsolve, polyorder, steinOrder, kernel_function, sigma, K0, subset, nystrom_inds, conjugate_gradient, reltol, diagnostics)
 }
 
-aSECF_crossval_cpp <- function(integrands, samples, derivatives, getX, aSECF_mse_linsolve, polyorder = NULL, steinOrder = NULL, kernel_function = NULL, sigma = NULL, subset = NULL, folds = NULL, conjugate_gradient = TRUE, reltol = 0.01, est_inds = NULL) {
-    .Call(`_ZVCV_aSECF_crossval_cpp`, integrands, samples, derivatives, getX, aSECF_mse_linsolve, polyorder, steinOrder, kernel_function, sigma, subset, folds, conjugate_gradient, reltol, est_inds)
+aSECF_crossval_cpp <- function(integrands, samples, derivatives, getX, aSECF_mse_linsolve, num_nystrom, polyorder = NULL, steinOrder = NULL, kernel_function = NULL, sigma = NULL, subset = NULL, folds = NULL, conjugate_gradient = TRUE, reltol = 0.01, est_inds = NULL) {
+    .Call(`_ZVCV_aSECF_crossval_cpp`, integrands, samples, derivatives, getX, aSECF_mse_linsolve, num_nystrom, polyorder, steinOrder, kernel_function, sigma, subset, folds, conjugate_gradient, reltol, est_inds)
 }
 
 getPoly <- function(samples, derivatives, combinations) {

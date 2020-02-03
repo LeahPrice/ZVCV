@@ -9,15 +9,15 @@ squareNorm(samples, nystrom_inds = NULL)
 \arguments{
 \item{samples}{An \eqn{N} by \eqn{d} matrix of samples from the target}
 
-\item{nystrom_inds}{The (optional) sample indices to be used in the Nystrom approximation (for when using approximate SECF).}
+\item{nystrom_inds}{The (optional) sample indices to be used in the Nystrom approximation (for when using aSECF).}
 }
 \value{
-An \eqn{N} by \eqn{N} matrix of squared norms between samples (or \eqn{N} by \eqn{k} where \eqn{k} is the length of \code{nystrom_inds}).
+An \eqn{N} by \eqn{N} matrix of squared norms between samples (or \eqn{N} by \eqn{m} where \eqn{m} is the length of \code{nystrom_inds}).
 }
 \description{
-This function gets the matrix of square norms which is needed for the Gaussian, Matern and rational quadratic kernels.
+This function gets the matrix of square norms which is needed for all kernels.
 Calculating this can help to save time if you are also interested in calculating the median heuristic, handling multiple tuning parameters
-or trying other kernels in this group.
+or trying other kernels.
 }
 \seealso{
 See \code{\link{medianTune}} and \code{\link{K0_fn}} for functions which use this.

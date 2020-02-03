@@ -6,7 +6,7 @@
 \usage{
 SECF_crossval(integrands, samples, derivatives, polyorder = NULL,
   steinOrder = NULL, kernel_function = NULL, sigma_list = NULL,
-  K0_list = NULL, subset = NULL, folds = NULL, est_inds = NULL,
+  K0_list = NULL, est_inds = NULL, subset = NULL, folds = NULL,
   diagnostics = FALSE)
 }
 \arguments{
@@ -24,11 +24,11 @@ SECF_crossval(integrands, samples, derivatives, polyorder = NULL,
 
 \item{K0_list}{(optional between this and \code{sigma_list}) A list of kernel matrices, which can be calculated using \code{\link{K0_fn}}.}
 
+\item{est_inds}{(optional) The default is to perform estimation and evaluation using the full set of samples. This argument lets you specify that the \code{est_inds} indices are used for estimation only and the remaining samples are used for evaluation only. This can be used to reduce bias from adaption and also to make computation feasible for very large sample sizes (small \code{est_inds} is faster).}
+
 \item{subset}{(optional) The subset of parameters to be used in the polynomial. Typically this argument would only be used if the dimension of the problem is very large.}
 
 \item{folds}{(optional) The number of folds for cross-validation. The default is five.}
-
-\item{est_inds}{(optional) The default is to perform estimation and evaluation using the full set of samples. This argument lets you specify that the \code{est_inds} indices are used for estimation only and the remaining samples are used for evaluation only. This can be used to reduce bias from adaption and also to make computation feasible for very large sample sizes (small \code{est_inds} is faster).}
 
 \item{diagnostics}{(optional) A flag for whether to return the necessary outputs for plotting or estimating using the fitted model. The default is \code{false} since this requires some additional computation when \code{est_inds} is \code{NULL}.}
 }
@@ -54,6 +54,15 @@ because it can be used to choose the Stein operator order and the kernel functio
 to its parameters. It is also faster to pre-specify \code{\link{K0_fn}}.
 For estimation with fixed kernel parameters, use \code{\link{SECF}}.
 }
+\section{Warning}{
+
+Solving the linear system in SECF has \eqn{O(N^3+Q^3)} complexity where \eqn{N} is the sample size and \eqn{Q} is the number of terms in the polynomial.
+Standard SECF is therefore not suited to large \eqn{N}. The method aSECF is designed for larger \eqn{N} and details can be found at \code{\link{aSECF}} and in South et al (2020).
+An alternative would be to use \eqn{est_inds} which has \eqn{O(N_0^3 + Q^3)} complexity in solving the linear system and \eqn{O((N-N_0)^2)} complexity in
+handling the remaining samples, where \eqn{N_0} is the length of \eqn{est_inds}. This can be much cheaper for large \eqn{N} but the estimation of the
+Gaussian process model is only done using \eqn{N_0} samples and the evaluation of the integral only uses \eqn{N-N_0} samples.
+}
+
 \section{On the choice of \eqn{\sigma}, the kernel and the Stein order}{
 
 The kernel in Stein-based kernel methods is \eqn{L_x L_y k(x,y)} where \eqn{L_x} is a first or second order Stein operator in \eqn{x} and \eqn{k(x,y)} is some generic kernel to be specified.

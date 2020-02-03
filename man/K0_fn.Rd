@@ -18,12 +18,12 @@ K0_fn(samples, derivatives, sigma, steinOrder, kernel_function, Z = NULL,
 
 \item{kernel_function}{Choose between "gaussian", "matern", "RQ", "product" or "prodsim". See below for further details.}
 
-\item{Z}{(optional) An \eqn{N} by \eqn{N} (or \eqn{N} by \eqn{k} where \eqn{k} is the length of \code{nystrom_inds}). This can be calculated using \code{\link{squareNorm}}.}
+\item{Z}{(optional) An \eqn{N} by \eqn{N} (or \eqn{N} by \eqn{m} where \eqn{m} is the length of \code{nystrom_inds}). This can be calculated using \code{\link{squareNorm}}.}
 
-\item{nystrom_inds}{(optional) The sample indices to be used in the Nystrom approximation (for when using approximate semi-exact control functionals).}
+\item{nystrom_inds}{(optional) The sample indices to be used in the Nystrom approximation (for when using aSECF).}
 }
 \value{
-An \eqn{N} by \eqn{N} kernel matrix (or \eqn{N} by \eqn{k} where \eqn{k} is the length of \code{nystrom_inds}).
+An \eqn{N} by \eqn{N} kernel matrix (or \eqn{N} by \eqn{m} where \eqn{m} is the length of \code{nystrom_inds}).
 }
 \description{
 This function calculates the full \eqn{K_0} matrix, which is a first or second order Stein operator applied to

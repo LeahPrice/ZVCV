@@ -6,7 +6,7 @@
 \usage{
 CF_crossval(integrands, samples, derivatives, steinOrder = NULL,
   kernel_function = NULL, sigma_list = NULL, K0_list = NULL,
-  folds = NULL, est_inds = NULL, one_in_denom = FALSE,
+  est_inds = NULL, one_in_denom = FALSE, folds = NULL,
   diagnostics = FALSE)
 }
 \arguments{
@@ -22,11 +22,11 @@ CF_crossval(integrands, samples, derivatives, steinOrder = NULL,
 
 \item{K0_list}{(optional between this and \code{sigma_list}) A list of kernel matrices, which can be calculated using \code{\link{K0_fn}}.}
 
-\item{folds}{(optional) The number of folds for cross-validation. The default is five.}
-
 \item{est_inds}{(optional) The default is to perform estimation and evaluation using the full set of samples. This argument lets you specify that the \code{est_inds} indices are used for estimation only and the remaining samples are used for evaluation only. This can be used to reduce bias from adaption and also to make computation feasible for very large sample sizes (small \code{est_inds} is faster).}
 
 \item{one_in_denom}{(optional) Whether or not to include a \eqn{1 + } in the denominator of the control functionals estimator, as in equation 2 on p703 of Oates et al (2017). The \eqn{1 +} in the denominator is an arbitrary choice so we set it to zero by default.}
+
+\item{folds}{(optional) The number of folds for cross-validation. The default is five.}
 
 \item{diagnostics}{(optional) A flag for whether to return the necessary outputs for plotting or estimating using the fitted model. The default is \code{false} since this requires some additional computation when \code{est_inds} is \code{NULL}.}
 }
@@ -52,6 +52,11 @@ because it can be used to choose the Stein operator order and the kernel functio
 to its parameters. It is also faster to pre-specify \code{\link{K0_fn}}.
 For estimation with fixed kernel parameters, use \code{\link{CF}}.
 }
+\section{Warning}{
+
+Solving the linear system in CF has \eqn{O(N^3)} complexity and is therefore not suited to large \eqn{N}. Using \eqn{est_inds} will instead have an \eqn{O(N_0^3)} cost in solving the linear system and an \eqn{O((N-N_0)^2)} cost in handling the remaining samples, where \eqn{N_0} is the length of \eqn{est_inds}. This can be much cheaper for large \eqn{N}.
+}
+
 \section{On the choice of \eqn{\sigma}, the kernel and the Stein order}{
 
 The kernel in Stein-based kernel methods is \eqn{L_x L_y k(x,y)} where \eqn{L_x} is a first or second order Stein operator in \eqn{x} and \eqn{k(x,y)} is some generic kernel to be specified.

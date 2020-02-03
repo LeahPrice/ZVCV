@@ -6,14 +6,14 @@ using namespace std;
 
 //' Squared norm matrix calculation
 //' 
-//' This function gets the matrix of square norms which is needed for the Gaussian, Matern and rational quadratic kernels.
+//' This function gets the matrix of square norms which is needed for all kernels.
 //' Calculating this can help to save time if you are also interested in calculating the median heuristic, handling multiple tuning parameters
-//' or trying other kernels in this group.
+//' or trying other kernels.
 //'
 //' @param samples An \eqn{N} by \eqn{d} matrix of samples from the target
-//' @param nystrom_inds The (optional) sample indices to be used in the Nystrom approximation (for when using approximate SECF).
+//' @param nystrom_inds The (optional) sample indices to be used in the Nystrom approximation (for when using aSECF).
 //'
-//' @return An \eqn{N} by \eqn{N} matrix of squared norms between samples (or \eqn{N} by \eqn{k} where \eqn{k} is the length of \code{nystrom_inds}).
+//' @return An \eqn{N} by \eqn{N} matrix of squared norms between samples (or \eqn{N} by \eqn{m} where \eqn{m} is the length of \code{nystrom_inds}).
 //'
 //' @author Leah F. South
 //' @seealso See \code{\link{medianTune}} and \code{\link{K0_fn}} for functions which use this.
@@ -107,10 +107,10 @@ double medianTune(const arma::mat & samples, const Rcpp::Nullable<Rcpp::NumericM
 //' @param sigma			The tuning parameters of the specified kernel. This involves a single length-scale parameter in "gaussian" and "RQ", a length-scale and a smoothness parameter in "matern" and two parameters in "product" and "prodsim". See below for further details.
 //' @param steinOrder	This is the order of the Stein operator. The default is \code{1} in the control functionals paper (Oates et al, 2017) and \code{2} in the semi-exact control functionals paper (South et al, 2020).  The following values are currently available: \code{1} for all kernels and \code{2} for "gaussian", "matern" and "RQ". See below for further details.
 //' @param kernel_function		Choose between "gaussian", "matern", "RQ", "product" or "prodsim". See below for further details.
-//' @param Z (optional) An \eqn{N} by \eqn{N} (or \eqn{N} by \eqn{k} where \eqn{k} is the length of \code{nystrom_inds}). This can be calculated using \code{\link{squareNorm}}.
-//' @param nystrom_inds (optional) The sample indices to be used in the Nystrom approximation (for when using approximate semi-exact control functionals).
+//' @param Z (optional) An \eqn{N} by \eqn{N} (or \eqn{N} by \eqn{m} where \eqn{m} is the length of \code{nystrom_inds}). This can be calculated using \code{\link{squareNorm}}.
+//' @param nystrom_inds (optional) The sample indices to be used in the Nystrom approximation (for when using aSECF).
 //'
-//' @return An \eqn{N} by \eqn{N} kernel matrix (or \eqn{N} by \eqn{k} where \eqn{k} is the length of \code{nystrom_inds}).
+//' @return An \eqn{N} by \eqn{N} kernel matrix (or \eqn{N} by \eqn{m} where \eqn{m} is the length of \code{nystrom_inds}).
 //'
 //' @section On the choice of \eqn{\sigma}, the kernel and the Stein order:
 //' The kernel in Stein-based kernel methods is \eqn{L_x L_y k(x,y)} where \eqn{L_x} is a first or second order Stein operator in \eqn{x} and \eqn{k(x,y)} is some generic kernel to be specified.
@@ -993,7 +993,7 @@ Rcpp::List aSECF_unbiased_cpp_prep(const arma::mat & integrands, const arma::mat
 // If the K0 matrix is not given, this procedure involves recalculating the K0 matrix once for each selected tuning parameter (there can be multiple tuning parameters selected if there are multiple integrands).
 // This double-up on computation can be avoided by using the K0 argument.
 // [[Rcpp::export]]
-arma::mat aSECF_crossval_cpp(const arma::mat & integrands, const arma::mat & samples, const arma::mat & derivatives, Rcpp::Function getX, Rcpp::Function aSECF_mse_linsolve, Rcpp::Nullable<unsigned int> polyorder = R_NilValue, Rcpp::Nullable<unsigned int> steinOrder = R_NilValue, Rcpp::Nullable<Rcpp::String> kernel_function = R_NilValue, Rcpp::Nullable<Rcpp::List> sigma = R_NilValue, Rcpp::Nullable<Rcpp::IntegerVector> subset = R_NilValue, Rcpp::Nullable<unsigned int> folds = R_NilValue, bool conjugate_gradient = true, double reltol = 0.01, const Rcpp::Nullable<Rcpp::IntegerVector> & est_inds = R_NilValue){
+arma::mat aSECF_crossval_cpp(const arma::mat & integrands, const arma::mat & samples, const arma::mat & derivatives, Rcpp::Function getX, Rcpp::Function aSECF_mse_linsolve, unsigned int num_nystrom, Rcpp::Nullable<unsigned int> polyorder = R_NilValue, Rcpp::Nullable<unsigned int> steinOrder = R_NilValue, Rcpp::Nullable<Rcpp::String> kernel_function = R_NilValue, Rcpp::Nullable<Rcpp::List> sigma = R_NilValue, Rcpp::Nullable<Rcpp::IntegerVector> subset = R_NilValue, Rcpp::Nullable<unsigned int> folds = R_NilValue, bool conjugate_gradient = true, double reltol = 0.01, const Rcpp::Nullable<Rcpp::IntegerVector> & est_inds = R_NilValue){
   
   unsigned int N_expectations = integrands.n_cols;
   
@@ -1015,7 +1015,7 @@ arma::mat aSECF_crossval_cpp(const arma::mat & integrands, const arma::mat & sam
     //Rcpp::Rcout << "Iteration " << j << std::endl;
     Rcpp::NumericVector sigs = sig_list[j];
     Rcpp::Nullable<Rcpp::NumericVector> sigs1(sigs);
-    mse.col(j) = aSECF_mse_cpp(integrands, samples, derivatives, getX, aSECF_mse_linsolve, polyorder, steinOrder, kernel_function, sigs1, subset, folds, conjugate_gradient, reltol, est_inds);
+    mse.col(j) = aSECF_mse_cpp(integrands, samples, derivatives, getX, aSECF_mse_linsolve, num_nystrom, polyorder, steinOrder, kernel_function, sigs1, subset, folds, conjugate_gradient, reltol, est_inds);
   }
   return ( mse );
 }
@@ -1230,7 +1230,7 @@ arma::vec SECF_mse_cpp(arma::mat integrands, arma::mat samples, arma::mat deriva
 
 
 // An internal function used by aSECF_crossval_cpp. Given a single kernel and tuning parameter, this function uses (folds)-fold cross-validation to get the approximate mean square predictive error using the fitted gaussian process models from different estimation sets.
-arma::vec aSECF_mse_cpp(arma::mat integrands, arma::mat samples, arma::mat derivatives, Rcpp::Function getX, Rcpp::Function aSECF_mse_linsolve, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<Rcpp::NumericVector> sigma, Rcpp::Nullable<Rcpp::IntegerVector> subset, Rcpp::Nullable<unsigned int> folds, bool conjugate_gradient, double reltol, const Rcpp::Nullable<Rcpp::IntegerVector> & est_inds){
+arma::vec aSECF_mse_cpp(arma::mat integrands, arma::mat samples, arma::mat derivatives, Rcpp::Function getX, Rcpp::Function aSECF_mse_linsolve, unsigned int num_nystrom, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<Rcpp::NumericVector> sigma, Rcpp::Nullable<Rcpp::IntegerVector> subset, Rcpp::Nullable<unsigned int> folds, bool conjugate_gradient, double reltol, const Rcpp::Nullable<Rcpp::IntegerVector> & est_inds){
   
   unsigned int N = samples.n_rows;
   unsigned int N_expectations = integrands.n_cols;
@@ -1252,7 +1252,6 @@ arma::vec aSECF_mse_cpp(arma::mat integrands, arma::mat samples, arma::mat deriv
     N = inds_est.n_rows;
   }
   
-  unsigned int m0 = std::ceil( std::sqrt( static_cast<double>(N) ) );
   arma::uvec inds_ny, inds_ny_withinfull; // Not giving inds_nystrom as can't really do cross-validation with a set set of inds. Don't get benefit of doing K0 once either.
   
   arma::uvec resampled = Rcpp::RcppArmadillo::sample(arma::linspace<arma::uvec>(0, N-1, N), N, false);
@@ -1287,7 +1286,7 @@ arma::vec aSECF_mse_cpp(arma::mat integrands, arma::mat samples, arma::mat deriv
       keep_indx.shed_row(holdout_indx2(zz));
     }
     
-    inds_ny = Rcpp::RcppArmadillo::sample(arma::linspace<arma::uvec>(0, N_estim-1, N_estim), m0, false);
+    inds_ny = Rcpp::RcppArmadillo::sample(arma::linspace<arma::uvec>(0, N_estim-1, N_estim), num_nystrom, false);
     inds_ny_withinfull = keep_indx.rows(inds_ny);
     
     Rcpp::IntegerVector temp_inds = Rcpp::as<Rcpp::IntegerVector>(Rcpp::wrap(inds_ny + 1));
@@ -1311,8 +1310,8 @@ arma::vec aSECF_mse_cpp(arma::mat integrands, arma::mat samples, arma::mat deriv
     
     arma::mat phi_holdout = Phi_fn_cpp(samples.rows(holdout_indx),derivatives.rows(holdout_indx),getX,polyorder,subset);
     
-    arma::uvec beta_rows = arma::linspace<arma::uvec>(m0, m0 + phi_holdout.n_cols - 1, phi_holdout.n_cols);
-    arma::uvec a_rows = arma::linspace<arma::uvec>(0, m0-1, m0);
+    arma::uvec beta_rows = arma::linspace<arma::uvec>(num_nystrom, num_nystrom + phi_holdout.n_cols - 1, phi_holdout.n_cols);
+    arma::uvec a_rows = arma::linspace<arma::uvec>(0, num_nystrom-1, num_nystrom);
     
     Rcpp::List ab_tilde_curr;
     Rcpp::NumericVector res;

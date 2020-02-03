@@ -39,7 +39,7 @@ SECF is reduced in aSECF using nystrom approximations and conjugate gradient.
      The kernel matrix is automatically computed in all of the above methods, but it is faster to calculate
      in advance when using more than one of the above functions and when using any of the crossval functions.
      \item \code{\link{Phi_fn}}: Calculates the Phi matrix for SECF and aSECF (similar to \code{getX} but with different arguments and it includes the column of 1's)
-     \item \code{\link{squareNorm}}: Gets the matrix of square norms which is needed for the Gaussian, Matern and rational quadratic kernels.
+     \item \code{\link{squareNorm}}: Gets the matrix of square norms which is needed for all kernels.
      Calculating this can help to save time if you are also interested in calculating the median heuristic, handling multiple tuning parameters or trying other kernels in this group.
      \item \code{\link{nearPD}}: Finds the nearest symmetric positive definite matrix to the given matrix, for handling numerical issues.
      \item \code{\link{logsumexp}}: Performs stable computation of the log sum of exponential (useful when handling the sum of weights)
@@ -75,6 +75,13 @@ integrand_fn <- function(x){ return (1 + x[,2] + 0.1*x[,1]*x[,2]*x[,3] + sin(x[,
 
 results <- data.frame()
 for (N in N_all){
+
+  # identify the largest polynomial order that can be fit without regularisation for auto ZV-CV
+  max_r <- 0
+  while (choose(d + max_r + 1,d)<(0.8*N)){ # 0.8*N because of the 5-fold cross-validation
+  	max_r <- max_r + 1
+  }
+
   MC <- ZV1 <- ZV2 <- ZVchoose <- CF <- SECF1 <- aSECF1 <- SECF2 <- aSECF2 <- rep(NaN,N_repeats)
   for (i in 1:N_repeats){     
     x <- matrix(rnorm(N*d),ncol=d)
@@ -83,10 +90,10 @@ for (N in N_all){
     
     MC[i] <- mean(f)
     ZV1[i] <- zvcv(f,x,u,options=list(polyorder=1,regul_reg=FALSE))$expectation
-    if (N > choose(d+2,d)){  # Checking if the sample size is large enough to accommodation a second order polynomial with cross-validation
+    if (N > choose(d+2,d)){  # Checking if the sample size is large enough to accommodation a second order polynomial
       ZV2[i] <- zvcv(f,x,u,options=list(polyorder=2,regul_reg=FALSE))$expectation
     }
-    ZVchoose[i] <- zvcv(f,x,u,options=list(list(polyorder=Inf,regul_reg=FALSE,polyorder_max=30),list(polyorder=Inf,regul_reg=TRUE,polyorder_max=30)))$expectation
+    ZVchoose[i] <- zvcv(f,x,u,options=list(list(polyorder=Inf,regul_reg=FALSE,polyorder_max=max_r),list(polyorder=Inf,regul_reg=TRUE)))$expectation
     
     # Calculating the kernel matrix in advance for CF and SECF
     K0_list <- list()
@@ -96,10 +103,10 @@ for (N in N_all){
     
     CF[i] <- CF_crossval(f,x,u,K0_list=K0_list)$expectation
     SECF1[i] <- SECF_crossval(f,x,u,K0_list=K0_list)$expectation
-    aSECF1[i] <- aSECF_crossval(f,x,u,steinOrder=2,kernel_function="RQ",sigma_list=sigma_list,reltol=10e-05)$expectation
-    if ((0.8*N) > choose(d+2,d)){ # Checking if the sample size is large enough to accommodation a second order polynomial with cross-validation
+    aSECF1[i] <- aSECF_crossval(f,x,u,steinOrder=2,kernel_function="RQ",sigma_list=sigma_list,reltol=1e-05)$expectation
+    if (max_r>=2){
       SECF2[i] <- SECF_crossval(f,x,u,polyorder=2,K0_list=K0_list)$expectation
-      aSECF2[i] <- aSECF_crossval(f,x,u,polyorder=2,steinOrder=2,kernel_function="RQ",sigma_list=sigma_list,reltol=10e-05)$expectation
+      aSECF2[i] <- aSECF_crossval(f,x,u,polyorder=2,steinOrder=2,kernel_function="RQ",sigma_list=sigma_list,reltol=1e-05)$expectation
     }
     
     print(sprintf("--\%d",i))
@@ -122,7 +129,7 @@ for (N in N_all){
 
 
 # Plotting
-library(ggplot)
+library(ggplot2)
 library(ggthemes)
 library(ggpubr)
 a <- ggplot(data=results,

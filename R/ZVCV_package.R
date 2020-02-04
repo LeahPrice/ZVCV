@@ -83,7 +83,7 @@
 #'     if (N > choose(d+2,d)){  # Checking if the sample size is large enough to accommodation a second order polynomial
 #'       ZV2[i] <- zvcv(f,x,u,options=list(polyorder=2,regul_reg=FALSE))$expectation
 #'     }
-#'     ZVchoose[i] <- zvcv(f,x,u,options=list(list(polyorder=Inf,regul_reg=FALSE,polyorder_max=max_r),list(polyorder=Inf,regul_reg=TRUE)))$expectation
+#'     ZVchoose[i] <- zvcv(f,x,u,options=list(list(polyorder=Inf,regul_reg=FALSE,polyorder_max=max_r),list(polyorder=Inf,regul_reg=TRUE,20)))$expectation
 #'     
 #'     # Calculating the kernel matrix in advance for CF and SECF
 #'     K0_list <- list()

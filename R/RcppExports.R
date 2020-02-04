@@ -84,7 +84,7 @@ medianTune <- function(samples, Z = NULL) {
 #' @references
 #' Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.
 #'
-#' South, L. F., Karvonen, T., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/}
+#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 #'
 #' @author Leah F. South
 K0_fn <- function(samples, derivatives, sigma, steinOrder, kernel_function, Z = NULL, nystrom_inds = NULL) {

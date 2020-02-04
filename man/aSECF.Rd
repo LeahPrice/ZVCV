@@ -85,7 +85,7 @@ In the above equations, \eqn{z(x) = \sum_j x[j]^2} and \eqn{z(x,y) = \sum_j (x[j
 }
 
 \references{
-South, L. F., Karvonen, T., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/}
+South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 }
 \seealso{
 \code{\link{aSECF_crossval}} for a function to choose between different kernels for this estimator.

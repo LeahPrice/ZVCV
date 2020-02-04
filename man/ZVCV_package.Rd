@@ -145,7 +145,7 @@ print(a)
 \references{
 Mira, A., Solgi, R., & Imparato, D. (2013). Zero variance Markov chain Monte Carlo for Bayesian estimators. Statistics and Computing, 23(5), 653-662.
 
-South, L. F., Karvonen, T., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/}
+South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 
 South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2018). Regularised zero-variance control variates for high-dimensional variance reduction. \url{https://arxiv.org/abs/1811.05073}
 }

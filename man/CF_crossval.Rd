@@ -87,7 +87,7 @@ In the above equations, \eqn{z(x) = \sum_j x[j]^2} and \eqn{z(x,y) = \sum_j (x[j
 \references{
 Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.
 
-South, L. F., Karvonen, T., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/}
+South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 }
 \seealso{
 \code{\link{CF}} for a function to perform control functionals with fixed kernel specifications.

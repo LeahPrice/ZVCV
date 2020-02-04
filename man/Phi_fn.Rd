@@ -25,7 +25,7 @@ estimation but may be useful when evaluation samples are not initially available
 estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]} where \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices.
 }
 \references{
-South, L. F., Karvonen, T., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/}
+South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 }
 \author{
 Leah F. South

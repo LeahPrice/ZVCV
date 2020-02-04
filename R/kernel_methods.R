@@ -35,7 +35,7 @@
 #' @inheritSection K0_fn On the choice of \eqn{\sigma}, the kernel and the Stein order
 #'
 #' @references
-#' South, L. F., Karvonen, T., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/}
+#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 #'
 #' @author Leah F. South
 #' @seealso \code{\link{aSECF_crossval}} for a function to choose between different kernels for this estimator.
@@ -161,7 +161,7 @@ aSECF <- function(integrands,samples,derivatives, polyorder = NULL, steinOrder =
 #' @references
 #' Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.
 #'
-#' South, L. F., Karvonen, T., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/}
+#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 #'
 #' @author Leah F. South
 #' @seealso \code{\link{CF_crossval}} for a function to choose between different kernels for this estimator.
@@ -224,7 +224,7 @@ CF <- function(integrands, samples, derivatives, steinOrder = NULL, kernel_funct
 #' @references
 #' Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.
 #'
-#' South, L. F., Karvonen, T., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/}
+#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 #'
 #' @author Leah F. South
 #' @seealso \code{\link{CF}} for a function to perform control functionals with fixed kernel specifications.
@@ -278,7 +278,7 @@ CF_crossval <- function(integrands, samples, derivatives, steinOrder = NULL, ker
 #' @references
 #' Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.
 #'
-#' South, L. F., Karvonen, T., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/}
+#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 #'
 #' @author Leah F. South
 #' @seealso \code{\link{SECF_crossval}} for a function to choose between different kernels for this estimator.
@@ -360,7 +360,7 @@ SECF <- function(integrands,samples,derivatives, polyorder = NULL, steinOrder = 
 #' @references
 #' Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.
 #'
-#' South, L. F., Karvonen, T., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/}
+#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 #'
 #' @author Leah F. South
 #' @seealso \code{\link{SECF}} for a function to perform semi-exact control functionals with fixed kernel specifications.
@@ -489,7 +489,7 @@ aSECF_mse_linsolve <- function(integrands,samples,derivatives, polyorder = NULL,
 #' @inheritSection K0_fn On the choice of \eqn{\sigma}, the kernel and the Stein order
 #'
 #' @references
-#' South, L. F., Karvonen, T., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/}
+#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 #'
 #' @author Leah F. South
 #' @seealso \code{\link{aSECF_crossval}} for a function to choose between different kernels for this estimator.
@@ -613,7 +613,7 @@ aSECF_crossval <- function(integrands,samples,derivatives, polyorder = NULL, ste
 #' @return An \eqn{N} by \eqn{Q} matrix (where Q is determined by the polynomial order and the subset).
 #'
 #' @references
-#' South, L. F., Karvonen, T., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/}
+#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 #'
 #' @author Leah F. South
 Phi_fn <- function(samples,derivatives,polyorder=NULL,subset=NULL){

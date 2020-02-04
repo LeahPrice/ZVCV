@@ -37,7 +37,7 @@ using \code{\link{squareNorm}}, as long as the \code{nystrom_inds} are \code{NUL
 
 \item{diagnostics}{(optional) A flag for whether to return the necessary outputs for plotting or estimating using the fitted model. The default is \code{false} since this requires some additional computation when \code{est_inds} is \code{NULL}.}
 
-\item{integrand}{An \eqn{N} by \eqn{k} matrix of integrands (evaluations of the function of interest)  from the target}
+\item{integrand}{An \eqn{N} by \eqn{k} matrix of integrands (evaluations of the function of interest)}
 }
 \value{
 A list with the following elements:

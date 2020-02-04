@@ -4,7 +4,7 @@
 #' This package can be used to perform post-hoc variance reduction of Monte Carlo estimators when the derivatives of the log target are available.
 #' The main functionality is available through the following functions. 
 #' All of these use a set of \eqn{N} \eqn{d}-dimensional samples along with the associated derivatives of the log target. 
-#' You can evaluate posterior expectations of \eqn{k} functions (except ZV-CV which is currently restricted to \eqn{k=1}).
+#' You can evaluate posterior expectations of \eqn{k} functions.
 #'
 #' \itemize{
 #'      \item \code{\link{zvcv}}: For estimating expectations using (regularised) zero-variance control variates (ZV-CV, Mira et al, 2013; South et al, 2018).

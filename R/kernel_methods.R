@@ -4,7 +4,7 @@
 #' This is faster than \code{\link{SECF}} for large \eqn{N}. If you would like to choose
 #' between different kernels using cross-validation, then you can use \code{\link{aSECF_crossval}}.
 #'
-#' @param integrand		An \eqn{N} by \eqn{k} matrix of integrands (evaluations of the function of interest)  from the target
+#' @param integrand		An \eqn{N} by \eqn{k} matrix of integrands (evaluations of the function of interest)
 #' @param samples		An \eqn{N} by \eqn{d} matrix of samples from the target
 #' @param derivatives	An \eqn{N} by \eqn{d} matrix of derivatives of the log target with respect to the parameters
 #' @param polyorder (optional)		The order of the polynomial to be used in the parametric component, with a default of \eqn{1}. We recommend keeping this value low (e.g. only 1-2).

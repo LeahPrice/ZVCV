@@ -11,7 +11,7 @@ zvcv(integrand, samples, derivatives, log_weight,
   Inf), folds_choose = 5)
 }
 \arguments{
-\item{integrand}{The integrand, i.e. a set of \eqn{N} evaluations of the function of interest.}
+\item{integrand}{An \eqn{N} by \eqn{k} matrix of integrands (evaluations of the function of interest)}
 
 \item{samples}{An \eqn{N} by \eqn{d} matrix of samples from the target}
 
@@ -41,7 +41,7 @@ zvcv(integrand, samples, derivatives, log_weight,
 \value{
 A list is returned, containing the following components:
 \itemize{
-\item \code{expectation}: The estimate of the expectation.
+\item \code{expectation}: The estimates of the expectations.
 \item \code{num_select}: The number of non-zero coefficients in the polynomial.
 \item \code{mse}: The mean square error for the evaluation set.
 \item \code{integrand_logged}: The \code{integrand_logged} input stored for reference.
@@ -58,24 +58,24 @@ A list is returned, containing the following components:
 The function \code{zvcv} is used to perform (regularised) ZV-CV given a set of samples, derivatives and function evaluations.
 }
 \examples{
-# Estimating the mean of theta1 when theta is bivariate normally distributed with:
+# Estimating some expectations when theta is bivariate normally distributed with:
 mymean <- c(1,2)
 mycov <- matrix(c(1,0.5,0.5,2),nrow=2)
 
 # Perfect draws from the target distribution (could be replaced with
 # approximate draws from e.g. MCMC or SMC)
-N <- 50
+N <- 100
 require(mvtnorm)
 set.seed(1)
 samples <- rmvnorm(N, mean = mymean, sigma = mycov)
-integrand <- samples[,1]
+derivatives <- t( apply(samples,1,function(x) -solve(mycov)\%*\%(x - mymean)) ) # derivatives of Gaussian wrt x
 
-# derivatives of Gaussian wrt x
-derivatives <- t( apply(samples,1,function(x) -solve(mycov)\%*\%(x - mymean)) ) 
+# The integrands are the marginal posterior means of theta, the variances and the covariance (true values are c(1,2,1,2,0.5))
+integrand <- cbind(samples,(samples[,1] - 1)^2,(samples[,2] - 2)^2, (samples[,1] - 1)*(samples[,2] - 2))
 
 # Estimates without ZV-CV (i.e. vanilla Monte Carlo integration)
 # Without the ZVCV package
-mean(integrand)
+colMeans(integrand)
 # With the ZVCV package
 zvcv(integrand,samples,derivatives,options = list(polyorder = 0))$expectation
 
@@ -84,15 +84,17 @@ zvcv(integrand,samples,derivatives,options = list(polyorder = 0))$expectation
 sprintf("\%.15f",zvcv(integrand, samples, derivatives)$expectation)
 # 2nd order polynomial with OLS
 sprintf("\%.15f",zvcv(integrand, samples, derivatives,
-options = list(polyorder = 2, regul_reg = FALSE))$expectation) 
+										 options = list(polyorder = 2, regul_reg = FALSE))$expectation) 
 
 # ZV-CV with cross validation
 # Choose between OLS and LASSO, with the order selected using cross validation
+# For this example, polyorder = 1 with OLS is exact for the first two integrands and polyorder = 2 with OLS is exact for the last three integrands
 myopts <- list(list(polyorder = Inf, regul_reg = FALSE),list(polyorder = Inf)) 
 temp <- zvcv(integrand,samples,derivatives,options = myopts) 
 temp$polyorder # The chosen control variate order
-sprintf("\%.15f",temp$expectation) # The expectation based on the minimum MSE control variate
 temp$regul_reg # Flag for if the chosen control variate uses regularisation
+sprintf("\%.15f",temp$expectation) # The expectation based on the minimum MSE control variate
+
 
 }
 \references{

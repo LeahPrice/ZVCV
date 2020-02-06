@@ -272,16 +272,41 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// getPoly
-arma::mat getPoly(arma::mat samples, arma::mat derivatives, Rcpp::List combinations);
-RcppExport SEXP _ZVCV_getPoly(SEXP samplesSEXP, SEXP derivativesSEXP, SEXP combinationsSEXP) {
+// get_all_combins
+arma::umat get_all_combins(arma::umat mymat, unsigned int polyorder);
+RcppExport SEXP _ZVCV_get_all_combins(SEXP mymatSEXP, SEXP polyorderSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::umat >::type mymat(mymatSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type polyorder(polyorderSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_all_combins(mymat, polyorder));
+    return rcpp_result_gen;
+END_RCPP
+}
+// getPoly_withoutpackage
+arma::mat getPoly_withoutpackage(arma::mat samples, arma::mat derivatives, arma::mat combinations);
+RcppExport SEXP _ZVCV_getPoly_withoutpackage(SEXP samplesSEXP, SEXP derivativesSEXP, SEXP combinationsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type samples(samplesSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type derivatives(derivativesSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type combinations(combinationsSEXP);
+    rcpp_result_gen = Rcpp::wrap(getPoly_withoutpackage(samples, derivatives, combinations));
+    return rcpp_result_gen;
+END_RCPP
+}
+// getPoly_withpackage
+arma::mat getPoly_withpackage(arma::mat samples, arma::mat derivatives, Rcpp::List combinations);
+RcppExport SEXP _ZVCV_getPoly_withpackage(SEXP samplesSEXP, SEXP derivativesSEXP, SEXP combinationsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat >::type samples(samplesSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type derivatives(derivativesSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type combinations(combinationsSEXP);
-    rcpp_result_gen = Rcpp::wrap(getPoly(samples, derivatives, combinations));
+    rcpp_result_gen = Rcpp::wrap(getPoly_withpackage(samples, derivatives, combinations));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -301,7 +326,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ZVCV_aSECF_cpp_prep", (DL_FUNC) &_ZVCV_aSECF_cpp_prep, 12},
     {"_ZVCV_aSECF_unbiased_cpp_prep", (DL_FUNC) &_ZVCV_aSECF_unbiased_cpp_prep, 16},
     {"_ZVCV_aSECF_crossval_cpp", (DL_FUNC) &_ZVCV_aSECF_crossval_cpp, 15},
-    {"_ZVCV_getPoly", (DL_FUNC) &_ZVCV_getPoly, 3},
+    {"_ZVCV_get_all_combins", (DL_FUNC) &_ZVCV_get_all_combins, 2},
+    {"_ZVCV_getPoly_withoutpackage", (DL_FUNC) &_ZVCV_getPoly_withoutpackage, 3},
+    {"_ZVCV_getPoly_withpackage", (DL_FUNC) &_ZVCV_getPoly_withpackage, 3},
     {NULL, NULL, 0}
 };
 

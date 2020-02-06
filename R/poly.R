@@ -13,15 +13,9 @@ getX <- function(samples, derivatives, polyorder){
 	N <- NROW(samples)
 	d <- NCOL(samples)
 	
-	# The actual form for polynomial orders less than 4 or any polynomial order
-	# with dimension d = 1 is coded in getX_fast
+	# There is a fast (hard-coded) version of this for d=1, polyorder<=4<=d in getX_fast.
 	if (d==1 | (polyorder %in% c(1,2,3,4) & polyorder <= d)){
 		return (getX_fast(samples,derivatives,polyorder))
-	}
-	
-	alpha <- list()
-	for (i in 1:polyorder){
-		alpha[[i]] <- compositions(i,d)
 	}
 	
 	if (d==1){
@@ -29,7 +23,44 @@ getX <- function(samples, derivatives, polyorder){
 		Z <- array(Z,c(N,d))
 	}
 	
-	return (getPoly(samples,derivatives,alpha))
+	# If the partitions function is available, then using the compositions function is the fastest approach that I've come across.
+	if (requireNamespace("partitions", quietly = TRUE)){
+		alpha <- list()
+		for (i in 1:polyorder){
+			alpha[[i]] <- partitions::compositions(i,d)
+		}
+		
+		return (getPoly_withpackage(samples,derivatives,alpha))
+	}
+	
+	# However, the function partitions appears not to be Linux friendly, so the last resort is below.
+	mymat <- matrix(0,nrow=polyorder,ncol=d)
+	mymat[,1] <- 1:polyorder
+	curr_inds <- 1:polyorder
+	while (1){
+		for (inds in curr_inds){
+			for (j in 2:d){
+				for (k in 1:polyorder){
+					temp = mymat[inds,]
+					if (sum(temp)<k){
+						temp[j] <- k - sum(temp)
+					}
+					if ((temp[j]<=temp[j-1]) && sum(apply(mymat, 1, function(x) identical(temp, x)))==0){
+						mymat <- rbind(mymat,temp)
+					}
+				}
+			}
+		}
+		if (NROW(mymat)==curr_inds[length(curr_inds)]){
+			break;
+		}
+		curr_inds <- (curr_inds[length(curr_inds)] + 1):NROW(mymat)
+	}
+	mymat <- mymat[order(rowSums(mymat),decreasing=TRUE),]
+	
+	final_mat_dup <- get_all_combins(mymat, polyorder)
+	
+	return(getPoly_withoutpackage(samples,derivatives,final_mat_dup))
 	
 }
 

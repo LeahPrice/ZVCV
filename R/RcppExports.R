@@ -151,7 +151,15 @@ aSECF_crossval_cpp <- function(integrands, samples, derivatives, getX, aSECF_mse
     .Call(`_ZVCV_aSECF_crossval_cpp`, integrands, samples, derivatives, getX, aSECF_mse_linsolve, num_nystrom, polyorder, steinOrder, kernel_function, sigma, subset, folds, conjugate_gradient, reltol, est_inds)
 }
 
-getPoly <- function(samples, derivatives, combinations) {
-    .Call(`_ZVCV_getPoly`, samples, derivatives, combinations)
+get_all_combins <- function(mymat, polyorder) {
+    .Call(`_ZVCV_get_all_combins`, mymat, polyorder)
+}
+
+getPoly_withoutpackage <- function(samples, derivatives, combinations) {
+    .Call(`_ZVCV_getPoly_withoutpackage`, samples, derivatives, combinations)
+}
+
+getPoly_withpackage <- function(samples, derivatives, combinations) {
+    .Call(`_ZVCV_getPoly_withpackage`, samples, derivatives, combinations)
 }
 

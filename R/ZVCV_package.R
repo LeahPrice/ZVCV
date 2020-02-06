@@ -119,9 +119,8 @@
 #' 
 #' 
 #' # Plotting
-#' library(ggplot2)
-#' library(ggthemes)
-#' library(ggpubr)
+#' require(ggplot2)
+#' require(ggthemes)
 #' a <- ggplot(data=results,
 #'             aes(x=N,y=efficiency,col=type,linetype=order)) + scale_color_pander() + 
 #'   ggtitle("") + geom_line(size=1.5) + scale_x_log10() + scale_y_log10() + 

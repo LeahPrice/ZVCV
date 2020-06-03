@@ -400,7 +400,7 @@ Rcpp::List CF_unbiased_cpp(const arma::mat & integrands, const arma::mat & sampl
 // If the K0 matrix is not given, this function recalculates the K0 matrix once for each selected tuning parameter (there can be multiple tuning parameters selected if there are multiple integrands).
 // This double-up on computation can be avoided by using the K0 argument.
 // [[Rcpp::export]]
-Rcpp::List CF_crossval_cpp(arma::mat integrands, arma::mat samples, arma::mat derivatives, Rcpp::Nullable<unsigned int> steinOrder = R_NilValue, Rcpp::Nullable<Rcpp::String> kernel_function = R_NilValue, Rcpp::Nullable<Rcpp::List> sigma = R_NilValue, const Rcpp::Nullable<Rcpp::List> & K0 = R_NilValue, Rcpp::Nullable<unsigned int> folds = R_NilValue, const Rcpp::Nullable<Rcpp::IntegerVector> & est_inds = R_NilValue, bool one_in_denom = false, bool diagnostics = false){
+Rcpp::List CF_crossval_cpp(arma::mat integrands, arma::mat samples, arma::mat derivatives, Rcpp::Nullable<unsigned int> steinOrder = R_NilValue, Rcpp::Nullable<Rcpp::String> kernel_function = R_NilValue, Rcpp::Nullable<Rcpp::List> sigma = R_NilValue, const Rcpp::Nullable<Rcpp::List> & K0 = R_NilValue, Rcpp::Nullable<unsigned int> folds = R_NilValue, const Rcpp::Nullable<Rcpp::IntegerVector> & est_inds = R_NilValue, const Rcpp::Nullable<Rcpp::NumericVector> & input_weights = R_NilValue, bool one_in_denom = false, bool diagnostics = false){
   unsigned int N = samples.n_rows;
   unsigned int N_expectations = integrands.n_cols;
   
@@ -411,6 +411,10 @@ Rcpp::List CF_crossval_cpp(arma::mat integrands, arma::mat samples, arma::mat de
   
   Rcpp::List sig_list;
   Rcpp::List K0_list;
+  
+  if ( (est_inds.isNotNull()) & (input_weights.isNotNull()) ){
+    throw(Rcpp::exception("Weights are given along with split indices. This is not currently implemented because typically split indices would be used to get unbiased estimators and using weighted importance samples introduces bias."));
+  }
   
   if (sigma.isNotNull()) {
     sig_list = Rcpp::as<Rcpp::List>(sigma);
@@ -441,11 +445,11 @@ Rcpp::List CF_crossval_cpp(arma::mat integrands, arma::mat samples, arma::mat de
     if (K0_given){
       Rcpp::NumericMatrix K0curr = K0_list[j];
       Rcpp::Nullable<Rcpp::NumericMatrix> Kcurr(K0curr);
-      mse.col(j) = CF_mse_cpp(integrands, samples, derivatives, steinOrder, kernel_function, R_NilValue, Kcurr, folds, est_inds, one_in_denom);
+      mse.col(j) = CF_mse_cpp(integrands, samples, derivatives, steinOrder, kernel_function, R_NilValue, Kcurr, folds, est_inds, input_weights, one_in_denom);
     } else {
       Rcpp::NumericVector sigs = sig_list[j];
       Rcpp::Nullable<Rcpp::NumericVector> sigs1(sigs);
-      mse.col(j) = CF_mse_cpp(integrands, samples, derivatives, steinOrder, kernel_function, sigs1, R_NilValue, folds, est_inds, one_in_denom);
+      mse.col(j) = CF_mse_cpp(integrands, samples, derivatives, steinOrder, kernel_function, sigs1, R_NilValue, folds, est_inds, input_weights, one_in_denom);
     }
   }
   
@@ -1022,7 +1026,7 @@ arma::mat aSECF_crossval_cpp(const arma::mat & integrands, const arma::mat & sam
 
 
 // An internal function used by CF_crossval_cpp. Given a single kernel and tuning parameter, this function uses (folds)-fold cross-validation to get the approximate mean square predictive error using the fitted gaussian process models from different estimation sets.
-arma::vec CF_mse_cpp(arma::mat integrands, arma::mat samples, arma::mat derivatives, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<Rcpp::NumericVector> sigma, const Rcpp::Nullable<Rcpp::NumericMatrix> & K0, Rcpp::Nullable<unsigned int> folds, const Rcpp::Nullable<Rcpp::IntegerVector> & est_inds, bool one_in_denom){
+arma::vec CF_mse_cpp(arma::mat integrands, arma::mat samples, arma::mat derivatives, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<Rcpp::NumericVector> sigma, const Rcpp::Nullable<Rcpp::NumericMatrix> & K0, Rcpp::Nullable<unsigned int> folds, const Rcpp::Nullable<Rcpp::IntegerVector> & est_inds, const Rcpp::Nullable<Rcpp::NumericVector> & input_weights, bool one_in_denom){
   unsigned int N = samples.n_rows;
   unsigned int N_expectations = integrands.n_cols;
   
@@ -1113,7 +1117,18 @@ arma::vec CF_mse_cpp(arma::mat integrands, arma::mat samples, arma::mat derivati
       K0inv_f = K0inv*f_curr;
       mu = arma::as_scalar(arma::ones<arma::rowvec>(N_curr) *K0inv_f)/temp_1;
       f_hat = K0_holdout * K0inv_f + (1.0 - K0_holdout * K0inv_ones)*mu;
-      crossval_mse(i,ii) = pow(norm(f_hat-f_holdout,2),2);
+	  
+	  if (input_weights.isNotNull()) {
+        arma::vec input_w = Rcpp::as<arma::vec>(input_weights);
+        if (est_inds.isNotNull()) {
+          input_w = input_w.rows(inds_est);
+        }
+        input_w = input_w.rows(holdout_indx);
+        input_w = input_w/arma::sum(input_w);
+        crossval_mse(i,ii) = pow(norm(sqrt(input_w)%(f_hat-f_holdout),2),2);
+      } else{
+        crossval_mse(i,ii) = pow(norm(f_hat-f_holdout,2),2);
+      }
     }
   }
   

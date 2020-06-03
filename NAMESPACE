@@ -2,6 +2,8 @@ useDynLib("ZVCV", .registration=TRUE)
 
 import(glmnet)
 import(abind)
+importFrom(dplyr,"group_by","group_size")
+importFrom(magrittr,"%>%")
 importFrom(mvtnorm,"rmvnorm")
 importFrom("Rcpp", "evalCpp")
 importFrom("stats", "coef", "lm", "uniroot")
@@ -15,6 +17,8 @@ export("zvcv",
 "Expand_Temperatures",
 "evidence_CTI",
 "evidence_SMC",
+"evidence_CTI_CF",
+"evidence_SMC_CF",
 "squareNorm","Phi_fn","K0_fn","medianTune","nearPD",
 "SECF","SECF_crossval","aSECF","aSECF_crossval",
 "CF","CF_crossval"

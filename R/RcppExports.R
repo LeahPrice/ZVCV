@@ -123,8 +123,8 @@ CF_unbiased_cpp <- function(integrands, samples, derivatives, est_inds, steinOrd
     .Call(`_ZVCV_CF_unbiased_cpp`, integrands, samples, derivatives, est_inds, steinOrder, kernel_function, sigma, K0, one_in_denom, diagnostics)
 }
 
-CF_crossval_cpp <- function(integrands, samples, derivatives, steinOrder = NULL, kernel_function = NULL, sigma = NULL, K0 = NULL, folds = NULL, est_inds = NULL, one_in_denom = FALSE, diagnostics = FALSE) {
-    .Call(`_ZVCV_CF_crossval_cpp`, integrands, samples, derivatives, steinOrder, kernel_function, sigma, K0, folds, est_inds, one_in_denom, diagnostics)
+CF_crossval_cpp <- function(integrands, samples, derivatives, steinOrder = NULL, kernel_function = NULL, sigma = NULL, K0 = NULL, folds = NULL, est_inds = NULL, input_weights = NULL, one_in_denom = FALSE, diagnostics = FALSE) {
+    .Call(`_ZVCV_CF_crossval_cpp`, integrands, samples, derivatives, steinOrder, kernel_function, sigma, K0, folds, est_inds, input_weights, one_in_denom, diagnostics)
 }
 
 SECF_cpp <- function(integrands, samples, derivatives, getX, polyorder = NULL, steinOrder = NULL, kernel_function = NULL, sigma = NULL, K0 = NULL, subset = NULL, diagnostics = FALSE) {

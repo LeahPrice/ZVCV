@@ -6,8 +6,8 @@
 \usage{
 CF_crossval(integrands, samples, derivatives, steinOrder = NULL,
   kernel_function = NULL, sigma_list = NULL, K0_list = NULL,
-  est_inds = NULL, one_in_denom = FALSE, folds = NULL,
-  diagnostics = FALSE)
+  est_inds = NULL, input_weights = NULL, one_in_denom = FALSE,
+  folds = NULL, diagnostics = FALSE)
 }
 \arguments{
 \item{samples}{An \eqn{N} by \eqn{d} matrix of samples from the target}
@@ -23,6 +23,8 @@ CF_crossval(integrands, samples, derivatives, steinOrder = NULL,
 \item{K0_list}{(optional between this and \code{sigma_list}) A list of kernel matrices, which can be calculated using \code{\link{K0_fn}}.}
 
 \item{est_inds}{(optional) The default is to perform estimation and evaluation using the full set of samples. This argument lets you specify that the \code{est_inds} indices are used for estimation only and the remaining samples are used for evaluation only. This can be used to reduce bias from adaption and also to make computation feasible for very large sample sizes (small \code{est_inds} is faster).}
+
+\item{input_weights}{(optional) A vector of weights associated with the samples. The weights are only used in estimating the cross-validation error. This method is not implemented for the case where \code{est_inds} is specified becausing specifying \code{est_inds} typically indicates a desire for an unbiased estimator and using self-normalised importance weights introduces bias.}
 
 \item{one_in_denom}{(optional) Whether or not to include a \eqn{1 + } in the denominator of the control functionals estimator, as in equation 2 on p703 of Oates et al (2017). The \eqn{1 +} in the denominator is an arbitrary choice so we set it to zero by default.}
 

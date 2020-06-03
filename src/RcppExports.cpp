@@ -113,8 +113,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // CF_crossval_cpp
-Rcpp::List CF_crossval_cpp(arma::mat integrands, arma::mat samples, arma::mat derivatives, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<Rcpp::List> sigma, const Rcpp::Nullable<Rcpp::List>& K0, Rcpp::Nullable<unsigned int> folds, const Rcpp::Nullable<Rcpp::IntegerVector>& est_inds, bool one_in_denom, bool diagnostics);
-RcppExport SEXP _ZVCV_CF_crossval_cpp(SEXP integrandsSEXP, SEXP samplesSEXP, SEXP derivativesSEXP, SEXP steinOrderSEXP, SEXP kernel_functionSEXP, SEXP sigmaSEXP, SEXP K0SEXP, SEXP foldsSEXP, SEXP est_indsSEXP, SEXP one_in_denomSEXP, SEXP diagnosticsSEXP) {
+Rcpp::List CF_crossval_cpp(arma::mat integrands, arma::mat samples, arma::mat derivatives, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<Rcpp::List> sigma, const Rcpp::Nullable<Rcpp::List>& K0, Rcpp::Nullable<unsigned int> folds, const Rcpp::Nullable<Rcpp::IntegerVector>& est_inds, const Rcpp::Nullable<Rcpp::NumericVector>& input_weights, bool one_in_denom, bool diagnostics);
+RcppExport SEXP _ZVCV_CF_crossval_cpp(SEXP integrandsSEXP, SEXP samplesSEXP, SEXP derivativesSEXP, SEXP steinOrderSEXP, SEXP kernel_functionSEXP, SEXP sigmaSEXP, SEXP K0SEXP, SEXP foldsSEXP, SEXP est_indsSEXP, SEXP input_weightsSEXP, SEXP one_in_denomSEXP, SEXP diagnosticsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -127,9 +127,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::List>& >::type K0(K0SEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<unsigned int> >::type folds(foldsSEXP);
     Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::IntegerVector>& >::type est_inds(est_indsSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericVector>& >::type input_weights(input_weightsSEXP);
     Rcpp::traits::input_parameter< bool >::type one_in_denom(one_in_denomSEXP);
     Rcpp::traits::input_parameter< bool >::type diagnostics(diagnosticsSEXP);
-    rcpp_result_gen = Rcpp::wrap(CF_crossval_cpp(integrands, samples, derivatives, steinOrder, kernel_function, sigma, K0, folds, est_inds, one_in_denom, diagnostics));
+    rcpp_result_gen = Rcpp::wrap(CF_crossval_cpp(integrands, samples, derivatives, steinOrder, kernel_function, sigma, K0, folds, est_inds, input_weights, one_in_denom, diagnostics));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -319,7 +320,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ZVCV_Phi_fn_cpp", (DL_FUNC) &_ZVCV_Phi_fn_cpp, 5},
     {"_ZVCV_CF_cpp", (DL_FUNC) &_ZVCV_CF_cpp, 9},
     {"_ZVCV_CF_unbiased_cpp", (DL_FUNC) &_ZVCV_CF_unbiased_cpp, 10},
-    {"_ZVCV_CF_crossval_cpp", (DL_FUNC) &_ZVCV_CF_crossval_cpp, 11},
+    {"_ZVCV_CF_crossval_cpp", (DL_FUNC) &_ZVCV_CF_crossval_cpp, 12},
     {"_ZVCV_SECF_cpp", (DL_FUNC) &_ZVCV_SECF_cpp, 11},
     {"_ZVCV_SECF_unbiased_cpp", (DL_FUNC) &_ZVCV_SECF_unbiased_cpp, 12},
     {"_ZVCV_SECF_crossval_cpp", (DL_FUNC) &_ZVCV_SECF_crossval_cpp, 13},

@@ -200,6 +200,7 @@ CF <- function(integrands, samples, derivatives, steinOrder = NULL, kernel_funct
 #' @inheritParams aSECF
 #' @param sigma_list (optional between this and \code{K0_list})			A list of tuning parameters for the specified kernel. This involves a list of single length-scale parameter in "gaussian" and "RQ", a list of vectors containing length-scale and smoothness parameters in "matern" and a list of vectors of the two parameters in "product" and "prodsim". See below for further details. When \code{sigma_list} is specified and not \code{K0_list}, the \eqn{K0} matrix is computed twice for each selected tuning parameter.
 #' @param K0_list (optional between this and \code{sigma_list}) A list of kernel matrices, which can be calculated using \code{\link{K0_fn}}.
+#' @param input_weights (optional) A vector of weights associated with the samples. The weights are only used in estimating the cross-validation error. This method is not implemented for the case where \code{est_inds} is specified becausing specifying \code{est_inds} typically indicates a desire for an unbiased estimator and using self-normalised importance weights introduces bias. 
 #' @param one_in_denom (optional) Whether or not to include a \eqn{1 + } in the denominator of the control functionals estimator, as in equation 2 on p703 of Oates et al (2017). The \eqn{1 +} in the denominator is an arbitrary choice so we set it to zero by default.
 #' @param folds (optional) The number of folds for cross-validation. The default is five.
 #'
@@ -228,7 +229,7 @@ CF <- function(integrands, samples, derivatives, steinOrder = NULL, kernel_funct
 #'
 #' @author Leah F. South
 #' @seealso \code{\link{CF}} for a function to perform control functionals with fixed kernel specifications.
-CF_crossval <- function(integrands, samples, derivatives, steinOrder = NULL, kernel_function = NULL, sigma_list = NULL, K0_list = NULL, est_inds = NULL, one_in_denom = FALSE, folds = NULL, diagnostics = FALSE){
+CF_crossval <- function(integrands, samples, derivatives, steinOrder = NULL, kernel_function = NULL, sigma_list = NULL, K0_list = NULL, est_inds = NULL, input_weights = NULL, one_in_denom = FALSE, folds = NULL, diagnostics = FALSE){
 	
 	N <- NROW(samples)
 	d <- NCOL(samples)
@@ -243,7 +244,7 @@ CF_crossval <- function(integrands, samples, derivatives, steinOrder = NULL, ker
 		derivatives <- matrix(derivatives,nrow=N,ncol=1)
 	}
 	
-	temp <- CF_crossval_cpp(integrands, samples, derivatives, steinOrder, kernel_function, sigma_list, K0_list, folds, est_inds, one_in_denom, diagnostics)
+	temp <- CF_crossval_cpp(integrands, samples, derivatives, steinOrder, kernel_function, sigma_list, K0_list, folds, est_inds, input_weights, one_in_denom, diagnostics)
 	
 	return (temp)
 }

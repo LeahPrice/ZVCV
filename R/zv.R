@@ -15,7 +15,7 @@ zv <- function(integrand, samples, derivatives, log_weight, integrand_logged, ob
 	
 	if (integrand_logged){
 		max_integrand <- apply(integrand,2,max)
-		integrand <- exp(test - matrix(1,nrow=N)%*%max_integrand)
+		integrand <- exp(integrand - matrix(1,nrow=N)%*%max_integrand)
 	}
 	
 	# Setting default weight
@@ -123,7 +123,7 @@ zv <- function(integrand, samples, derivatives, log_weight, integrand_logged, ob
 			mse <- colMeans((y_estim - fitteds_estim - matrix(1,nrow=NROW(y_estim))%*%coefs[1,])^2)
 		} else {
 			fitteds_estim <- X_estim%*%coefs
-			mse <- colMeans((y_estim - fitteds_estim - matrix(1,nrow=NROW(y_fit))%*%weight_fit%*%y_fit)^2)
+			mse <- colMeans((y_estim - fitteds_estim - matrix(1,nrow=NROW(y_estim))%*%weight_fit%*%y_fit)^2)
 		}
 		
 		

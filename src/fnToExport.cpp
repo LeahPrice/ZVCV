@@ -274,7 +274,7 @@ arma::mat nearPD(arma::mat K0){
 
 // The internal function for getting the Phi matrix in SECF. There is an R wrapper for this function.
 // [[Rcpp::export]]
-arma::mat Phi_fn_cpp(const arma::mat & samples, const arma::mat & derivatives, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder = R_NilValue, Rcpp::Nullable<Rcpp::IntegerVector> subset = R_NilValue){
+arma::mat Phi_fn_cpp(const arma::mat & samples, const arma::mat & derivatives, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder = R_NilValue, Rcpp::Nullable<Rcpp::IntegerVector> apriori = R_NilValue){
   unsigned int N = samples.n_rows;
   
   unsigned int poly_q;
@@ -288,8 +288,8 @@ arma::mat Phi_fn_cpp(const arma::mat & samples, const arma::mat & derivatives, R
   // phi is based on a given order polynomial
   // subs is the subset of variables used
   arma::mat phi;
-  if (subset.isNotNull()){
-    arma::uvec subs = Rcpp::as<arma::uvec>(subset) -1;
+  if (apriori.isNotNull()){
+    arma::uvec subs = Rcpp::as<arma::uvec>(apriori) -1;
     arma::mat samples_sub = samples.cols(subs);
     arma::mat derivatives_sub = derivatives.cols(subs);
     phi = Rcpp::as<arma::mat>( getX(samples_sub,derivatives_sub,poly_q) );
@@ -547,10 +547,10 @@ Rcpp::List CF_crossval_cpp(arma::mat integrands, arma::mat samples, arma::mat de
 
 // The internal function for performing semi-exact control functionals when samples are NOT split for estimation and evaluation. There is an R wrapper that combines this function and SECF_unbiased_cpp.
 // [[Rcpp::export]]
-Rcpp::List SECF_cpp(const arma::mat & integrands, const arma::mat & samples, const arma::mat & derivatives, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder = R_NilValue, Rcpp::Nullable<unsigned int> steinOrder = R_NilValue, Rcpp::Nullable<Rcpp::String> kernel_function = R_NilValue, Rcpp::Nullable<arma::vec> sigma = R_NilValue, const Rcpp::Nullable<Rcpp::NumericMatrix> & K0 = R_NilValue, Rcpp::Nullable<Rcpp::IntegerVector> subset = R_NilValue, bool diagnostics = false){
+Rcpp::List SECF_cpp(const arma::mat & integrands, const arma::mat & samples, const arma::mat & derivatives, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder = R_NilValue, Rcpp::Nullable<unsigned int> steinOrder = R_NilValue, Rcpp::Nullable<Rcpp::String> kernel_function = R_NilValue, Rcpp::Nullable<arma::vec> sigma = R_NilValue, const Rcpp::Nullable<Rcpp::NumericMatrix> & K0 = R_NilValue, Rcpp::Nullable<Rcpp::IntegerVector> apriori = R_NilValue, bool diagnostics = false){
   unsigned int N_expectations = integrands.n_cols;
   
-  arma::mat phi = Phi_fn_cpp(samples,derivatives,getX,polyorder,subset);
+  arma::mat phi = Phi_fn_cpp(samples,derivatives,getX,polyorder,apriori);
   
   arma::mat K0mat = getK0(samples,derivatives,K0,steinOrder,kernel_function,sigma);
   
@@ -583,11 +583,11 @@ Rcpp::List SECF_cpp(const arma::mat & integrands, const arma::mat & samples, con
 
 // The internal function for performing semi-exact control functionals when samples ARE split for estimation and evaluation. There is an R wrapper that combines this function and SECF_cpp.
 // [[Rcpp::export]]
-Rcpp::List SECF_unbiased_cpp(const arma::mat & integrands, const arma::mat & samples, const arma::mat & derivatives, arma::uvec est_inds, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder = R_NilValue, Rcpp::Nullable<unsigned int> steinOrder = R_NilValue, Rcpp::Nullable<Rcpp::String> kernel_function = R_NilValue, Rcpp::Nullable<arma::vec> sigma = R_NilValue, const Rcpp::Nullable<Rcpp::NumericMatrix> & K0 = R_NilValue, Rcpp::Nullable<Rcpp::IntegerVector> subset = R_NilValue, bool diagnostics = false){
+Rcpp::List SECF_unbiased_cpp(const arma::mat & integrands, const arma::mat & samples, const arma::mat & derivatives, arma::uvec est_inds, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder = R_NilValue, Rcpp::Nullable<unsigned int> steinOrder = R_NilValue, Rcpp::Nullable<Rcpp::String> kernel_function = R_NilValue, Rcpp::Nullable<arma::vec> sigma = R_NilValue, const Rcpp::Nullable<Rcpp::NumericMatrix> & K0 = R_NilValue, Rcpp::Nullable<Rcpp::IntegerVector> apriori = R_NilValue, bool diagnostics = false){
   
   unsigned int N = samples.n_rows;
   
-  arma::mat phi = Phi_fn_cpp(samples,derivatives,getX,polyorder,subset);
+  arma::mat phi = Phi_fn_cpp(samples,derivatives,getX,polyorder,apriori);
   
   arma::mat K0mat = getK0(samples,derivatives,K0,steinOrder,kernel_function,sigma);
   
@@ -638,7 +638,7 @@ Rcpp::List SECF_unbiased_cpp(const arma::mat & integrands, const arma::mat & sam
 // If the K0 matrix is not given, this function recalculates the K0 matrix once for each selected tuning parameter (there can be multiple tuning parameters selected if there are multiple integrands).
 // This double-up on computation can be avoided by using the K0 argument.
 // [[Rcpp::export]]
-Rcpp::List SECF_crossval_cpp(const arma::mat & integrands, const arma::mat & samples, const arma::mat & derivatives, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder = R_NilValue, Rcpp::Nullable<unsigned int> steinOrder = R_NilValue, Rcpp::Nullable<Rcpp::String> kernel_function = R_NilValue, Rcpp::Nullable<Rcpp::List> sigma = R_NilValue, const Rcpp::Nullable<Rcpp::List> & K0 = R_NilValue, Rcpp::Nullable<Rcpp::IntegerVector> subset = R_NilValue, Rcpp::Nullable<unsigned int> folds = R_NilValue, const Rcpp::Nullable<Rcpp::IntegerVector> & est_inds = R_NilValue, bool diagnostics = false){
+Rcpp::List SECF_crossval_cpp(const arma::mat & integrands, const arma::mat & samples, const arma::mat & derivatives, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder = R_NilValue, Rcpp::Nullable<unsigned int> steinOrder = R_NilValue, Rcpp::Nullable<Rcpp::String> kernel_function = R_NilValue, Rcpp::Nullable<Rcpp::List> sigma = R_NilValue, const Rcpp::Nullable<Rcpp::List> & K0 = R_NilValue, Rcpp::Nullable<Rcpp::IntegerVector> apriori = R_NilValue, Rcpp::Nullable<unsigned int> folds = R_NilValue, const Rcpp::Nullable<Rcpp::IntegerVector> & est_inds = R_NilValue, bool diagnostics = false){
   unsigned int N = samples.n_rows;
   unsigned int N_expectations = integrands.n_cols;
   
@@ -680,11 +680,11 @@ Rcpp::List SECF_crossval_cpp(const arma::mat & integrands, const arma::mat & sam
     if (K0_given){
       Rcpp::NumericMatrix K0curr = K0_list[j];
       Rcpp::Nullable<Rcpp::NumericMatrix> Kcurr(K0curr);
-      mse.col(j) = SECF_mse_cpp(integrands, samples, derivatives, getX, polyorder, steinOrder, kernel_function, R_NilValue, Kcurr, subset, folds, est_inds);
+      mse.col(j) = SECF_mse_cpp(integrands, samples, derivatives, getX, polyorder, steinOrder, kernel_function, R_NilValue, Kcurr, apriori, folds, est_inds);
     } else {
       Rcpp::NumericVector sigs = sig_list[j];
       Rcpp::Nullable<Rcpp::NumericVector> sigs1(sigs);
-      mse.col(j) = SECF_mse_cpp(integrands, samples, derivatives, getX, polyorder, steinOrder, kernel_function, sigs1, R_NilValue, subset, folds, est_inds);
+      mse.col(j) = SECF_mse_cpp(integrands, samples, derivatives, getX, polyorder, steinOrder, kernel_function, sigs1, R_NilValue, apriori, folds, est_inds);
     }
   }
   
@@ -726,20 +726,20 @@ Rcpp::List SECF_crossval_cpp(const arma::mat & integrands, const arma::mat & sam
       Rcpp::NumericMatrix K0curr_opt = K0_list[inds_unique(i)];
       Rcpp::Nullable<Rcpp::NumericMatrix> Kcurr_opt(K0curr_opt);
       if (est_inds.isNull()){
-        temp = SECF_cpp(integrands_temp, samples, derivatives, getX, polyorder, steinOrder, kernel_function, R_NilValue, Kcurr_opt, subset, diagnostics);
+        temp = SECF_cpp(integrands_temp, samples, derivatives, getX, polyorder, steinOrder, kernel_function, R_NilValue, Kcurr_opt, apriori, diagnostics);
       } else{
         arma::uvec inds_est = Rcpp::as<arma::uvec>(est_inds);
-        temp = SECF_unbiased_cpp(integrands_temp, samples, derivatives, inds_est, getX, polyorder, steinOrder, kernel_function, R_NilValue, Kcurr_opt, subset, diagnostics);
+        temp = SECF_unbiased_cpp(integrands_temp, samples, derivatives, inds_est, getX, polyorder, steinOrder, kernel_function, R_NilValue, Kcurr_opt, apriori, diagnostics);
       }
     } else {
       Rcpp::NumericVector sigs_opt = sig_list[inds_unique(i)];
       //arma::vec sigs_opt_vec = Rcpp::as<arma::vec>(wrap(sigs_opt));
       Rcpp::Nullable<arma::vec> sigs1_opt(wrap(sigs_opt));
       if (est_inds.isNull()){
-        temp = SECF_cpp(integrands_temp, samples, derivatives, getX, polyorder, steinOrder, kernel_function, sigs1_opt, R_NilValue, subset, diagnostics);
+        temp = SECF_cpp(integrands_temp, samples, derivatives, getX, polyorder, steinOrder, kernel_function, sigs1_opt, R_NilValue, apriori, diagnostics);
       } else{
         arma::uvec inds_est = Rcpp::as<arma::uvec>(est_inds);
-        temp = SECF_unbiased_cpp(integrands_temp, samples, derivatives, inds_est, getX, polyorder, steinOrder, kernel_function, sigs1_opt, R_NilValue, subset, diagnostics);
+        temp = SECF_unbiased_cpp(integrands_temp, samples, derivatives, inds_est, getX, polyorder, steinOrder, kernel_function, sigs1_opt, R_NilValue, apriori, diagnostics);
       }
     }
     for (unsigned int kk = 0; kk<q1.n_rows; kk++){
@@ -785,7 +785,7 @@ Rcpp::List SECF_crossval_cpp(const arma::mat & integrands, const arma::mat & sam
 
 // This internal function is used to get the linear system that requires solving in approximate semi-exact control functionals. The conjugate gradient step is done in R so that an R library can be used.
 // [[Rcpp::export]]
-Rcpp::List aSECF_cpp_prep(const arma::mat & integrands, const arma::mat & samples, const arma::mat & derivatives, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder = R_NilValue, Rcpp::Nullable<unsigned int> steinOrder = R_NilValue, Rcpp::Nullable<Rcpp::String> kernel_function = R_NilValue, Rcpp::Nullable<arma::vec> sigma = R_NilValue, const Rcpp::Nullable<Rcpp::NumericMatrix> & K0 = R_NilValue, Rcpp::Nullable<Rcpp::IntegerVector> subset = R_NilValue, const Rcpp::Nullable<Rcpp::IntegerVector> & nystrom_inds = R_NilValue, bool conjugate_gradient = true){
+Rcpp::List aSECF_cpp_prep(const arma::mat & integrands, const arma::mat & samples, const arma::mat & derivatives, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder = R_NilValue, Rcpp::Nullable<unsigned int> steinOrder = R_NilValue, Rcpp::Nullable<Rcpp::String> kernel_function = R_NilValue, Rcpp::Nullable<arma::vec> sigma = R_NilValue, const Rcpp::Nullable<Rcpp::NumericMatrix> & K0 = R_NilValue, Rcpp::Nullable<Rcpp::IntegerVector> apriori = R_NilValue, const Rcpp::Nullable<Rcpp::IntegerVector> & nystrom_inds = R_NilValue, bool conjugate_gradient = true){
   unsigned int N = samples.n_rows;
   unsigned int N_expectations = integrands.n_cols;
   
@@ -802,7 +802,7 @@ Rcpp::List aSECF_cpp_prep(const arma::mat & integrands, const arma::mat & sample
   Rcpp::IntegerVector temp_inds = Rcpp::as<Rcpp::IntegerVector>(Rcpp::wrap(inds + 1));
   Rcpp::Nullable<Rcpp::IntegerVector> inds_nullable(temp_inds);
   
-  arma::mat phi = Phi_fn_cpp(samples,derivatives,getX,polyorder,subset);
+  arma::mat phi = Phi_fn_cpp(samples,derivatives,getX,polyorder,apriori);
   unsigned int q = phi.n_cols;
   arma::mat phi_sub = phi.rows(inds);
   
@@ -880,7 +880,7 @@ Rcpp::List aSECF_cpp_prep(const arma::mat & integrands, const arma::mat & sample
 // This internal function is used to performing approximate semi-exact control functionals when samples ARE split for estimation and evaluation.
 // There is an R wrapper that combines this function and the version of aSECF for when samples are not split.
 // [[Rcpp::export]]
-Rcpp::List aSECF_unbiased_cpp_prep(const arma::mat & integrands, const arma::mat & samples, const arma::mat & derivatives, arma::uvec est_inds, Rcpp::Function getX, Rcpp::Function aSECF_mse_linsolve, Rcpp::Nullable<unsigned int> polyorder = R_NilValue, Rcpp::Nullable<unsigned int> steinOrder = R_NilValue, Rcpp::Nullable<Rcpp::String> kernel_function = R_NilValue, Rcpp::Nullable<arma::vec> sigma = R_NilValue, const Rcpp::Nullable<Rcpp::NumericMatrix> & K0 = R_NilValue, Rcpp::Nullable<Rcpp::IntegerVector> subset = R_NilValue, const Rcpp::Nullable<Rcpp::IntegerVector> & nystrom_inds = R_NilValue, bool conjugate_gradient = true, double reltol = 0.01, bool diagnostics = false){
+Rcpp::List aSECF_unbiased_cpp_prep(const arma::mat & integrands, const arma::mat & samples, const arma::mat & derivatives, arma::uvec est_inds, Rcpp::Function getX, Rcpp::Function aSECF_mse_linsolve, Rcpp::Nullable<unsigned int> polyorder = R_NilValue, Rcpp::Nullable<unsigned int> steinOrder = R_NilValue, Rcpp::Nullable<Rcpp::String> kernel_function = R_NilValue, Rcpp::Nullable<arma::vec> sigma = R_NilValue, const Rcpp::Nullable<Rcpp::NumericMatrix> & K0 = R_NilValue, Rcpp::Nullable<Rcpp::IntegerVector> apriori = R_NilValue, const Rcpp::Nullable<Rcpp::IntegerVector> & nystrom_inds = R_NilValue, bool conjugate_gradient = true, double reltol = 0.01, bool diagnostics = false){
   unsigned int N = samples.n_rows;
   unsigned int N_expectations = integrands.n_cols;
   
@@ -902,7 +902,7 @@ Rcpp::List aSECF_unbiased_cpp_prep(const arma::mat & integrands, const arma::mat
     inds_ny = arma::uvec(m0);
     arma::uvec overlap = arma::intersect(est_inds,inds_ny_withinfull);
     if (overlap.n_rows!=m0){
-      throw(Rcpp::exception("The nystrom_inds are not a unique subset of the estimation set est_inds."));
+      throw(Rcpp::exception("The nystrom_inds are not a unique apriori of the estimation set est_inds."));
     }
     arma::uvec temp;
     for (unsigned int kk=0; kk<m0; kk++){
@@ -934,9 +934,9 @@ Rcpp::List aSECF_unbiased_cpp_prep(const arma::mat & integrands, const arma::mat
   arma::mat samples_e = samples.rows(est_inds);
   arma::mat derivatives_e = derivatives.rows(est_inds);
   
-  Rcpp::List ab_tilde = aSECF_mse_linsolve(integrands_e,samples_e,derivatives_e,polyorder, R_NilValue, R_NilValue, R_NilValue, K0_est, subset, inds_nullable, conjugate_gradient, reltol);
+  Rcpp::List ab_tilde = aSECF_mse_linsolve(integrands_e,samples_e,derivatives_e,polyorder, R_NilValue, R_NilValue, R_NilValue, K0_est, apriori, inds_nullable, conjugate_gradient, reltol);
   
-  arma::mat phi_eval = Phi_fn_cpp(samples.rows(eval_inds),derivatives.rows(eval_inds),getX,polyorder,subset);
+  arma::mat phi_eval = Phi_fn_cpp(samples.rows(eval_inds),derivatives.rows(eval_inds),getX,polyorder,apriori);
   
   arma::uvec beta_rows = arma::linspace<arma::uvec>(m0, m0 + phi_eval.n_cols - 1, phi_eval.n_cols);
   arma::uvec a_rows = arma::linspace<arma::uvec>(0, m0-1, m0);
@@ -997,7 +997,7 @@ Rcpp::List aSECF_unbiased_cpp_prep(const arma::mat & integrands, const arma::mat
 // If the K0 matrix is not given, this procedure involves recalculating the K0 matrix once for each selected tuning parameter (there can be multiple tuning parameters selected if there are multiple integrands).
 // This double-up on computation can be avoided by using the K0 argument.
 // [[Rcpp::export]]
-arma::mat aSECF_crossval_cpp(const arma::mat & integrands, const arma::mat & samples, const arma::mat & derivatives, Rcpp::Function getX, Rcpp::Function aSECF_mse_linsolve, unsigned int num_nystrom, Rcpp::Nullable<unsigned int> polyorder = R_NilValue, Rcpp::Nullable<unsigned int> steinOrder = R_NilValue, Rcpp::Nullable<Rcpp::String> kernel_function = R_NilValue, Rcpp::Nullable<Rcpp::List> sigma = R_NilValue, Rcpp::Nullable<Rcpp::IntegerVector> subset = R_NilValue, Rcpp::Nullable<unsigned int> folds = R_NilValue, bool conjugate_gradient = true, double reltol = 0.01, const Rcpp::Nullable<Rcpp::IntegerVector> & est_inds = R_NilValue){
+arma::mat aSECF_crossval_cpp(const arma::mat & integrands, const arma::mat & samples, const arma::mat & derivatives, Rcpp::Function getX, Rcpp::Function aSECF_mse_linsolve, unsigned int num_nystrom, Rcpp::Nullable<unsigned int> polyorder = R_NilValue, Rcpp::Nullable<unsigned int> steinOrder = R_NilValue, Rcpp::Nullable<Rcpp::String> kernel_function = R_NilValue, Rcpp::Nullable<Rcpp::List> sigma = R_NilValue, Rcpp::Nullable<Rcpp::IntegerVector> apriori = R_NilValue, Rcpp::Nullable<unsigned int> folds = R_NilValue, bool conjugate_gradient = true, double reltol = 0.01, const Rcpp::Nullable<Rcpp::IntegerVector> & est_inds = R_NilValue){
   
   unsigned int N_expectations = integrands.n_cols;
   
@@ -1019,7 +1019,7 @@ arma::mat aSECF_crossval_cpp(const arma::mat & integrands, const arma::mat & sam
     //Rcpp::Rcout << "Iteration " << j << std::endl;
     Rcpp::NumericVector sigs = sig_list[j];
     Rcpp::Nullable<Rcpp::NumericVector> sigs1(sigs);
-    mse.col(j) = aSECF_mse_cpp(integrands, samples, derivatives, getX, aSECF_mse_linsolve, num_nystrom, polyorder, steinOrder, kernel_function, sigs1, subset, folds, conjugate_gradient, reltol, est_inds);
+    mse.col(j) = aSECF_mse_cpp(integrands, samples, derivatives, getX, aSECF_mse_linsolve, num_nystrom, polyorder, steinOrder, kernel_function, sigs1, apriori, folds, conjugate_gradient, reltol, est_inds);
   }
   return ( mse );
 }
@@ -1141,7 +1141,7 @@ arma::vec CF_mse_cpp(arma::mat integrands, arma::mat samples, arma::mat derivati
 
 
 // An internal function used by SECF_crossval_cpp. Given a single kernel and tuning parameter, this function uses (folds)-fold cross-validation to get the approximate mean square predictive error using the fitted gaussian process models from different estimation sets.
-arma::vec SECF_mse_cpp(arma::mat integrands, arma::mat samples, arma::mat derivatives, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<Rcpp::NumericVector> sigma, const Rcpp::Nullable<Rcpp::NumericMatrix> & K0, Rcpp::Nullable<Rcpp::IntegerVector> subset, Rcpp::Nullable<unsigned int> folds, const Rcpp::Nullable<Rcpp::IntegerVector> & est_inds){
+arma::vec SECF_mse_cpp(arma::mat integrands, arma::mat samples, arma::mat derivatives, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<Rcpp::NumericVector> sigma, const Rcpp::Nullable<Rcpp::NumericMatrix> & K0, Rcpp::Nullable<Rcpp::IntegerVector> apriori, Rcpp::Nullable<unsigned int> folds, const Rcpp::Nullable<Rcpp::IntegerVector> & est_inds){
   
   unsigned int N = samples.n_rows;
   unsigned int N_expectations = integrands.n_cols;
@@ -1162,7 +1162,7 @@ arma::vec SECF_mse_cpp(arma::mat integrands, arma::mat samples, arma::mat deriva
     N = inds_est.n_rows;
   }
   
-  arma::mat phi = Phi_fn_cpp(samples,derivatives,getX,polyorder,subset);
+  arma::mat phi = Phi_fn_cpp(samples,derivatives,getX,polyorder,apriori);
   
   arma::mat K0mat;
   if (K0.isNotNull()) {
@@ -1245,7 +1245,7 @@ arma::vec SECF_mse_cpp(arma::mat integrands, arma::mat samples, arma::mat deriva
 
 
 // An internal function used by aSECF_crossval_cpp. Given a single kernel and tuning parameter, this function uses (folds)-fold cross-validation to get the approximate mean square predictive error using the fitted gaussian process models from different estimation sets.
-arma::vec aSECF_mse_cpp(arma::mat integrands, arma::mat samples, arma::mat derivatives, Rcpp::Function getX, Rcpp::Function aSECF_mse_linsolve, unsigned int num_nystrom, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<Rcpp::NumericVector> sigma, Rcpp::Nullable<Rcpp::IntegerVector> subset, Rcpp::Nullable<unsigned int> folds, bool conjugate_gradient, double reltol, const Rcpp::Nullable<Rcpp::IntegerVector> & est_inds){
+arma::vec aSECF_mse_cpp(arma::mat integrands, arma::mat samples, arma::mat derivatives, Rcpp::Function getX, Rcpp::Function aSECF_mse_linsolve, unsigned int num_nystrom, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<Rcpp::NumericVector> sigma, Rcpp::Nullable<Rcpp::IntegerVector> apriori, Rcpp::Nullable<unsigned int> folds, bool conjugate_gradient, double reltol, const Rcpp::Nullable<Rcpp::IntegerVector> & est_inds){
   
   unsigned int N = samples.n_rows;
   unsigned int N_expectations = integrands.n_cols;
@@ -1321,9 +1321,9 @@ arma::vec aSECF_mse_cpp(arma::mat integrands, arma::mat samples, arma::mat deriv
     arma::mat samples_e = samples.rows(keep_indx);
     arma::mat derivatives_e = derivatives.rows(keep_indx);
     
-    Rcpp::List ab_tilde = aSECF_mse_linsolve(integrands_e,samples_e,derivatives_e,polyorder, R_NilValue, R_NilValue, R_NilValue, K0_curr, subset, inds_nullable, conjugate_gradient, reltol);
+    Rcpp::List ab_tilde = aSECF_mse_linsolve(integrands_e,samples_e,derivatives_e,polyorder, R_NilValue, R_NilValue, R_NilValue, K0_curr, apriori, inds_nullable, conjugate_gradient, reltol);
     
-    arma::mat phi_holdout = Phi_fn_cpp(samples.rows(holdout_indx),derivatives.rows(holdout_indx),getX,polyorder,subset);
+    arma::mat phi_holdout = Phi_fn_cpp(samples.rows(holdout_indx),derivatives.rows(holdout_indx),getX,polyorder,apriori);
     
     arma::uvec beta_rows = arma::linspace<arma::uvec>(num_nystrom, num_nystrom + phi_holdout.n_cols - 1, phi_holdout.n_cols);
     arma::uvec a_rows = arma::linspace<arma::uvec>(0, num_nystrom-1, num_nystrom);

@@ -2,7 +2,6 @@
 #'
 #' The function \code{evidence_CTI} uses ZV-CV on the controlled thermodynamic integration estimator for the normalising constant.
 #'
-#' @inheritParams CF_crossval
 #' @param samples       An \eqn{N} by \eqn{d} by \eqn{T} matrix of samples from the \eqn{T} power posteriors, where \eqn{N} is the number of samples and \eqn{d} is the dimension of the target distribution
 #' @param loglike       An \eqn{N} by \eqn{T} matrix of log likelihood values corresponding to \code{samples}
 #' @param der_loglike   An \eqn{N} by \eqn{d} by \eqn{T} matrix of the derivatives of the log likelihood with respect to the parameters, with parameter values corresponding to \code{samples}
@@ -10,10 +9,9 @@
 #' @param temperatures      A vector of length \eqn{T} of temperatures for the power posterior temperatures
 #' @param temperatures_all  An adjusted vector of length \eqn{tau} of temperatures. Better performance should be obtained with a more conservative temperature schedule. See \code{\link{Expand_Temperatures}} for a function to adjust the temperatures.
 #' @param most_recent   A vector of length \eqn{tau} which gives the indices in the original temperatures that the new temperatures correspond to.
-#' @param obs_estim_choose See \code{\link{zvcv}}.
-#' @param obs_estim     See \code{\link{zvcv}}.
+#' @param est_inds     See \code{\link{zvcv}}.
 #' @param options       See \code{\link{zvcv}}.
-#' @param folds_choose  The number of folds used in k-fold cross-validation for selecting the optimal control variate. Depending on the \code{options}, this may include selection of the optimal polynomial order, regression type and subset of parameters in the polynomial. The default is five.
+#' @param folds  The number of folds used in k-fold cross-validation for selecting the optimal control variate. For ZV-CV, this may include selection of the optimal polynomial order, regression type and subset of parameters depending on options. For CF, this includes the selection of the optimal tuning parameters in \code{sigma_list}. The default is five.
 #' 
 #' @return 				The function \code{evidence_CTI}  returns a list, containing the following components:
 #' \itemize{
@@ -32,7 +30,7 @@
 #' @seealso See \code{\link{Expand_Temperatures}} for a function that can be used to find stricter (or less stricter) temperature schedules based on the conditional effective sample size. See an example at \code{\link{VDP}} and see \link{ZVCV} for more package details.
 #' 
 #' @name evidence
-evidence_CTI <- function(samples, loglike, der_loglike, der_logprior, temperatures, temperatures_all, most_recent, obs_estim_choose, obs_estim, options, folds_choose = 5){# =  = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds = 10, apriori, intercept = TRUE)){
+evidence_CTI <- function(samples, loglike, der_loglike, der_logprior, temperatures, temperatures_all, most_recent, est_inds, options, folds = 5){# =  = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds = 10, apriori, intercept = TRUE)){
 	# Stepping stone identity for evidence.
 	
 	N <- NROW(samples)
@@ -64,12 +62,12 @@ evidence_CTI <- function(samples, loglike, der_loglike, der_logprior, temperatur
 		
 		integrand <- loglike[,tt]
 		
-		regression_LL[[tt]] <- zvcv(integrand, samples[,,tt], derivatives, log_weights[,tt], obs_estim_choose = obs_estim_choose, obs_estim = obs_estim, options = options, folds_choose = folds_choose)
+		regression_LL[[tt]] <- zvcv(integrand, samples[,,tt], derivatives, log_weights[,tt], est_inds = est_inds, options = options, folds = folds)
 		expectation_LL[tt] <- regression_LL[[tt]]$expectation
 		
 		if (is.na(expectation_LL[tt])==FALSE){
 			integrand <- (loglike[,tt] - expectation_LL[tt])^2
-			regression_vLL[[tt]] <- zvcv(integrand, samples[,,tt], derivatives, log_weights[,tt], obs_estim_choose = obs_estim_choose, obs_estim = obs_estim, options = options, folds_choose = folds_choose)
+			regression_vLL[[tt]] <- zvcv(integrand, samples[,,tt], derivatives, log_weights[,tt], est_inds = est_inds, options = options, folds = folds)
 			expectation_vLL[tt] <- regression_vLL[[tt]]$expectation
 		} else {
 			expectation_vLL[tt] <- NaN

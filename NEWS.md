@@ -7,7 +7,7 @@
 # ZVCV 0.1.1
 
 * Allows for any order polynomial (with fast implementations available for polynomial orders Q = 1-4 or dimension d = 1)
-* A cross validation method which chooses the polynomial order starting at 0 and going to infinity is now implemented (this new method could allow for super-root-N convergence)
+* A cross validation method which chooses the polynomial order starting at 1 and going to infinity is now implemented (this new method could allow for super-root-N convergence)
 
 # ZVCV 0.1.2
 
@@ -20,3 +20,16 @@
 # ZVCV 1.1.0
 
 * Added control functionals, semi-exact control functionals and approximate semi-exact control functionals
+
+# ZVCV 2.1.0
+
+* Making Linux friendly
+* Adding more checks of input arguments
+* Removing duplicates in kernel methods
+* Returning the estimated coefficients in zvcv
+* Changing some input arguments for zvcv:
+- log_weight --> log_weights
+- folds_choose --> folds
+- obs_estim --> est_inds and is used to specify the estimation/fitting only samples (with the remainder being used for evaluation of the integrand
+- REMOVED obs_estim_choose, the option to specify the samples for each cross-validation fold. I think this level of flexibility would rarely be required and it cause confusion when est_inds is specified.
+

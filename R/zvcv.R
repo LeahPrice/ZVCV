@@ -5,21 +5,20 @@
 #' @param integrand		An \eqn{N} by \eqn{k} matrix of integrands (evaluations of the function of interest)
 #' @param samples       An \eqn{N} by \eqn{d} matrix of samples from the target
 #' @param derivatives	An \eqn{N} by \eqn{d} matrix of derivatives of the log target with respect to the parameters
-#' @param log_weight    (optional) A vector of length \eqn{N} containing log weights of the samples. The default is equal weights.
+#' @param log_weights    (optional) A vector of length \eqn{N} containing log weights of the samples. The default is equal weights.
 #' @param integrand_logged (optional) Sometimes it is better to input the integrand on the logged scale for stability. If the actual integrand is the exponential of \code{integrand}, then \code{integrand_logged = TRUE}. Otherwise, the default of \code{integrand_logged = FALSE} should be used.
-#' @param obs_estim_choose (optional) The indices of the samples to be used in estimating the MSE for cross validation. This is not relevant if \code{options} is a single list of specifications. If \code{options} is a list of multiple control variate specifications, then the default is to use 10 percent of the full data set for estimating the MSE.
-#' @param obs_estim     (optional) The indices of the samples to be used in evaluating the integrand. If this is missing or \code{NULL} then the full data set is used for both estimating the polynomial and evaluating the integrand. Otherwise, the samples from \code{obs_estim} are used in evaluating the integral and the remainder are used in estimating the polynomial. 
+#' @param est_inds     (optional) A vector of indices for the estimation-only samples. The default when \code{est_inds} is missing or \code{NULL} is to perform both estimation of the control variates and evaluation of the integral using all samples. Otherwise, the samples from \code{est_inds} are used in estimating the control variates and the remainder are used in evaluating the integral. Splitting the indices in this way can be used to reduce bias from adaption and to make computation feasible for very large sample sizes (small \code{est_inds} is faster), but in general in will increase the variance of the estimator.
 #' @param options       A list of control variate specifications. This can be a single list containing the elements below (the defaults are used for elements which are not specified). Alternatively, it can be a list of lists containing any or all of the elements below. Where the latter is used, the function \code{zvcv} automatically selects the best performing option based on cross-validation. 
 #' \itemize{
 #' \item \code{polyorder}:   The order of the polynomial, with a default of 2. A value of \code{Inf} will get the cross-validation method to choose between orders.
 #' \item \code{regul_reg}:   A flag for whether regularised regression is to be used. The default is TRUE, i.e. regularised regression is used.
 #' \item \code{alpha_elnet}:   The alpha parameter for elastic net. The default is 1, which correponds to LASSO. A value of 0 would correspond to ridge regression.
 #' \item \code{nfolds}:   The number of folds used in cross-validation to select lambda for LASSO or elastic net. The default is 10.
-#' \item \code{apriori}:   The indices of the parameters to use in the polynomial. The default is to use all parameters \eqn{1:d} where \eqn{d} is the dimension of the target. If only the first and third derivatives should be used, then this would be specified by using \code{apriori} = c(1,3) (alternatively, this can be done by only using the relevant columns in \code{samples} and \code{derivatives}).
+#' \item \code{apriori}:   A vector containing the subset of parameter indices to use in the polynomial. Typically this argument would only be used if the dimension of the problem is very large or if prior information about parameter dependencies is known. The default is to use all parameters \eqn{1:d} where \eqn{d} is the dimension of the target. In \code{zvcv}, this is equivalent to using only the relevant columns in \code{samples} and \code{derivatives}).
 #' \item \code{intercept}:   A flag for whether the intercept should be estimated or fixed to the empirical mean of the integrand in the estimation set. The default is to include an intercept (\code{intercept = TRUE}) as this tends to lead to better variance reductions. Note that an \code{intercept = TRUE} flag may be changed to \code{intercept = FALSE} within the function if \code{integrand_logged = TRUE} and a \code{NaN} is encountered. See South et al. (2018) for further details.
 #' \item \code{polyorder_max}:   The maximum allowable polynomial order. This may be used to prevent memory issues in the case that the polynomial order is selected automatically. You will be prompted to see if you wish to continue if the selected polynomial order results in a design matrix with more than ten million elements. A default maximum polynomial order will be selected if the \code{polyorder} is infinite and in this case a warning will be given. Recall that setting your default R settings to \code{options(warn=1)} will ensure that you receive these warnings in real time. Optimal polynomial order selection may go to at most this maximum value, or it may stop earlier. 
 #' }
-#' @param folds_choose  The number of folds used in k-fold cross-validation for selecting the optimal control variate. Depending on the \code{options}, this may include selection of the optimal polynomial order, regression type and subset of parameters in the polynomial. The default is five.
+#' @param folds  The number of folds used in k-fold cross-validation for selecting the optimal control variate. Depending on the \code{options}, this may include selection of the optimal polynomial order, regression type and subset of parameters in the polynomial. The default is five.
 #' 
 #' @return 				A list is returned, containing the following components:
 #' \itemize{
@@ -28,12 +27,12 @@
 #' \item \code{mse}: The mean square error for the evaluation set.
 #' \item \code{coefs}: The estimated coefficients for the regression (columns are for the different integrands).
 #' \item \code{integrand_logged}: The \code{integrand_logged} input stored for reference.
-#' \item \code{obs_estim}: The \code{obs_estim} input stored for reference.
+#' \item \code{est_inds}: The \code{est_inds} input stored for reference.
 #' \item \code{polyorder}: The \code{polyorder} value used in the final estimate.
 #' \item \code{regul_reg}: The \code{regul_reg} flag used in the final estimate.
 #' \item \code{alpha_elnet}: The \code{alpha_elnet} value used in the final estimate.
 #' \item \code{nfolds}: The \code{nfolds} value used in the final estimate.
-#' \item \code{apriori}:  The \code{apriori} value used in the final estimate.
+#' \item \code{apriori}:  The \code{apriori} vector used in the final estimate.
 #' \item \code{intercept}: The \code{intercept} flag used in the final estimate.
 #' }
 #'
@@ -51,7 +50,7 @@
 #' derivatives <- t( apply(samples,1,function(x) -solve(mycov)%*%(x - mymean)) ) # derivatives of Gaussian wrt x
 #' 
 #' # The integrands are the marginal posterior means of theta, the variances and the covariance (true values are c(1,2,1,2,0.5))
-#' integrand <- cbind(samples,(samples[,1] - 1)^2,(samples[,2] - 2)^2, (samples[,1] - 1)*(samples[,2] - 2))
+#' integrand <- cbind(samples,(samples[,1] - mymean[1])^2,(samples[,2] - mymean[2])^2, (samples[,1] - mymean[1])*(samples[,2] - mymean[2]))
 #' 
 #' # Estimates without ZV-CV (i.e. vanilla Monte Carlo integration)
 #' # Without the ZVCV package
@@ -84,7 +83,7 @@
 #' @author 								Leah F. South
 #' @seealso 							See \code{\link{evidence}} for functions which use \code{zvcv} to estimate the normalising constant of the posterior. See an example at \code{\link{VDP}} and see \link{ZVCV} for more package details.
 #' @export zvcv
-zvcv <- function(integrand, samples, derivatives, log_weight, integrand_logged = FALSE, obs_estim_choose, obs_estim, options = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds = 10, apriori = (1:NCOL(samples)), intercept = TRUE, polyorder_max = Inf), folds_choose = 5) {
+zvcv <- function(integrand, samples, derivatives, log_weights, integrand_logged = FALSE, est_inds, options = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds = 10, apriori = (1:NCOL(samples)), intercept = TRUE, polyorder_max = Inf), folds = 5) {
   
   N <- NROW(integrand)
   N_expectations <- NCOL(integrand)
@@ -93,9 +92,19 @@ zvcv <- function(integrand, samples, derivatives, log_weight, integrand_logged =
   options <- clean_options(options,N,d)
   num_options <- length(options)
   
-  if (missing(log_weight)) { log_weight <- rep(0,N) } # weights are normalised in another function
-  if (missing(obs_estim_choose) & (num_options>1 | is.infinite(options[[1]]$polyorder))) {  obs_estim_choose <- split(sample(1:N),rep(1:folds_choose, ceiling(N/folds_choose),length.out = N))  }
-  if (missing(obs_estim)) { obs_estim <- NULL }
+  if (missing(log_weights)) { log_weights <- rep(0,N) } # weights are normalised in another function
+  if (missing(est_inds)) {
+    est_inds <- NULL
+  }
+  
+  est_inds_choose <- list()
+  if (num_options>1 | is.infinite(options[[1]]$polyorder)) { 
+    if (is.null(est_inds)){
+      est_inds_choose <- split(sample(1:N),rep(1:folds, ceiling(N/folds),length.out = N))
+    } else{
+      est_inds_choose <- split(sample(est_inds),rep(1:folds, ceiling(length(est_inds)/folds),length.out = length(est_inds)))
+    }
+  }
   
   if (is.null(ncol(integrand))){
     integrand <- matrix(integrand,ncol=1)
@@ -119,9 +128,9 @@ zvcv <- function(integrand, samples, derivatives, log_weight, integrand_logged =
           if  (any(polyorder_curr > options[[i]]$polyorder_max)){
             break
           }
-          mse_temp <- matrix(NaN,nrow=folds_choose,ncol=length(inds_to_continue))
-          for (k in 1:folds_choose){
-            res_curr <- zv(integrand[,inds_to_continue], samples, derivatives, log_weight, integrand_logged, obs_estim = obs_estim_choose[[k]], polyorder_track, options[[i]]$regul_reg, options[[i]]$alpha_elnet, options[[i]]$nfolds, options[[i]]$apriori, options[[i]]$intercept)
+          mse_temp <- matrix(NaN,nrow=folds,ncol=length(inds_to_continue))
+          for (k in 1:folds){
+            res_curr <- zv(integrand[,inds_to_continue], samples, derivatives, log_weights, integrand_logged, est_inds = est_inds_choose[[k]], polyorder_track, options[[i]]$regul_reg, options[[i]]$alpha_elnet, options[[i]]$nfolds, options[[i]]$apriori, options[[i]]$intercept)
             mse_temp[k,] <- res_curr$mse
             mse_temp[k,which(is.na(mse_temp[k,]))] <- Inf # stop if get a NA fit
           }
@@ -131,9 +140,9 @@ zvcv <- function(integrand, samples, derivatives, log_weight, integrand_logged =
         options[[i]]$polyorder <- polyorder_curr - 1
         mse[i,] <- mse_old
       } else{
-        mse_temp <- matrix(NaN,nrow=folds_choose,ncol=N_expectations)
-        for (k in 1:folds_choose){
-          res <- zv(integrand, samples, derivatives, log_weight, integrand_logged, obs_estim = obs_estim_choose[[k]], options[[i]]$polyorder, options[[i]]$regul_reg, options[[i]]$alpha_elnet, options[[i]]$nfolds, options[[i]]$apriori, options[[i]]$intercept)
+        mse_temp <- matrix(NaN,nrow=folds,ncol=N_expectations)
+        for (k in 1:folds){
+          res <- zv(integrand, samples, derivatives, log_weights, integrand_logged, est_inds = est_inds_choose[[k]], options[[i]]$polyorder, options[[i]]$regul_reg, options[[i]]$alpha_elnet, options[[i]]$nfolds, options[[i]]$apriori, options[[i]]$intercept)
           mse_temp[k,] <- res$mse
         }
         mse[i,] <- colMeans(mse_temp)
@@ -152,7 +161,7 @@ zvcv <- function(integrand, samples, derivatives, log_weight, integrand_logged =
         inds <- which(ind_select==j)
         inds <- inds[options[[j]]$polyorder[inds]==k]
         if (length(inds)>0){
-          temp <- zv(matrix(integrand[,inds],ncol=length(inds)), samples, derivatives, log_weight, integrand_logged, obs_estim = obs_estim, k, options[[j]]$regul_reg, options[[j]]$alpha_elnet, options[[j]]$nfolds, options[[j]]$apriori, options[[j]]$intercept)
+          temp <- zv(matrix(integrand[,inds],ncol=length(inds)), samples, derivatives, log_weights, integrand_logged, est_inds = est_inds, k, options[[j]]$regul_reg, options[[j]]$alpha_elnet, options[[j]]$nfolds, options[[j]]$apriori, options[[j]]$intercept)
           r_expectation[inds] <- temp$expectation
           r_num_select[inds] <- temp$num_select
           r_mse[inds] <- temp$mse
@@ -170,12 +179,12 @@ zvcv <- function(integrand, samples, derivatives, log_weight, integrand_logged =
       }
     }
     res_final <- list(expectation = r_expectation, num_select = r_num_select, mse = r_mse, coefs = r_coefs,
-                      integrand_logged = r_integrand_logged, obs_estim = obs_estim, polyorder = r_polyorder, regul_reg = r_regul_reg, alpha_elnet = r_alpha_elnet,
+                      integrand_logged = r_integrand_logged, est_inds = est_inds, polyorder = r_polyorder, regul_reg = r_regul_reg, alpha_elnet = r_alpha_elnet,
                       nfolds = r_nfolds, apriori = r_apriori, intercept = r_intercept)
     
   } else{
     ind_select <- rep(1,N_expectations)
-    res_final <- zv(integrand, samples, derivatives, log_weight, integrand_logged, obs_estim = obs_estim, options[[1]]$polyorder, options[[1]]$regul_reg, options[[1]]$alpha_elnet, options[[1]]$nfolds, options[[1]]$apriori, options[[1]]$intercept)
+    res_final <- zv(integrand, samples, derivatives, log_weights, integrand_logged, est_inds = est_inds, options[[1]]$polyorder, options[[1]]$regul_reg, options[[1]]$alpha_elnet, options[[1]]$nfolds, options[[1]]$apriori, options[[1]]$intercept)
   }
   
   return(res_final)

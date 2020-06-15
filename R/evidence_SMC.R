@@ -7,7 +7,7 @@
 #' }
 #' 
 #' @rdname evidence
-evidence_SMC <- function(samples, loglike, der_loglike, der_logprior, temperatures, temperatures_all, most_recent, obs_estim_choose, obs_estim, options, folds_choose = 5){# = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds = 10, apriori, intercept = TRUE)){
+evidence_SMC <- function(samples, loglike, der_loglike, der_logprior, temperatures, temperatures_all, most_recent, est_inds, options, folds = 5){# = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds = 10, apriori, intercept = TRUE)){
 	# Stepping stone identity for evidence.
 	
 	N <- NROW(samples)
@@ -37,7 +37,7 @@ evidence_SMC <- function(samples, loglike, der_loglike, der_logprior, temperatur
 		#log_integrand <- log_weights[,tt] + loglike[,tt]*(temperatures_all[tt+1]-temperatures_all[tt])
 		log_integrand <- loglike[,tt]*(temperatures_all[tt+1]-temperatures_all[tt])
 		
-		regression_SMC[[tt]] <- zvcv(log_integrand, samples[,,tt], derivatives, log_weights[,tt], integrand_logged = TRUE, obs_estim_choose = obs_estim_choose, obs_estim = obs_estim, options = options, folds_choose = folds_choose)
+		regression_SMC[[tt]] <- zvcv(log_integrand, samples[,,tt], derivatives, log_weights[,tt], integrand_logged = TRUE, est_inds = est_inds, options = options, folds = folds)
 		expectation_SMC[tt] <- regression_SMC[[tt]]$expectation
 	}
 	

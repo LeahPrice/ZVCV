@@ -4,12 +4,24 @@
 \alias{CF_crossval}
 \title{Control functionals (CF) with cross-validation}
 \usage{
-CF_crossval(integrands, samples, derivatives, steinOrder = NULL,
-  kernel_function = NULL, sigma_list = NULL, K0_list = NULL,
-  est_inds = NULL, input_weights = NULL, one_in_denom = FALSE,
-  folds = NULL, diagnostics = FALSE)
+CF_crossval(
+  integrands,
+  samples,
+  derivatives,
+  steinOrder = NULL,
+  kernel_function = NULL,
+  sigma_list = NULL,
+  K0_list = NULL,
+  est_inds = NULL,
+  input_weights = NULL,
+  one_in_denom = FALSE,
+  folds = NULL,
+  diagnostics = FALSE
+)
 }
 \arguments{
+\item{integrands}{An \eqn{N} by \eqn{k} matrix of integrands (evaluations of the function of interest)}
+
 \item{samples}{An \eqn{N} by \eqn{d} matrix of samples from the target}
 
 \item{derivatives}{An \eqn{N} by \eqn{d} matrix of derivatives of the log target with respect to the parameters}

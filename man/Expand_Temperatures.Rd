@@ -4,8 +4,12 @@
 \alias{Expand_Temperatures}
 \title{Adjusting the temperature schedule}
 \usage{
-Expand_Temperatures(temperatures, loglike, rho,
-  bisec_tol = .Machine$double.eps^0.25)
+Expand_Temperatures(
+  temperatures,
+  loglike,
+  rho,
+  bisec_tol = .Machine$double.eps^0.25
+)
 }
 \arguments{
 \item{temperatures}{A vector of length \eqn{T} temperatures for the power posterior temperatures.}

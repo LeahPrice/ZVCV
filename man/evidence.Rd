@@ -9,21 +9,61 @@
 \alias{evidence_SMC_CF}
 \title{Evidence estimation with ZV-CV}
 \usage{
-evidence_CTI(samples, loglike, der_loglike, der_logprior, temperatures,
-  temperatures_all, most_recent, obs_estim_choose, obs_estim, options,
-  folds_choose = 5)
+evidence_CTI(
+  samples,
+  loglike,
+  der_loglike,
+  der_logprior,
+  temperatures,
+  temperatures_all,
+  most_recent,
+  obs_estim_choose,
+  obs_estim,
+  options,
+  folds_choose = 5
+)
 
-evidence_CTI_CF(samples, loglike, der_loglike, der_logprior, temperatures,
-  temperatures_all, most_recent, steinOrder, kernel_function, sigma_list,
-  folds = 5)
+evidence_CTI_CF(
+  samples,
+  loglike,
+  der_loglike,
+  der_logprior,
+  temperatures,
+  temperatures_all,
+  most_recent,
+  steinOrder,
+  kernel_function,
+  sigma_list,
+  folds = 5
+)
 
-evidence_SMC(samples, loglike, der_loglike, der_logprior, temperatures,
-  temperatures_all, most_recent, obs_estim_choose, obs_estim, options,
-  folds_choose = 5)
+evidence_SMC(
+  samples,
+  loglike,
+  der_loglike,
+  der_logprior,
+  temperatures,
+  temperatures_all,
+  most_recent,
+  obs_estim_choose,
+  obs_estim,
+  options,
+  folds_choose = 5
+)
 
-evidence_SMC_CF(samples, loglike, der_loglike, der_logprior, temperatures,
-  temperatures_all, most_recent, steinOrder, kernel_function, sigma_list,
-  folds = 5)
+evidence_SMC_CF(
+  samples,
+  loglike,
+  der_loglike,
+  der_logprior,
+  temperatures,
+  temperatures_all,
+  most_recent,
+  steinOrder,
+  kernel_function,
+  sigma_list,
+  folds = 5
+)
 }
 \arguments{
 \item{samples}{An \eqn{N} by \eqn{d} by \eqn{T} matrix of samples from the \eqn{T} power posteriors, where \eqn{N} is the number of samples and \eqn{d} is the dimension of the target distribution}
@@ -48,25 +88,13 @@ evidence_SMC_CF(samples, loglike, der_loglike, der_logprior, temperatures,
 
 \item{folds_choose}{The number of folds used in k-fold cross-validation for selecting the optimal control variate. Depending on the \code{options}, this may include selection of the optimal polynomial order, regression type and subset of parameters in the polynomial. The default is five.}
 
-\item{samples}{An \eqn{N} by \eqn{d} by \eqn{T} matrix of samples from the \eqn{T} power posteriors, where \eqn{N} is the number of samples and \eqn{d} is the dimension of the target distribution}
+\item{steinOrder}{(optional)    This is the order of the Stein operator. The default is \code{1} in the control functionals paper (Oates et al, 2017) and \code{2} in the semi-exact control functionals paper (South et al, 2020).  The following values are currently available: \code{1} for all kernels and \code{2} for "gaussian", "matern" and "RQ". See below for further details.}
 
-\item{loglike}{An \eqn{N} by \eqn{T} matrix of log likelihood values corresponding to \code{samples}}
+\item{kernel_function}{(optional)        Choose between "gaussian", "matern", "RQ", "product" or "prodsim". See below for further details.}
 
-\item{der_loglike}{An \eqn{N} by \eqn{d} by \eqn{T} matrix of the derivatives of the log likelihood with respect to the parameters, with parameter values corresponding to \code{samples}}
+\item{sigma_list}{(optional between this and \code{K0_list})            A list of tuning parameters for the specified kernel. This involves a list of single length-scale parameter in "gaussian" and "RQ", a list of vectors containing length-scale and smoothness parameters in "matern" and a list of vectors of the two parameters in "product" and "prodsim". See below for further details. When \code{sigma_list} is specified and not \code{K0_list}, the \eqn{K0} matrix is computed twice for each selected tuning parameter.}
 
-\item{der_logprior}{An \eqn{N} by \eqn{d} by \eqn{T} matrix of the derivatives of the log prior with respect to the parameters, with parameter values corresponding to \code{samples}}
-
-\item{temperatures}{A vector of length \eqn{T} of temperatures for the power posterior temperatures}
-
-\item{temperatures_all}{An adjusted vector of length \eqn{tau} of temperatures. Better performance should be obtained with a more conservative temperature schedule. See \code{\link{Expand_Temperatures}} for a function to adjust the temperatures.}
-
-\item{most_recent}{A vector of length \eqn{tau} which gives the indices in the original temperatures that the new temperatures correspond to.}
-
-\item{obs_estim_choose}{See \code{\link{zvcv}}.}
-
-\item{obs_estim}{See \code{\link{zvcv}}.}
-
-\item{options}{See \code{\link{zvcv}}.}
+\item{folds}{(optional) The number of folds for cross-validation. The default is five.}
 }
 \value{
 The function \code{evidence_CTI}  returns a list, containing the following components:

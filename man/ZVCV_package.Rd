@@ -4,7 +4,6 @@
 \name{ZVCV_package}
 \alias{ZVCV}
 \alias{ZVCV-package}
-\alias{ZVCV_package-package}
 \title{Zero-Variance Control Variates}
 \description{
 This package can be used to perform post-hoc variance reduction of Monte Carlo estimators when the derivatives of the log target are available.
@@ -61,7 +60,7 @@ The function \code{\link{Expand_Temperatures}} can be used to adjust the tempera
 
 \examples{
 
-# A real data example using ZV-CV is available at \\link{VDP}. This involves estimating posterior expectations and the evidence from SMC samples.
+# A real data example using ZV-CV is available at \link{VDP}. This involves estimating posterior expectations and the evidence from SMC samples.
 
 # The remainder of this section is duplicating (albeit with a different random seed) Figure 2a of South et al. (2020).
 
@@ -93,7 +92,7 @@ for (N in N_all){
     if (N > choose(d+2,d)){  # Checking if the sample size is large enough to accommodation a second order polynomial
       ZV2[i] <- zvcv(f,x,u,options=list(polyorder=2,regul_reg=FALSE))$expectation
     }
-    ZVchoose[i] <- zvcv(f,x,u,options=list(list(polyorder=Inf,regul_reg=FALSE,polyorder_max=max_r),list(polyorder=Inf,regul_reg=TRUE,20)))$expectation
+    ZVchoose[i] <- zvcv(f,x,u,options=list(list(polyorder=Inf,regul_reg=FALSE,polyorder_max=max_r),list(polyorder=Inf,regul_reg=TRUE)))$expectation
     
     # Calculating the kernel matrix in advance for CF and SECF
     K0_list <- list()

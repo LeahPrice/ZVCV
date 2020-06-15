@@ -4,11 +4,18 @@
 \alias{zvcv}
 \title{ZV-CV for general expectations}
 \usage{
-zvcv(integrand, samples, derivatives, log_weight,
-  integrand_logged = FALSE, obs_estim_choose, obs_estim,
-  options = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds
-  = 10, apriori = (1:NCOL(samples)), intercept = TRUE, polyorder_max =
-  Inf), folds_choose = 5)
+zvcv(
+  integrand,
+  samples,
+  derivatives,
+  log_weight,
+  integrand_logged = FALSE,
+  obs_estim_choose,
+  obs_estim,
+  options = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds = 10, apriori
+    = (1:NCOL(samples)), intercept = TRUE, polyorder_max = Inf),
+  folds_choose = 5
+)
 }
 \arguments{
 \item{integrand}{An \eqn{N} by \eqn{k} matrix of integrands (evaluations of the function of interest)}
@@ -44,6 +51,7 @@ A list is returned, containing the following components:
 \item \code{expectation}: The estimates of the expectations.
 \item \code{num_select}: The number of non-zero coefficients in the polynomial.
 \item \code{mse}: The mean square error for the evaluation set.
+\item \code{coefs}: The estimated coefficients for the regression (columns are for the different integrands).
 \item \code{integrand_logged}: The \code{integrand_logged} input stored for reference.
 \item \code{obs_estim}: The \code{obs_estim} input stored for reference.
 \item \code{polyorder}: The \code{polyorder} value used in the final estimate.

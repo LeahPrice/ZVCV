@@ -4,11 +4,23 @@
 \alias{SECF}
 \title{Semi-exact control functionals (SECF)}
 \usage{
-SECF(integrands, samples, derivatives, polyorder = NULL,
-  steinOrder = NULL, kernel_function = NULL, sigma = NULL,
-  K0 = NULL, est_inds = NULL, subset = NULL, diagnostics = FALSE)
+SECF(
+  integrands,
+  samples,
+  derivatives,
+  polyorder = NULL,
+  steinOrder = NULL,
+  kernel_function = NULL,
+  sigma = NULL,
+  K0 = NULL,
+  est_inds = NULL,
+  subset = NULL,
+  diagnostics = FALSE
+)
 }
 \arguments{
+\item{integrands}{An \eqn{N} by \eqn{k} matrix of integrands (evaluations of the function of interest)}
+
 \item{samples}{An \eqn{N} by \eqn{d} matrix of samples from the target}
 
 \item{derivatives}{An \eqn{N} by \eqn{d} matrix of derivatives of the log target with respect to the parameters}

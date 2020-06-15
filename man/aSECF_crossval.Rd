@@ -4,13 +4,26 @@
 \alias{aSECF_crossval}
 \title{Approximate semi-exact control functionals (aSECF) with cross-validation}
 \usage{
-aSECF_crossval(integrands, samples, derivatives, polyorder = NULL,
-  steinOrder = NULL, kernel_function = NULL, sigma_list = NULL,
-  est_inds = NULL, subset = NULL, num_nystrom = NULL,
-  conjugate_gradient = TRUE, reltol = 0.01, folds = NULL,
-  diagnostics = FALSE)
+aSECF_crossval(
+  integrands,
+  samples,
+  derivatives,
+  polyorder = NULL,
+  steinOrder = NULL,
+  kernel_function = NULL,
+  sigma_list = NULL,
+  est_inds = NULL,
+  subset = NULL,
+  num_nystrom = NULL,
+  conjugate_gradient = TRUE,
+  reltol = 0.01,
+  folds = NULL,
+  diagnostics = FALSE
+)
 }
 \arguments{
+\item{integrands}{An \eqn{N} by \eqn{k} matrix of integrands (evaluations of the function of interest)}
+
 \item{samples}{An \eqn{N} by \eqn{d} matrix of samples from the target}
 
 \item{derivatives}{An \eqn{N} by \eqn{d} matrix of derivatives of the log target with respect to the parameters}

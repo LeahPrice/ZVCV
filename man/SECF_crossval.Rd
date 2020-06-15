@@ -4,12 +4,24 @@
 \alias{SECF_crossval}
 \title{Semi-exact control functionals (SECF) with cross-validation}
 \usage{
-SECF_crossval(integrands, samples, derivatives, polyorder = NULL,
-  steinOrder = NULL, kernel_function = NULL, sigma_list = NULL,
-  K0_list = NULL, est_inds = NULL, subset = NULL, folds = NULL,
-  diagnostics = FALSE)
+SECF_crossval(
+  integrands,
+  samples,
+  derivatives,
+  polyorder = NULL,
+  steinOrder = NULL,
+  kernel_function = NULL,
+  sigma_list = NULL,
+  K0_list = NULL,
+  est_inds = NULL,
+  subset = NULL,
+  folds = NULL,
+  diagnostics = FALSE
+)
 }
 \arguments{
+\item{integrands}{An \eqn{N} by \eqn{k} matrix of integrands (evaluations of the function of interest)}
+
 \item{samples}{An \eqn{N} by \eqn{d} matrix of samples from the target}
 
 \item{derivatives}{An \eqn{N} by \eqn{d} matrix of derivatives of the log target with respect to the parameters}

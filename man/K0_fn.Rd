@@ -4,8 +4,15 @@
 \alias{K0_fn}
 \title{Kernel matrix calculation}
 \usage{
-K0_fn(samples, derivatives, sigma, steinOrder, kernel_function, Z = NULL,
-  nystrom_inds = NULL)
+K0_fn(
+  samples,
+  derivatives,
+  sigma,
+  steinOrder,
+  kernel_function,
+  Z = NULL,
+  nystrom_inds = NULL
+)
 }
 \arguments{
 \item{samples}{An \eqn{N} by \eqn{d} matrix of samples from the target}

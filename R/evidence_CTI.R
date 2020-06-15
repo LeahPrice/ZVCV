@@ -2,6 +2,7 @@
 #'
 #' The function \code{evidence_CTI} uses ZV-CV on the controlled thermodynamic integration estimator for the normalising constant.
 #'
+#' @inheritParams CF_crossval
 #' @param samples       An \eqn{N} by \eqn{d} by \eqn{T} matrix of samples from the \eqn{T} power posteriors, where \eqn{N} is the number of samples and \eqn{d} is the dimension of the target distribution
 #' @param loglike       An \eqn{N} by \eqn{T} matrix of log likelihood values corresponding to \code{samples}
 #' @param der_loglike   An \eqn{N} by \eqn{d} by \eqn{T} matrix of the derivatives of the log likelihood with respect to the parameters, with parameter values corresponding to \code{samples}

@@ -4,7 +4,7 @@
 #' This is faster than \code{\link{SECF}} for large \eqn{N}. If you would like to choose
 #' between different kernels using cross-validation, then you can use \code{\link{aSECF_crossval}}.
 #'
-#' @param integrand		An \eqn{N} by \eqn{k} matrix of integrands (evaluations of the function of interest)
+#' @param integrands		An \eqn{N} by \eqn{k} matrix of integrands (evaluations of the function of interest)
 #' @param samples		An \eqn{N} by \eqn{d} matrix of samples from the target
 #' @param derivatives	An \eqn{N} by \eqn{d} matrix of derivatives of the log target with respect to the parameters
 #' @param polyorder (optional)		The order of the polynomial to be used in the parametric component, with a default of \eqn{1}. We recommend keeping this value low (e.g. only 1-2).
@@ -52,6 +52,26 @@ aSECF <- function(integrands,samples,derivatives, polyorder = NULL, steinOrder =
 	if (is.null(ncol(samples))){
 		samples <- matrix(samples,nrow=N,ncol=1)
 		derivatives <- matrix(derivatives,nrow=N,ncol=1)
+	}
+	
+	if (is.null(est_inds)){
+	  inds_unique <- !duplicated(samples)
+	  samples <- samples[inds_unique,,drop=FALSE]
+	  derivatives <- derivatives[inds_unique,,drop=FALSE]
+	  integrands <- integrands[inds_unique,,drop=FALSE]
+	  N <- sum(inds_unique)
+	} else{
+	  inds_all <- 1:N
+	  # can have duplicated in eval_inds but not est_inds
+	  to_remove <- est_inds[duplicated(samples[est_inds,,drop=FALSE])] 
+	  N_new <- N - length(to_remove)
+	  samples <- samples[-to_remove,,drop=FALSE]
+	  derivatives <- derivatives[-to_remove,,drop=FALSE]
+	  integrands <- integrands[-to_remove,,drop=FALSE]
+	  inds_all <- inds_all[-to_remove]
+	  inds_all[!to_remove] <- 1:N_new
+	  est_inds <- inds_all[est_inds]
+	  N <- N_new
 	}
 	
 	d <- NCOL(samples)
@@ -176,8 +196,28 @@ CF <- function(integrands, samples, derivatives, steinOrder = NULL, kernel_funct
 	}
 	
 	if (is.null(ncol(samples))){
-		samples <- matrix(samples,nrow=N,ncol=1)
-		derivatives <- matrix(derivatives,nrow=N,ncol=1)
+	  samples <- matrix(samples,nrow=N,ncol=1)
+	  derivatives <- matrix(derivatives,nrow=N,ncol=1)
+	}
+	
+	if (is.null(est_inds)){
+	  inds_unique <- !duplicated(samples)
+	  samples <- samples[inds_unique,,drop=FALSE]
+	  derivatives <- derivatives[inds_unique,,drop=FALSE]
+	  integrands <- integrands[inds_unique,,drop=FALSE]
+	  N <- sum(inds_unique)
+	} else{
+	  inds_all <- 1:N
+	  # can have duplicated in eval_inds but not est_inds
+	  to_remove <- est_inds[duplicated(samples[est_inds,,drop=FALSE])] 
+	  N_new <- N - length(to_remove)
+	  samples <- samples[-to_remove,,drop=FALSE]
+	  derivatives <- derivatives[-to_remove,,drop=FALSE]
+	  integrands <- integrands[-to_remove,,drop=FALSE]
+	  inds_all <- inds_all[-to_remove]
+	  inds_all[!to_remove] <- 1:N_new
+	  est_inds <- inds_all[est_inds]
+	  N <- N_new
 	}
 	
 	if (is.null(est_inds)){
@@ -244,6 +284,26 @@ CF_crossval <- function(integrands, samples, derivatives, steinOrder = NULL, ker
 		derivatives <- matrix(derivatives,nrow=N,ncol=1)
 	}
 	
+	if (is.null(est_inds)){
+	  inds_unique <- !duplicated(samples)
+	  samples <- samples[inds_unique,,drop=FALSE]
+	  derivatives <- derivatives[inds_unique,,drop=FALSE]
+	  integrands <- integrands[inds_unique,,drop=FALSE]
+	  N <- sum(inds_unique)
+	} else{
+	  inds_all <- 1:N
+	  # can have duplicated in eval_inds but not est_inds
+	  to_remove <- est_inds[duplicated(samples[est_inds,,drop=FALSE])] 
+	  N_new <- N - length(to_remove)
+	  samples <- samples[-to_remove,,drop=FALSE]
+	  derivatives <- derivatives[-to_remove,,drop=FALSE]
+	  integrands <- integrands[-to_remove,,drop=FALSE]
+	  inds_all <- inds_all[-to_remove]
+	  inds_all[!to_remove] <- 1:N_new
+	  est_inds <- inds_all[est_inds]
+	  N <- N_new
+	}
+	
 	temp <- CF_crossval_cpp(integrands, samples, derivatives, steinOrder, kernel_function, sigma_list, K0_list, folds, est_inds, input_weights, one_in_denom, diagnostics)
 	
 	return (temp)
@@ -296,6 +356,26 @@ SECF <- function(integrands,samples,derivatives, polyorder = NULL, steinOrder = 
 	if (is.null(ncol(samples))){
 		samples <- matrix(samples,nrow=N,ncol=1)
 		derivatives <- matrix(derivatives,nrow=N,ncol=1)
+	}
+	
+	if (is.null(est_inds)){
+	  inds_unique <- !duplicated(samples)
+	  samples <- samples[inds_unique,,drop=FALSE]
+	  derivatives <- derivatives[inds_unique,,drop=FALSE]
+	  integrands <- integrands[inds_unique,,drop=FALSE]
+	  N <- sum(inds_unique)
+	} else{
+	  inds_all <- 1:N
+	  # can have duplicated in eval_inds but not est_inds
+	  to_remove <- est_inds[duplicated(samples[est_inds,,drop=FALSE])] 
+	  N_new <- N - length(to_remove)
+	  samples <- samples[-to_remove,,drop=FALSE]
+	  derivatives <- derivatives[-to_remove,,drop=FALSE]
+	  integrands <- integrands[-to_remove,,drop=FALSE]
+	  inds_all <- inds_all[-to_remove]
+	  inds_all[!to_remove] <- 1:N_new
+	  est_inds <- inds_all[est_inds]
+	  N <- N_new
 	}
 	
 	d <- NCOL(samples)
@@ -378,6 +458,26 @@ SECF_crossval <- function(integrands,samples,derivatives, polyorder = NULL, stei
 	if (is.null(ncol(samples))){
 		samples <- matrix(samples,nrow=N,ncol=1)
 		derivatives <- matrix(derivatives,nrow=N,ncol=1)
+	}
+	
+	if (is.null(est_inds)){
+	  inds_unique <- !duplicated(samples)
+	  samples <- samples[inds_unique,,drop=FALSE]
+	  derivatives <- derivatives[inds_unique,,drop=FALSE]
+	  integrands <- integrands[inds_unique,,drop=FALSE]
+	  N <- sum(inds_unique)
+	} else{
+	  inds_all <- 1:N
+	  # can have duplicated in eval_inds but not est_inds
+	  to_remove <- est_inds[duplicated(samples[est_inds,,drop=FALSE])] 
+	  N_new <- N - length(to_remove)
+	  samples <- samples[-to_remove,,drop=FALSE]
+	  derivatives <- derivatives[-to_remove,,drop=FALSE]
+	  integrands <- integrands[-to_remove,,drop=FALSE]
+	  inds_all <- inds_all[-to_remove]
+	  inds_all[!to_remove] <- 1:N_new
+	  est_inds <- inds_all[est_inds]
+	  N <- N_new
 	}
 	
 	d <- NCOL(samples)
@@ -507,6 +607,26 @@ aSECF_crossval <- function(integrands,samples,derivatives, polyorder = NULL, ste
 	if (is.null(ncol(samples))){
 		samples <- matrix(samples,nrow=N,ncol=1)
 		derivatives <- matrix(derivatives,nrow=N,ncol=1)
+	}
+	
+	if (is.null(est_inds)){
+	  inds_unique <- !duplicated(samples)
+	  samples <- samples[inds_unique,,drop=FALSE]
+	  derivatives <- derivatives[inds_unique,,drop=FALSE]
+	  integrands <- integrands[inds_unique,,drop=FALSE]
+	  N <- sum(inds_unique)
+	} else{
+	  inds_all <- 1:N
+	  # can have duplicated in eval_inds but not est_inds
+	  to_remove <- est_inds[duplicated(samples[est_inds,,drop=FALSE])] 
+	  N_new <- N - length(to_remove)
+	  samples <- samples[-to_remove,,drop=FALSE]
+	  derivatives <- derivatives[-to_remove,,drop=FALSE]
+	  integrands <- integrands[-to_remove,,drop=FALSE]
+	  inds_all <- inds_all[-to_remove]
+	  inds_all[!to_remove] <- 1:N_new
+	  est_inds <- inds_all[est_inds]
+	  N <- N_new
 	}
 	
 	d <- NCOL(samples)

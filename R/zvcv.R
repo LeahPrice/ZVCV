@@ -26,6 +26,7 @@
 #' \item \code{expectation}: The estimates of the expectations.
 #' \item \code{num_select}: The number of non-zero coefficients in the polynomial.
 #' \item \code{mse}: The mean square error for the evaluation set.
+#' \item \code{coefs}: The estimated coefficients for the regression (columns are for the different integrands).
 #' \item \code{integrand_logged}: The \code{integrand_logged} input stored for reference.
 #' \item \code{obs_estim}: The \code{obs_estim} input stored for reference.
 #' \item \code{polyorder}: The \code{polyorder} value used in the final estimate.
@@ -84,93 +85,98 @@
 #' @seealso 							See \code{\link{evidence}} for functions which use \code{zvcv} to estimate the normalising constant of the posterior. See an example at \code{\link{VDP}} and see \link{ZVCV} for more package details.
 #' @export zvcv
 zvcv <- function(integrand, samples, derivatives, log_weight, integrand_logged = FALSE, obs_estim_choose, obs_estim, options = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds = 10, apriori = (1:NCOL(samples)), intercept = TRUE, polyorder_max = Inf), folds_choose = 5) {
-	
-	N <- NROW(integrand)
-	N_expectations <- NCOL(integrand)
-	d <- NCOL(samples)
-	
-	options <- clean_options(options,N,d)
-	num_options <- length(options)
-	
-	if (missing(log_weight)) { log_weight <- rep(0,N) } # weights are normalised in another function
-	if (missing(obs_estim_choose) & (num_options>1 | is.infinite(options[[1]]$polyorder))) {  obs_estim_choose <- split(sample(1:N),rep(1:folds_choose, ceiling(N/folds_choose),length.out = N))  }
-	if (missing(obs_estim)) { obs_estim <- NULL }
-	
-	if (is.null(ncol(integrand))){
-		integrand <- matrix(integrand,ncol=1)
-	}
-	
-	if (num_options>1 | is.infinite(options[[1]]$polyorder)){
-		mse <- matrix(NaN,nrow=num_options,ncol=N_expectations)
-		for (i in 1:num_options){
-			# If polyorder is infinity then keep increasing polynomial order until mse stops decreasing
-			if (is.infinite(options[[i]]$polyorder)){
-				options[[i]]$polyorder <- rep(NaN,N_expectations)
-				polyorder_track <- 0
-				polyorder_curr <- rep(0,N_expectations)
-				mse_old <- rep(0,N_expectations)
-				mse_new <- rep(Inf,N_expectations)
-				inds_to_continue <- 1:N_expectations
-				while (length(inds_to_continue)!=0){
-					mse_old[inds_to_continue] <- mse_new[inds_to_continue]
-					polyorder_track <- polyorder_track + 1
-					polyorder_curr[inds_to_continue] <- polyorder_curr[inds_to_continue] + 1
-					if  (any(polyorder_curr > options[[i]]$polyorder_max)){
-						break
-					}
-					mse_temp <- matrix(NaN,nrow=folds_choose,ncol=length(inds_to_continue))
-					for (k in 1:folds_choose){
-						res_curr <- zv(integrand[,inds_to_continue], samples, derivatives, log_weight, integrand_logged, obs_estim = obs_estim_choose[[k]], polyorder_track, options[[i]]$regul_reg, options[[i]]$alpha_elnet, options[[i]]$nfolds, options[[i]]$apriori, options[[i]]$intercept)
-						mse_temp[k,] <- res_curr$mse
-						mse_temp[k,which(is.na(mse_temp[k,]))] <- Inf # stop if get a NA fit
-					}
-					mse_new[inds_to_continue] <- colMeans(mse_temp)
-					inds_to_continue <- which(((mse_new - mse_old) < 0))
-				}
-				options[[i]]$polyorder <- polyorder_curr - 1
-				mse[i,] <- mse_old
-			} else{
-				mse_temp <- matrix(NaN,nrow=folds_choose,ncol=N_expectations)
-				for (k in 1:folds_choose){
-					res <- zv(integrand, samples, derivatives, log_weight, integrand_logged, obs_estim = obs_estim_choose[[k]], options[[i]]$polyorder, options[[i]]$regul_reg, options[[i]]$alpha_elnet, options[[i]]$nfolds, options[[i]]$apriori, options[[i]]$intercept)
-					mse_temp[k,] <- res$mse
-				}
-				mse[i,] <- colMeans(mse_temp)
-				options[[i]]$polyorder <- rep(options[[i]]$polyorder,N_expectations)
-			}
-		}
-		ind_select <- apply(mse,2,which.min)
-		
-		r_expectation <- r_num_select <- r_mse <-
-			r_integrand_logged <- r_polyorder <- r_regul_reg <- r_alpha_elnet<-
-			r_nfolds <- r_intercept <- rep(NaN,N_expectations)
-		r_apriori <- list()
-		
-		for (j in unique(ind_select)){
-			for (k in unique(options[[j]]$polyorder)){
-				inds <- which(ind_select==j)
-				inds <- inds[options[[j]]$polyorder[inds]==k]
-				temp <- zv(matrix(integrand[,inds],ncol=length(inds)), samples, derivatives, log_weight, integrand_logged, obs_estim = obs_estim, k, options[[j]]$regul_reg, options[[j]]$alpha_elnet, options[[j]]$nfolds, options[[j]]$apriori, options[[j]]$intercept)
-				r_expectation[inds] <- temp$expectation
-				r_num_select[inds] <- temp$num_select
-				r_mse[inds] <- temp$mse
-				r_integrand_logged[inds] <- temp$integrand_logged
-				r_polyorder[inds] <- temp$polyorder
-				r_regul_reg[inds] <- temp$regul_reg
-				r_alpha_elnet[inds] <- temp$alpha_elnet
-				r_nfolds[inds] <- temp$nfolds
-				r_intercept[inds] <- temp$intercept
-				for (zz in inds){ r_apriori[[zz]] <- temp$apriori }
-			}
-		}
-		res_final <- list(expectation = r_expectation, num_select = r_num_select, mse = r_mse,
-								integrand_logged = r_integrand_logged, obs_estim = obs_estim, polyorder = r_polyorder, regul_reg = r_regul_reg, alpha_elnet = r_alpha_elnet,
-								nfolds = r_nfolds, apriori = r_apriori, intercept = r_intercept)
-		
-	} else{
-		ind_select <- rep(1,N_expectations)
-		res_final <- zv(integrand, samples, derivatives, log_weight, integrand_logged, obs_estim = obs_estim, options[[1]]$polyorder, options[[1]]$regul_reg, options[[1]]$alpha_elnet, options[[1]]$nfolds, options[[1]]$apriori, options[[1]]$intercept)
-	}
-	
-	return(res_final)
+  
+  N <- NROW(integrand)
+  N_expectations <- NCOL(integrand)
+  d <- NCOL(samples)
+  
+  options <- clean_options(options,N,d)
+  num_options <- length(options)
+  
+  if (missing(log_weight)) { log_weight <- rep(0,N) } # weights are normalised in another function
+  if (missing(obs_estim_choose) & (num_options>1 | is.infinite(options[[1]]$polyorder))) {  obs_estim_choose <- split(sample(1:N),rep(1:folds_choose, ceiling(N/folds_choose),length.out = N))  }
+  if (missing(obs_estim)) { obs_estim <- NULL }
+  
+  if (is.null(ncol(integrand))){
+    integrand <- matrix(integrand,ncol=1)
+  }
+  
+  if (num_options>1 | is.infinite(options[[1]]$polyorder)){
+    mse <- matrix(NaN,nrow=num_options,ncol=N_expectations)
+    for (i in 1:num_options){
+      # If polyorder is infinity then keep increasing polynomial order until mse stops decreasing
+      if (is.infinite(options[[i]]$polyorder)){
+        options[[i]]$polyorder <- rep(NaN,N_expectations)
+        polyorder_track <- 0
+        polyorder_curr <- rep(0,N_expectations)
+        mse_old <- rep(0,N_expectations)
+        mse_new <- rep(Inf,N_expectations)
+        inds_to_continue <- 1:N_expectations
+        while (length(inds_to_continue)!=0){
+          mse_old[inds_to_continue] <- mse_new[inds_to_continue]
+          polyorder_track <- polyorder_track + 1
+          polyorder_curr[inds_to_continue] <- polyorder_curr[inds_to_continue] + 1
+          if  (any(polyorder_curr > options[[i]]$polyorder_max)){
+            break
+          }
+          mse_temp <- matrix(NaN,nrow=folds_choose,ncol=length(inds_to_continue))
+          for (k in 1:folds_choose){
+            res_curr <- zv(integrand[,inds_to_continue], samples, derivatives, log_weight, integrand_logged, obs_estim = obs_estim_choose[[k]], polyorder_track, options[[i]]$regul_reg, options[[i]]$alpha_elnet, options[[i]]$nfolds, options[[i]]$apriori, options[[i]]$intercept)
+            mse_temp[k,] <- res_curr$mse
+            mse_temp[k,which(is.na(mse_temp[k,]))] <- Inf # stop if get a NA fit
+          }
+          mse_new[inds_to_continue] <- colMeans(mse_temp)
+          inds_to_continue <- which(((mse_new - mse_old) < 0))
+        }
+        options[[i]]$polyorder <- polyorder_curr - 1
+        mse[i,] <- mse_old
+      } else{
+        mse_temp <- matrix(NaN,nrow=folds_choose,ncol=N_expectations)
+        for (k in 1:folds_choose){
+          res <- zv(integrand, samples, derivatives, log_weight, integrand_logged, obs_estim = obs_estim_choose[[k]], options[[i]]$polyorder, options[[i]]$regul_reg, options[[i]]$alpha_elnet, options[[i]]$nfolds, options[[i]]$apriori, options[[i]]$intercept)
+          mse_temp[k,] <- res$mse
+        }
+        mse[i,] <- colMeans(mse_temp)
+        options[[i]]$polyorder <- rep(options[[i]]$polyorder,N_expectations)
+      }
+    }
+    ind_select <- apply(mse,2,which.min)
+    
+    r_expectation <- r_num_select <- r_mse <-
+      r_integrand_logged <- r_polyorder <- r_regul_reg <- r_alpha_elnet<-
+      r_nfolds <- r_intercept <- rep(NaN,N_expectations)
+    r_apriori <- r_coefs <- list()
+    
+    for (j in unique(ind_select)){
+      for (k in unique(options[[j]]$polyorder)){
+        inds <- which(ind_select==j)
+        inds <- inds[options[[j]]$polyorder[inds]==k]
+        if (length(inds)>0){
+          temp <- zv(matrix(integrand[,inds],ncol=length(inds)), samples, derivatives, log_weight, integrand_logged, obs_estim = obs_estim, k, options[[j]]$regul_reg, options[[j]]$alpha_elnet, options[[j]]$nfolds, options[[j]]$apriori, options[[j]]$intercept)
+          r_expectation[inds] <- temp$expectation
+          r_num_select[inds] <- temp$num_select
+          r_mse[inds] <- temp$mse
+          r_integrand_logged[inds] <- temp$integrand_logged
+          r_polyorder[inds] <- temp$polyorder
+          r_regul_reg[inds] <- temp$regul_reg
+          r_alpha_elnet[inds] <- temp$alpha_elnet
+          r_nfolds[inds] <- temp$nfolds
+          r_intercept[inds] <- temp$intercept
+          for (zz in inds){
+            r_apriori[[zz]] <- temp$apriori
+            r_coefs[[zz]] <- temp$coefs
+          }
+        }
+      }
+    }
+    res_final <- list(expectation = r_expectation, num_select = r_num_select, mse = r_mse, coefs = r_coefs,
+                      integrand_logged = r_integrand_logged, obs_estim = obs_estim, polyorder = r_polyorder, regul_reg = r_regul_reg, alpha_elnet = r_alpha_elnet,
+                      nfolds = r_nfolds, apriori = r_apriori, intercept = r_intercept)
+    
+  } else{
+    ind_select <- rep(1,N_expectations)
+    res_final <- zv(integrand, samples, derivatives, log_weight, integrand_logged, obs_estim = obs_estim, options[[1]]$polyorder, options[[1]]$regul_reg, options[[1]]$alpha_elnet, options[[1]]$nfolds, options[[1]]$apriori, options[[1]]$intercept)
+  }
+  
+  return(res_final)
 }

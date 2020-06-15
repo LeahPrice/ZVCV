@@ -4,12 +4,26 @@
 \alias{aSECF}
 \title{Approximate semi-exact control functionals (aSECF)}
 \usage{
-aSECF(integrands, samples, derivatives, polyorder = NULL,
-  steinOrder = NULL, kernel_function = NULL, sigma = NULL,
-  K0 = NULL, nystrom_inds = NULL, est_inds = NULL, subset = NULL,
-  conjugate_gradient = TRUE, reltol = 0.01, diagnostics = FALSE)
+aSECF(
+  integrands,
+  samples,
+  derivatives,
+  polyorder = NULL,
+  steinOrder = NULL,
+  kernel_function = NULL,
+  sigma = NULL,
+  K0 = NULL,
+  nystrom_inds = NULL,
+  est_inds = NULL,
+  subset = NULL,
+  conjugate_gradient = TRUE,
+  reltol = 0.01,
+  diagnostics = FALSE
+)
 }
 \arguments{
+\item{integrands}{An \eqn{N} by \eqn{k} matrix of integrands (evaluations of the function of interest)}
+
 \item{samples}{An \eqn{N} by \eqn{d} matrix of samples from the target}
 
 \item{derivatives}{An \eqn{N} by \eqn{d} matrix of derivatives of the log target with respect to the parameters}
@@ -36,8 +50,6 @@ aSECF(integrands, samples, derivatives, polyorder = NULL,
 using \code{\link{squareNorm}}, as long as the \code{nystrom_inds} are \code{NULL}.}
 
 \item{diagnostics}{(optional) A flag for whether to return the necessary outputs for plotting or estimating using the fitted model. The default is \code{false} since this requires some additional computation when \code{est_inds} is \code{NULL}.}
-
-\item{integrand}{An \eqn{N} by \eqn{k} matrix of integrands (evaluations of the function of interest)}
 }
 \value{
 A list with the following elements:

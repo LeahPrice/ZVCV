@@ -75,8 +75,7 @@ zv <- function(integrand, samples, derivatives, log_weight, integrand_logged, ob
 			y_fit <- y_fit - matrix(1,nrow=NROW(y_fit))%*%weight_fit%*%y_fit
 		}
 		
-		
-		if (regul_reg){
+	  if (regul_reg){
 			num_select <- rep(NaN,NCOL(y_fit))
 			if (intercept){
 				coefs <- matrix(NaN,nrow=NCOL(X_fit)+1,ncol=NCOL(y_fit))
@@ -154,6 +153,8 @@ zv <- function(integrand, samples, derivatives, log_weight, integrand_logged, ob
 	}
 	
 	
-	return(list(expectation = expectation, num_select = num_select, mse = mse,
-							integrand_logged = integrand_logged, obs_estim = obs_estim, polyorder = polyorder, regul_reg = regul_reg, alpha_elnet = alpha_elnet, nfolds = nfolds, apriori = apriori, intercept = intercept))
+	return(list(expectation = expectation, num_select = num_select, mse = mse, coefs = coefs,
+							integrand_logged = integrand_logged, obs_estim = obs_estim,
+							polyorder = polyorder, regul_reg = regul_reg, alpha_elnet = alpha_elnet,
+							nfolds = nfolds, apriori = apriori, intercept = intercept))
 }

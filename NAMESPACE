@@ -2,7 +2,7 @@ useDynLib("ZVCV", .registration=TRUE)
 
 import(glmnet)
 import(abind)
-importFrom(dplyr,"group_by","group_size")
+importFrom(dplyr,"group_by","group_size","distinct")
 importFrom(magrittr,"%>%")
 importFrom(mvtnorm,"rmvnorm")
 importFrom("Rcpp", "evalCpp")

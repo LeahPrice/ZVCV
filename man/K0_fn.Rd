@@ -64,7 +64,7 @@ The generic kernels which are implemented in this package are listed below.  Not
 \item \strong{\code{"prodsim"}}: A slightly different product kernel with \eqn{\sigma = (a,b)} (see e.g. \url{https://www.imperial.ac.uk/inference-group/projects/monte-carlo-methods/control-functionals/}),
 \deqn{k(x,y) = (1+a z(x))^{-1}(1 + a z(y))^{-1} exp(-0.5 b^{-2} z(x,y)) }
 }
-In the above equations, \eqn{z(x) = \sum_j x[j]^2} and \eqn{z(x,y) = \sum_j (x[j] - y[j])^2}. For the last two kernels, \code{steinOrder} must be \code{1}. Each combination of \code{steinOrder} and \code{kernel_function} above is currently hard-coded but it may be possible to extend this to other kernels in future versions using autodiff. The calculations for the first three kernels above are detailed in South et al (2020).
+In the above equations, \eqn{z(x) = \sum_j x[j]^2} and \eqn{z(x,y) = \sum_j (x[j] - y[j])^2}. For the last two kernels, the code only has implementations for \code{steinOrder}=\code{1}. Each combination of \code{steinOrder} and \code{kernel_function} above is currently hard-coded but it may be possible to extend this to other kernels in future versions using autodiff. The calculations for the first three kernels above are detailed in South et al (2020).
 }
 
 \references{

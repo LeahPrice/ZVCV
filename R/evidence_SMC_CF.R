@@ -1,4 +1,4 @@
-#' The function \code{evidence_SMC_CF} uses CF on the SMC estimator for the normalising constant.
+# The function \code{evidence_SMC_CF} uses CF on the SMC estimator for the normalising constant.
 #'
 #' @return 				The function \code{evidence_SMC_CF}  returns a list, containing the following components:
 #' \itemize{
@@ -14,6 +14,10 @@ evidence_SMC_CF <- function(samples, loglike, der_loglike, der_logprior, tempera
   N <- NROW(samples)
   d <- NCOL(samples)
   TT <- length(temperatures_all)
+  
+  if (missing(est_inds)) {
+    est_inds <- NULL
+  }
   
   log_weights <- matrix(,nrow=N,ncol=TT)
   log_weights[,1] <- -log(N)*rep(1,N)
@@ -33,8 +37,6 @@ evidence_SMC_CF <- function(samples, loglike, der_loglike, der_logprior, tempera
   for (tt in 1:(TT-1)){
     
     log_weights_curr <- log_weights[,tt]
-    
-    
     
     if (is.null(est_inds)){
       # est_inds is not specified: Remove all duplicates and adjust weights accordingly.

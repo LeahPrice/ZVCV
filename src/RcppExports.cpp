@@ -59,8 +59,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // Phi_fn_cpp
-arma::mat Phi_fn_cpp(const arma::mat& samples, const arma::mat& derivatives, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<Rcpp::IntegerVector> subset);
-RcppExport SEXP _ZVCV_Phi_fn_cpp(SEXP samplesSEXP, SEXP derivativesSEXP, SEXP getXSEXP, SEXP polyorderSEXP, SEXP subsetSEXP) {
+arma::mat Phi_fn_cpp(const arma::mat& samples, const arma::mat& derivatives, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<Rcpp::IntegerVector> apriori);
+RcppExport SEXP _ZVCV_Phi_fn_cpp(SEXP samplesSEXP, SEXP derivativesSEXP, SEXP getXSEXP, SEXP polyorderSEXP, SEXP aprioriSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -68,8 +68,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type derivatives(derivativesSEXP);
     Rcpp::traits::input_parameter< Rcpp::Function >::type getX(getXSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<unsigned int> >::type polyorder(polyorderSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::IntegerVector> >::type subset(subsetSEXP);
-    rcpp_result_gen = Rcpp::wrap(Phi_fn_cpp(samples, derivatives, getX, polyorder, subset));
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::IntegerVector> >::type apriori(aprioriSEXP);
+    rcpp_result_gen = Rcpp::wrap(Phi_fn_cpp(samples, derivatives, getX, polyorder, apriori));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -135,8 +135,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // SECF_cpp
-Rcpp::List SECF_cpp(const arma::mat& integrands, const arma::mat& samples, const arma::mat& derivatives, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<arma::vec> sigma, const Rcpp::Nullable<Rcpp::NumericMatrix>& K0, Rcpp::Nullable<Rcpp::IntegerVector> subset, bool diagnostics);
-RcppExport SEXP _ZVCV_SECF_cpp(SEXP integrandsSEXP, SEXP samplesSEXP, SEXP derivativesSEXP, SEXP getXSEXP, SEXP polyorderSEXP, SEXP steinOrderSEXP, SEXP kernel_functionSEXP, SEXP sigmaSEXP, SEXP K0SEXP, SEXP subsetSEXP, SEXP diagnosticsSEXP) {
+Rcpp::List SECF_cpp(const arma::mat& integrands, const arma::mat& samples, const arma::mat& derivatives, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<arma::vec> sigma, const Rcpp::Nullable<Rcpp::NumericMatrix>& K0, Rcpp::Nullable<Rcpp::IntegerVector> apriori, bool diagnostics);
+RcppExport SEXP _ZVCV_SECF_cpp(SEXP integrandsSEXP, SEXP samplesSEXP, SEXP derivativesSEXP, SEXP getXSEXP, SEXP polyorderSEXP, SEXP steinOrderSEXP, SEXP kernel_functionSEXP, SEXP sigmaSEXP, SEXP K0SEXP, SEXP aprioriSEXP, SEXP diagnosticsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -149,15 +149,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::String> >::type kernel_function(kernel_functionSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<arma::vec> >::type sigma(sigmaSEXP);
     Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix>& >::type K0(K0SEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::IntegerVector> >::type subset(subsetSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::IntegerVector> >::type apriori(aprioriSEXP);
     Rcpp::traits::input_parameter< bool >::type diagnostics(diagnosticsSEXP);
-    rcpp_result_gen = Rcpp::wrap(SECF_cpp(integrands, samples, derivatives, getX, polyorder, steinOrder, kernel_function, sigma, K0, subset, diagnostics));
+    rcpp_result_gen = Rcpp::wrap(SECF_cpp(integrands, samples, derivatives, getX, polyorder, steinOrder, kernel_function, sigma, K0, apriori, diagnostics));
     return rcpp_result_gen;
 END_RCPP
 }
 // SECF_unbiased_cpp
-Rcpp::List SECF_unbiased_cpp(const arma::mat& integrands, const arma::mat& samples, const arma::mat& derivatives, arma::uvec est_inds, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<arma::vec> sigma, const Rcpp::Nullable<Rcpp::NumericMatrix>& K0, Rcpp::Nullable<Rcpp::IntegerVector> subset, bool diagnostics);
-RcppExport SEXP _ZVCV_SECF_unbiased_cpp(SEXP integrandsSEXP, SEXP samplesSEXP, SEXP derivativesSEXP, SEXP est_indsSEXP, SEXP getXSEXP, SEXP polyorderSEXP, SEXP steinOrderSEXP, SEXP kernel_functionSEXP, SEXP sigmaSEXP, SEXP K0SEXP, SEXP subsetSEXP, SEXP diagnosticsSEXP) {
+Rcpp::List SECF_unbiased_cpp(const arma::mat& integrands, const arma::mat& samples, const arma::mat& derivatives, arma::uvec est_inds, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<arma::vec> sigma, const Rcpp::Nullable<Rcpp::NumericMatrix>& K0, Rcpp::Nullable<Rcpp::IntegerVector> apriori, bool diagnostics);
+RcppExport SEXP _ZVCV_SECF_unbiased_cpp(SEXP integrandsSEXP, SEXP samplesSEXP, SEXP derivativesSEXP, SEXP est_indsSEXP, SEXP getXSEXP, SEXP polyorderSEXP, SEXP steinOrderSEXP, SEXP kernel_functionSEXP, SEXP sigmaSEXP, SEXP K0SEXP, SEXP aprioriSEXP, SEXP diagnosticsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -171,15 +171,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::String> >::type kernel_function(kernel_functionSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<arma::vec> >::type sigma(sigmaSEXP);
     Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix>& >::type K0(K0SEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::IntegerVector> >::type subset(subsetSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::IntegerVector> >::type apriori(aprioriSEXP);
     Rcpp::traits::input_parameter< bool >::type diagnostics(diagnosticsSEXP);
-    rcpp_result_gen = Rcpp::wrap(SECF_unbiased_cpp(integrands, samples, derivatives, est_inds, getX, polyorder, steinOrder, kernel_function, sigma, K0, subset, diagnostics));
+    rcpp_result_gen = Rcpp::wrap(SECF_unbiased_cpp(integrands, samples, derivatives, est_inds, getX, polyorder, steinOrder, kernel_function, sigma, K0, apriori, diagnostics));
     return rcpp_result_gen;
 END_RCPP
 }
 // SECF_crossval_cpp
-Rcpp::List SECF_crossval_cpp(const arma::mat& integrands, const arma::mat& samples, const arma::mat& derivatives, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<Rcpp::List> sigma, const Rcpp::Nullable<Rcpp::List>& K0, Rcpp::Nullable<Rcpp::IntegerVector> subset, Rcpp::Nullable<unsigned int> folds, const Rcpp::Nullable<Rcpp::IntegerVector>& est_inds, bool diagnostics);
-RcppExport SEXP _ZVCV_SECF_crossval_cpp(SEXP integrandsSEXP, SEXP samplesSEXP, SEXP derivativesSEXP, SEXP getXSEXP, SEXP polyorderSEXP, SEXP steinOrderSEXP, SEXP kernel_functionSEXP, SEXP sigmaSEXP, SEXP K0SEXP, SEXP subsetSEXP, SEXP foldsSEXP, SEXP est_indsSEXP, SEXP diagnosticsSEXP) {
+Rcpp::List SECF_crossval_cpp(const arma::mat& integrands, const arma::mat& samples, const arma::mat& derivatives, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<Rcpp::List> sigma, const Rcpp::Nullable<Rcpp::List>& K0, Rcpp::Nullable<Rcpp::IntegerVector> apriori, Rcpp::Nullable<unsigned int> folds, const Rcpp::Nullable<Rcpp::IntegerVector>& est_inds, bool diagnostics);
+RcppExport SEXP _ZVCV_SECF_crossval_cpp(SEXP integrandsSEXP, SEXP samplesSEXP, SEXP derivativesSEXP, SEXP getXSEXP, SEXP polyorderSEXP, SEXP steinOrderSEXP, SEXP kernel_functionSEXP, SEXP sigmaSEXP, SEXP K0SEXP, SEXP aprioriSEXP, SEXP foldsSEXP, SEXP est_indsSEXP, SEXP diagnosticsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -192,17 +192,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::String> >::type kernel_function(kernel_functionSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::List> >::type sigma(sigmaSEXP);
     Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::List>& >::type K0(K0SEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::IntegerVector> >::type subset(subsetSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::IntegerVector> >::type apriori(aprioriSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<unsigned int> >::type folds(foldsSEXP);
     Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::IntegerVector>& >::type est_inds(est_indsSEXP);
     Rcpp::traits::input_parameter< bool >::type diagnostics(diagnosticsSEXP);
-    rcpp_result_gen = Rcpp::wrap(SECF_crossval_cpp(integrands, samples, derivatives, getX, polyorder, steinOrder, kernel_function, sigma, K0, subset, folds, est_inds, diagnostics));
+    rcpp_result_gen = Rcpp::wrap(SECF_crossval_cpp(integrands, samples, derivatives, getX, polyorder, steinOrder, kernel_function, sigma, K0, apriori, folds, est_inds, diagnostics));
     return rcpp_result_gen;
 END_RCPP
 }
 // aSECF_cpp_prep
-Rcpp::List aSECF_cpp_prep(const arma::mat& integrands, const arma::mat& samples, const arma::mat& derivatives, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<arma::vec> sigma, const Rcpp::Nullable<Rcpp::NumericMatrix>& K0, Rcpp::Nullable<Rcpp::IntegerVector> subset, const Rcpp::Nullable<Rcpp::IntegerVector>& nystrom_inds, bool conjugate_gradient);
-RcppExport SEXP _ZVCV_aSECF_cpp_prep(SEXP integrandsSEXP, SEXP samplesSEXP, SEXP derivativesSEXP, SEXP getXSEXP, SEXP polyorderSEXP, SEXP steinOrderSEXP, SEXP kernel_functionSEXP, SEXP sigmaSEXP, SEXP K0SEXP, SEXP subsetSEXP, SEXP nystrom_indsSEXP, SEXP conjugate_gradientSEXP) {
+Rcpp::List aSECF_cpp_prep(const arma::mat& integrands, const arma::mat& samples, const arma::mat& derivatives, Rcpp::Function getX, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<arma::vec> sigma, const Rcpp::Nullable<Rcpp::NumericMatrix>& K0, Rcpp::Nullable<Rcpp::IntegerVector> apriori, const Rcpp::Nullable<Rcpp::IntegerVector>& nystrom_inds, bool conjugate_gradient);
+RcppExport SEXP _ZVCV_aSECF_cpp_prep(SEXP integrandsSEXP, SEXP samplesSEXP, SEXP derivativesSEXP, SEXP getXSEXP, SEXP polyorderSEXP, SEXP steinOrderSEXP, SEXP kernel_functionSEXP, SEXP sigmaSEXP, SEXP K0SEXP, SEXP aprioriSEXP, SEXP nystrom_indsSEXP, SEXP conjugate_gradientSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -215,16 +215,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::String> >::type kernel_function(kernel_functionSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<arma::vec> >::type sigma(sigmaSEXP);
     Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix>& >::type K0(K0SEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::IntegerVector> >::type subset(subsetSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::IntegerVector> >::type apriori(aprioriSEXP);
     Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::IntegerVector>& >::type nystrom_inds(nystrom_indsSEXP);
     Rcpp::traits::input_parameter< bool >::type conjugate_gradient(conjugate_gradientSEXP);
-    rcpp_result_gen = Rcpp::wrap(aSECF_cpp_prep(integrands, samples, derivatives, getX, polyorder, steinOrder, kernel_function, sigma, K0, subset, nystrom_inds, conjugate_gradient));
+    rcpp_result_gen = Rcpp::wrap(aSECF_cpp_prep(integrands, samples, derivatives, getX, polyorder, steinOrder, kernel_function, sigma, K0, apriori, nystrom_inds, conjugate_gradient));
     return rcpp_result_gen;
 END_RCPP
 }
 // aSECF_unbiased_cpp_prep
-Rcpp::List aSECF_unbiased_cpp_prep(const arma::mat& integrands, const arma::mat& samples, const arma::mat& derivatives, arma::uvec est_inds, Rcpp::Function getX, Rcpp::Function aSECF_mse_linsolve, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<arma::vec> sigma, const Rcpp::Nullable<Rcpp::NumericMatrix>& K0, Rcpp::Nullable<Rcpp::IntegerVector> subset, const Rcpp::Nullable<Rcpp::IntegerVector>& nystrom_inds, bool conjugate_gradient, double reltol, bool diagnostics);
-RcppExport SEXP _ZVCV_aSECF_unbiased_cpp_prep(SEXP integrandsSEXP, SEXP samplesSEXP, SEXP derivativesSEXP, SEXP est_indsSEXP, SEXP getXSEXP, SEXP aSECF_mse_linsolveSEXP, SEXP polyorderSEXP, SEXP steinOrderSEXP, SEXP kernel_functionSEXP, SEXP sigmaSEXP, SEXP K0SEXP, SEXP subsetSEXP, SEXP nystrom_indsSEXP, SEXP conjugate_gradientSEXP, SEXP reltolSEXP, SEXP diagnosticsSEXP) {
+Rcpp::List aSECF_unbiased_cpp_prep(const arma::mat& integrands, const arma::mat& samples, const arma::mat& derivatives, arma::uvec est_inds, Rcpp::Function getX, Rcpp::Function aSECF_mse_linsolve, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<arma::vec> sigma, const Rcpp::Nullable<Rcpp::NumericMatrix>& K0, Rcpp::Nullable<Rcpp::IntegerVector> apriori, const Rcpp::Nullable<Rcpp::IntegerVector>& nystrom_inds, bool conjugate_gradient, double reltol, bool diagnostics);
+RcppExport SEXP _ZVCV_aSECF_unbiased_cpp_prep(SEXP integrandsSEXP, SEXP samplesSEXP, SEXP derivativesSEXP, SEXP est_indsSEXP, SEXP getXSEXP, SEXP aSECF_mse_linsolveSEXP, SEXP polyorderSEXP, SEXP steinOrderSEXP, SEXP kernel_functionSEXP, SEXP sigmaSEXP, SEXP K0SEXP, SEXP aprioriSEXP, SEXP nystrom_indsSEXP, SEXP conjugate_gradientSEXP, SEXP reltolSEXP, SEXP diagnosticsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -239,18 +239,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::String> >::type kernel_function(kernel_functionSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<arma::vec> >::type sigma(sigmaSEXP);
     Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::NumericMatrix>& >::type K0(K0SEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::IntegerVector> >::type subset(subsetSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::IntegerVector> >::type apriori(aprioriSEXP);
     Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::IntegerVector>& >::type nystrom_inds(nystrom_indsSEXP);
     Rcpp::traits::input_parameter< bool >::type conjugate_gradient(conjugate_gradientSEXP);
     Rcpp::traits::input_parameter< double >::type reltol(reltolSEXP);
     Rcpp::traits::input_parameter< bool >::type diagnostics(diagnosticsSEXP);
-    rcpp_result_gen = Rcpp::wrap(aSECF_unbiased_cpp_prep(integrands, samples, derivatives, est_inds, getX, aSECF_mse_linsolve, polyorder, steinOrder, kernel_function, sigma, K0, subset, nystrom_inds, conjugate_gradient, reltol, diagnostics));
+    rcpp_result_gen = Rcpp::wrap(aSECF_unbiased_cpp_prep(integrands, samples, derivatives, est_inds, getX, aSECF_mse_linsolve, polyorder, steinOrder, kernel_function, sigma, K0, apriori, nystrom_inds, conjugate_gradient, reltol, diagnostics));
     return rcpp_result_gen;
 END_RCPP
 }
 // aSECF_crossval_cpp
-arma::mat aSECF_crossval_cpp(const arma::mat& integrands, const arma::mat& samples, const arma::mat& derivatives, Rcpp::Function getX, Rcpp::Function aSECF_mse_linsolve, unsigned int num_nystrom, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<Rcpp::List> sigma, Rcpp::Nullable<Rcpp::IntegerVector> subset, Rcpp::Nullable<unsigned int> folds, bool conjugate_gradient, double reltol, const Rcpp::Nullable<Rcpp::IntegerVector>& est_inds);
-RcppExport SEXP _ZVCV_aSECF_crossval_cpp(SEXP integrandsSEXP, SEXP samplesSEXP, SEXP derivativesSEXP, SEXP getXSEXP, SEXP aSECF_mse_linsolveSEXP, SEXP num_nystromSEXP, SEXP polyorderSEXP, SEXP steinOrderSEXP, SEXP kernel_functionSEXP, SEXP sigmaSEXP, SEXP subsetSEXP, SEXP foldsSEXP, SEXP conjugate_gradientSEXP, SEXP reltolSEXP, SEXP est_indsSEXP) {
+arma::mat aSECF_crossval_cpp(const arma::mat& integrands, const arma::mat& samples, const arma::mat& derivatives, Rcpp::Function getX, Rcpp::Function aSECF_mse_linsolve, unsigned int num_nystrom, Rcpp::Nullable<unsigned int> polyorder, Rcpp::Nullable<unsigned int> steinOrder, Rcpp::Nullable<Rcpp::String> kernel_function, Rcpp::Nullable<Rcpp::List> sigma, Rcpp::Nullable<Rcpp::IntegerVector> apriori, Rcpp::Nullable<unsigned int> folds, bool conjugate_gradient, double reltol, const Rcpp::Nullable<Rcpp::IntegerVector>& est_inds);
+RcppExport SEXP _ZVCV_aSECF_crossval_cpp(SEXP integrandsSEXP, SEXP samplesSEXP, SEXP derivativesSEXP, SEXP getXSEXP, SEXP aSECF_mse_linsolveSEXP, SEXP num_nystromSEXP, SEXP polyorderSEXP, SEXP steinOrderSEXP, SEXP kernel_functionSEXP, SEXP sigmaSEXP, SEXP aprioriSEXP, SEXP foldsSEXP, SEXP conjugate_gradientSEXP, SEXP reltolSEXP, SEXP est_indsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -264,12 +264,12 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::Nullable<unsigned int> >::type steinOrder(steinOrderSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::String> >::type kernel_function(kernel_functionSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::List> >::type sigma(sigmaSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::IntegerVector> >::type subset(subsetSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::IntegerVector> >::type apriori(aprioriSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<unsigned int> >::type folds(foldsSEXP);
     Rcpp::traits::input_parameter< bool >::type conjugate_gradient(conjugate_gradientSEXP);
     Rcpp::traits::input_parameter< double >::type reltol(reltolSEXP);
     Rcpp::traits::input_parameter< const Rcpp::Nullable<Rcpp::IntegerVector>& >::type est_inds(est_indsSEXP);
-    rcpp_result_gen = Rcpp::wrap(aSECF_crossval_cpp(integrands, samples, derivatives, getX, aSECF_mse_linsolve, num_nystrom, polyorder, steinOrder, kernel_function, sigma, subset, folds, conjugate_gradient, reltol, est_inds));
+    rcpp_result_gen = Rcpp::wrap(aSECF_crossval_cpp(integrands, samples, derivatives, getX, aSECF_mse_linsolve, num_nystrom, polyorder, steinOrder, kernel_function, sigma, apriori, folds, conjugate_gradient, reltol, est_inds));
     return rcpp_result_gen;
 END_RCPP
 }

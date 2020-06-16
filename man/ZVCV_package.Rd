@@ -13,7 +13,7 @@ You can evaluate posterior expectations of \eqn{k} functions.
 
 \itemize{
      \item \code{\link{zvcv}}: For estimating expectations using (regularised) zero-variance control variates (ZV-CV, Mira et al, 2013; South et al, 2018).
-     This function also allows for cross-validation, using a separate function argument design to the remaining functions (a potential job for a future release).
+     This function can also be used to choose between various versions of ZV-CV using cross-validation.
      \item \code{\link{CF}}: For estimating expectations using control functionals (CF, Oates et al, 2017). 
      \item \code{\link{SECF}}: For estimating expectations using semi-exact control functionals (SECF, South et al, 2020).
      \item \code{\link{aSECF}}: For estimating expectations using approximate semi-exact control functionals (aSECF, South et al, 2020). 
@@ -39,7 +39,7 @@ SECF is reduced in aSECF using nystrom approximations and conjugate gradient.
      in advance when using more than one of the above functions and when using any of the crossval functions.
      \item \code{\link{Phi_fn}}: Calculates the Phi matrix for SECF and aSECF (similar to \code{getX} but with different arguments and it includes the column of 1's)
      \item \code{\link{squareNorm}}: Gets the matrix of square norms which is needed for all kernels.
-     Calculating this can help to save time if you are also interested in calculating the median heuristic, handling multiple tuning parameters or trying other kernels in this group.
+     Calculating this can help to save time if you are also interested in calculating the median heuristic, handling multiple tuning parameters or trying other kernels.
      \item \code{\link{nearPD}}: Finds the nearest symmetric positive definite matrix to the given matrix, for handling numerical issues.
      \item \code{\link{logsumexp}}: Performs stable computation of the log sum of exponential (useful when handling the sum of weights)
      }
@@ -51,8 +51,8 @@ The following functions are used to estimate the evidence (the normalisiing cons
 sequential Monte Carlo with an annealing schedule has been used to collect the samples, and therefore are not of interest to those who are interested in
 variance reduction based on vanilla MCMC.
 \itemize{
-     \item \code{\link{evidence_CTI}}: A function to estimate the evidence using the controlled thermodynamic integration (CTI) identity, with samples from a set of \eqn{T} power posteriors.
-     \item \code{\link{evidence_SMC}}: A function to estimate the evidence using ZV-CV on the SMC evidence identity, with samples from a set of \eqn{T} power posteriors.
+     \item \code{\link{evidence_CTI}} and \code{\link{evidence_CTI_CF}}: Functions to estimate the evidence using thermodynamic integration (TI) with ZV-CV and CF, respectively
+     \item \code{\link{evidence_SMC}} and \code{\link{evidence_SMC_CF}}: Function to estimate the evidence using the SMC evidence identity with ZV-CV and CF, respectively.
 }
 
 The function \code{\link{Expand_Temperatures}} can be used to adjust the temperature schedule so that it is more (or less) strict than the original schedule of \eqn{T} temperatures.
@@ -77,11 +77,12 @@ for (N in N_all){
 
   # identify the largest polynomial order that can be fit without regularisation for auto ZV-CV
   max_r <- 0
-  while (choose(d + max_r + 1,d)<(0.8*N)){ # 0.8*N because of the 5-fold cross-validation
+  while (choose(d + max_r + 1,d)<(0.5*N)){ # 0.5*N because of the 2-fold cross-validation
   	max_r <- max_r + 1
   }
 
   MC <- ZV1 <- ZV2 <- ZVchoose <- CF <- SECF1 <- aSECF1 <- SECF2 <- aSECF2 <- rep(NaN,N_repeats)
+  CF_medHeur <- SECF1_medHeur <- aSECF1_medHeur <- SECF2_medHeur <- aSECF2_medHeur <- rep(NaN,N_repeats)
   for (i in 1:N_repeats){     
     x <- matrix(rnorm(N*d),ncol=d)
     u <- -x
@@ -92,7 +93,8 @@ for (N in N_all){
     if (N > choose(d+2,d)){  # Checking if the sample size is large enough to accommodation a second order polynomial
       ZV2[i] <- zvcv(f,x,u,options=list(polyorder=2,regul_reg=FALSE))$expectation
     }
-    ZVchoose[i] <- zvcv(f,x,u,options=list(list(polyorder=Inf,regul_reg=FALSE,polyorder_max=max_r),list(polyorder=Inf,regul_reg=TRUE)))$expectation
+    myopts <- list(list(polyorder=Inf,regul_reg=FALSE,polyorder_max=max_r),list(polyorder=Inf,nfolds=4))
+    ZVchoose[i] <- zvcv(f,x,u,options=myopts,folds = 2)$expectation
     
     # Calculating the kernel matrix in advance for CF and SECF
     K0_list <- list()
@@ -100,12 +102,22 @@ for (N in N_all){
       K0_list[[j]] <- K0_fn(x,u,sigma_list[[j]],steinOrder=2,kernel_function="RQ")
     }
     
-    CF[i] <- CF_crossval(f,x,u,K0_list=K0_list)$expectation
-    SECF1[i] <- SECF_crossval(f,x,u,K0_list=K0_list)$expectation
-    aSECF1[i] <- aSECF_crossval(f,x,u,steinOrder=2,kernel_function="RQ",sigma_list=sigma_list,reltol=1e-05)$expectation
+    CF[i] <- CF_crossval(f,x,u,K0_list=K0_list,folds = 2)$expectation
+    SECF1[i] <- SECF_crossval(f,x,u,K0_list=K0_list,folds = 2)$expectation
+    aSECF1[i] <- aSECF_crossval(f,x,u,steinOrder=2,kernel_function="RQ",sigma_list=sigma_list,reltol=1e-05,folds = 2)$expectation
     if (max_r>=2){
-      SECF2[i] <- SECF_crossval(f,x,u,polyorder=2,K0_list=K0_list)$expectation
-      aSECF2[i] <- aSECF_crossval(f,x,u,polyorder=2,steinOrder=2,kernel_function="RQ",sigma_list=sigma_list,reltol=1e-05)$expectation
+      SECF2[i] <- SECF_crossval(f,x,u,polyorder=2,K0_list=K0_list,folds = 2)$expectation
+      aSECF2[i] <- aSECF_crossval(f,x,u,polyorder=2,steinOrder=2,kernel_function="RQ",sigma_list=sigma_list,reltol=1e-05,folds = 2)$expectation
+    }
+
+    medHeur <- medianTune(x)
+    K0_medHeur <- K0_fn(x,u,medHeur,steinOrder=2,kernel_function="RQ")
+    CF_medHeur[i] <- CF(f,x,u,K0=K0_medHeur)$expectation
+    SECF1_medHeur[i] <- SECF(f,x,u,K0=K0_medHeur)$expectation
+    aSECF1_medHeur[i] <- aSECF(f,x,u,steinOrder=2,kernel_function="RQ",sigma=medHeur,reltol=1e-05)$expectation
+    if (max_r>=2){
+      SECF2_medHeur[i] <- SECF(f,x,u,polyorder=2,K0=K0_medHeur)$expectation
+      aSECF2_medHeur[i] <- aSECF(f,x,u,polyorder=2,steinOrder=2,kernel_function="RQ",sigma=medHeur,reltol=1e-05)$expectation
     }
     
     print(sprintf("--\%d",i))
@@ -119,24 +131,42 @@ for (N in N_all){
   results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = MSE_crude/mean((CF - 1)^2), type = "CF")) 
   results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = MSE_crude/mean((SECF1 - 1)^2), type = "SECF")) 
   results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = MSE_crude/mean((aSECF1 - 1)^2), type = "aSECF")) 
-  if ((0.8*N) > choose(d+2,d)){
+  if ((0.5*N) > choose(d+2,d)){
     results <- rbind(results,data.frame(N=N, order = "2", efficiency = MSE_crude/mean((SECF2 - 1)^2), type = "SECF")) 
     results <- rbind(results,data.frame(N=N, order = "2", efficiency = MSE_crude/mean((aSECF2 - 1)^2), type = "aSECF")) 
+  }
+
+  results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = MSE_crude/mean((CF_medHeur - 1)^2), type = "CF_medHeur")) 
+  results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = MSE_crude/mean((SECF1_medHeur - 1)^2), type = "SECF_medHeur")) 
+  results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = MSE_crude/mean((aSECF1_medHeur - 1)^2), type = "aSECF_medHeur")) 
+  if ((0.5*N) > choose(d+2,d)){
+    results <- rbind(results,data.frame(N=N, order = "2", efficiency = MSE_crude/mean((SECF2_medHeur - 1)^2), type = "SECF_medHeur")) 
+    results <- rbind(results,data.frame(N=N, order = "2", efficiency = MSE_crude/mean((aSECF2_medHeur - 1)^2), type = "aSECF_medHeur")) 
   }
   print(N)
 }
 
 
-# Plotting
+# Plotting results where cross-validation is used for kernel methods
 require(ggplot2)
 require(ggthemes)
-a <- ggplot(data=results,
+a <- ggplot(data=subset(results,!(type \%in\% c("CF_medHeur","SECF_medHeur","aSECF_medHeur","SECF_medHeur","aSECF_medHeur"))),
             aes(x=N,y=efficiency,col=type,linetype=order)) + scale_color_pander() + 
   ggtitle("") + geom_line(size=1.5) + scale_x_log10() + scale_y_log10() + 
   annotation_logticks(base=10) + labs(x="N",y="Efficiency",color="Method",linetype="Polynomial Order") + theme_minimal(base_size = 15) +
   theme(legend.key.size = unit(0.5, "cm"),legend.key.width =  unit(1, "cm")) +
   guides(linetype = guide_legend(override.aes = list(size=1),title.position = "top"), color = guide_legend(override.aes = list(size=1),title.position = "top"))
 print(a)
+
+
+# Plotting results where the median heuristic is used for kernel methods
+b <- ggplot(data=subset(results,!(type \%in\% c("CF","SECF","aSECF","SECF","aSECF"))),
+            aes(x=N,y=efficiency,col=type,linetype=order)) + scale_color_pander() + 
+  ggtitle("") + geom_line(size=1.5) + scale_x_log10() + scale_y_log10() + 
+  annotation_logticks(base=10) + labs(x="N",y="Efficiency",color="Method",linetype="Polynomial Order") + theme_minimal(base_size = 15) +
+  theme(legend.key.size = unit(0.5, "cm"),legend.key.width =  unit(1, "cm")) +
+  guides(linetype = guide_legend(override.aes = list(size=1),title.position = "top"), color = guide_legend(override.aes = list(size=1),title.position = "top"))
+print(b)
 
 
 }

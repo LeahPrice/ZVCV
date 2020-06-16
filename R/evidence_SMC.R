@@ -1,4 +1,4 @@
-#' The function \code{evidence_SMC} uses ZV-CV on the SMC estimator for the normalising constant.
+# The function \code{evidence_SMC} uses ZV-CV on the SMC estimator for the normalising constant.
 #'
 #' @return 				The function \code{evidence_SMC}  returns a list, containing the following components:
 #' \itemize{

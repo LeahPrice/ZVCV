@@ -14,7 +14,7 @@ SECF_crossval(
   sigma_list = NULL,
   K0_list = NULL,
   est_inds = NULL,
-  subset = NULL,
+  apriori = NULL,
   folds = NULL,
   diagnostics = FALSE
 )
@@ -36,9 +36,9 @@ SECF_crossval(
 
 \item{K0_list}{(optional between this and \code{sigma_list}) A list of kernel matrices, which can be calculated using \code{\link{K0_fn}}.}
 
-\item{est_inds}{(optional) The default is to perform estimation and evaluation using the full set of samples. This argument lets you specify that the \code{est_inds} indices are used for estimation only and the remaining samples are used for evaluation only. This can be used to reduce bias from adaption and also to make computation feasible for very large sample sizes (small \code{est_inds} is faster).}
+\item{est_inds}{(optional) A vector of indices for the estimation-only samples. The default when \code{est_inds} is missing or \code{NULL} is to perform both estimation of the control variates and evaluation of the integral using all samples. Otherwise, the samples from \code{est_inds} are used in estimating the control variates and the remainder are used in evaluating the integral. Splitting the indices in this way can be used to reduce bias from adaption and to make computation feasible for very large sample sizes (small \code{est_inds} is faster), but in general in will increase the variance of the estimator.}
 
-\item{subset}{(optional) The subset of parameters to be used in the polynomial. Typically this argument would only be used if the dimension of the problem is very large.}
+\item{apriori}{(optional) A vector containing the subset of parameter indices to use in the polynomial. Typically this argument would only be used if the dimension of the problem is very large or if prior information about parameter dependencies is known. The default is to use all parameters \eqn{1:d} where \eqn{d} is the dimension of the target.}
 
 \item{folds}{(optional) The number of folds for cross-validation. The default is five.}
 
@@ -99,7 +99,7 @@ The generic kernels which are implemented in this package are listed below.  Not
 \item \strong{\code{"prodsim"}}: A slightly different product kernel with \eqn{\sigma = (a,b)} (see e.g. \url{https://www.imperial.ac.uk/inference-group/projects/monte-carlo-methods/control-functionals/}),
 \deqn{k(x,y) = (1+a z(x))^{-1}(1 + a z(y))^{-1} exp(-0.5 b^{-2} z(x,y)) }
 }
-In the above equations, \eqn{z(x) = \sum_j x[j]^2} and \eqn{z(x,y) = \sum_j (x[j] - y[j])^2}. For the last two kernels, \code{steinOrder} must be \code{1}. Each combination of \code{steinOrder} and \code{kernel_function} above is currently hard-coded but it may be possible to extend this to other kernels in future versions using autodiff. The calculations for the first three kernels above are detailed in South et al (2020).
+In the above equations, \eqn{z(x) = \sum_j x[j]^2} and \eqn{z(x,y) = \sum_j (x[j] - y[j])^2}. For the last two kernels, the code only has implementations for \code{steinOrder}=\code{1}. Each combination of \code{steinOrder} and \code{kernel_function} above is currently hard-coded but it may be possible to extend this to other kernels in future versions using autodiff. The calculations for the first three kernels above are detailed in South et al (2020).
 }
 
 \references{
@@ -108,7 +108,7 @@ Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Ca
 South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 }
 \seealso{
-\code{\link{SECF}} for a function to perform semi-exact control functionals with fixed kernel specifications.
+See \link{ZVCV} for examples and related functions. See \code{\link{SECF}} for a function to perform semi-exact control functionals with fixed kernel specifications.
 }
 \author{
 Leah F. South

@@ -4,7 +4,7 @@
 \alias{Phi_fn}
 \title{Phi matrix calculation}
 \usage{
-Phi_fn(samples, derivatives, polyorder = NULL, subset = NULL)
+Phi_fn(samples, derivatives, polyorder = NULL, apriori = NULL)
 }
 \arguments{
 \item{samples}{An \eqn{N} by \eqn{d} matrix of samples from the target}
@@ -13,10 +13,10 @@ Phi_fn(samples, derivatives, polyorder = NULL, subset = NULL)
 
 \item{polyorder}{(optional)        The order of the polynomial to be used in the parametric component, with a default of \eqn{1}. We recommend keeping this value low (e.g. only 1-2).}
 
-\item{subset}{(optional) The subset of parameters to be used in the polynomial. Typically this argument would only be used if the dimension of the problem is very large.}
+\item{apriori}{(optional) A vector containing the subset of parameter indices to use in the polynomial. Typically this argument would only be used if the dimension of the problem is very large or if prior information about parameter dependencies is known. The default is to use all parameters \eqn{1:d} where \eqn{d} is the dimension of the target.}
 }
 \value{
-An \eqn{N} by \eqn{Q} matrix (where Q is determined by the polynomial order and the subset).
+An \eqn{N} by \eqn{Q} matrix (where Q is determined by the polynomial order and the apriori).
 }
 \description{
 This function calculates the \eqn{\Phi} matrix, which is a second order Stein operator applied

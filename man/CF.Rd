@@ -32,7 +32,7 @@ CF(
 
 \item{K0}{(optional) The kernel matrix. One can specify either this or all of \code{sigma}, \code{steinOrder} and \code{kernel_function}. The former involves pre-computing the kernel matrix using \code{\link{K0_fn}} and is more efficient when using multiple estimators out of \code{\link{CF}}, \code{\link{SECF}} and  \code{\link{aSECF}} or when using the cross-validation functions.}
 
-\item{est_inds}{(optional) The default is to perform estimation and evaluation using the full set of samples. This argument lets you specify that the \code{est_inds} indices are used for estimation only and the remaining samples are used for evaluation only. This can be used to reduce bias from adaption and also to make computation feasible for very large sample sizes (small \code{est_inds} is faster).}
+\item{est_inds}{(optional) A vector of indices for the estimation-only samples. The default when \code{est_inds} is missing or \code{NULL} is to perform both estimation of the control variates and evaluation of the integral using all samples. Otherwise, the samples from \code{est_inds} are used in estimating the control variates and the remainder are used in evaluating the integral. Splitting the indices in this way can be used to reduce bias from adaption and to make computation feasible for very large sample sizes (small \code{est_inds} is faster), but in general in will increase the variance of the estimator.}
 
 \item{one_in_denom}{(optional) Whether or not to include a \eqn{1 + } in the denominator of the control functionals estimator, as in equation 2 on p703 of Oates et al (2017). The \eqn{1 +} in the denominator is an arbitrary choice so we set it to zero by default.}
 
@@ -83,7 +83,7 @@ The generic kernels which are implemented in this package are listed below.  Not
 \item \strong{\code{"prodsim"}}: A slightly different product kernel with \eqn{\sigma = (a,b)} (see e.g. \url{https://www.imperial.ac.uk/inference-group/projects/monte-carlo-methods/control-functionals/}),
 \deqn{k(x,y) = (1+a z(x))^{-1}(1 + a z(y))^{-1} exp(-0.5 b^{-2} z(x,y)) }
 }
-In the above equations, \eqn{z(x) = \sum_j x[j]^2} and \eqn{z(x,y) = \sum_j (x[j] - y[j])^2}. For the last two kernels, \code{steinOrder} must be \code{1}. Each combination of \code{steinOrder} and \code{kernel_function} above is currently hard-coded but it may be possible to extend this to other kernels in future versions using autodiff. The calculations for the first three kernels above are detailed in South et al (2020).
+In the above equations, \eqn{z(x) = \sum_j x[j]^2} and \eqn{z(x,y) = \sum_j (x[j] - y[j])^2}. For the last two kernels, the code only has implementations for \code{steinOrder}=\code{1}. Each combination of \code{steinOrder} and \code{kernel_function} above is currently hard-coded but it may be possible to extend this to other kernels in future versions using autodiff. The calculations for the first three kernels above are detailed in South et al (2020).
 }
 
 \references{
@@ -92,7 +92,7 @@ Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Ca
 South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 }
 \seealso{
-\code{\link{CF_crossval}} for a function to choose between different kernels for this estimator.
+See \link{ZVCV} for examples and related functions. See \code{\link{CF_crossval}} for a function to choose between different kernels for this estimator.
 }
 \author{
 Leah F. South

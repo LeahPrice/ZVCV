@@ -1,6 +1,4 @@
-#' Evidence estimation with ZV-CV
-#'
-#' The function \code{evidence_CTI_CF} uses CF on the controlled thermodynamic integration estimator for the normalising constant.
+# The function \code{evidence_CTI_CF} uses CF on the thermodynamic integration estimator for the normalising constant.
 #'
 #' @return 				The function \code{evidence_CTI_CF}  returns a list, containing the following components:
 #' \itemize{
@@ -12,22 +10,18 @@
 #' \item \code{selected_vLL_CF}: The set of \eqn{tau} selected tuning parameters from \code{sigma_list} for the 2nd order quadrature expectations.
 #' }
 #'
-#' @references
-#' Mira, A., Solgi, R., & Imparato, D. (2013). Zero variance Markov chain Monte Carlo for Bayesian estimators. Statistics and Computing, 23(5), 653-662.
-#'
-#' South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2019). Regularised zero variance control variates for high-dimensional variance reduction. \url{https://arxiv.org/abs/1811.05073}
-#' 
 #' @inheritParams CF_crossval
-#' @author  Leah F. South
-#' @seealso See \code{\link{Expand_Temperatures}} for a function that can be used to find stricter (or less stricter) temperature schedules based on the conditional effective sample size. See an example at \code{\link{VDP}} and see \link{ZVCV} for more package details.
-#' 
-#' @name evidence
+#' @rdname evidence
 evidence_CTI_CF <- function(samples, loglike, der_loglike, der_logprior, temperatures, temperatures_all, most_recent, est_inds, steinOrder, kernel_function, sigma_list, folds = 5){
   # Stepping stone identity for evidence.
   
   N <- NROW(samples)
   d <- NCOL(samples)
   TT <- length(temperatures_all)
+  
+  if (missing(est_inds)) {
+    est_inds <- NULL
+  }
   
   log_weights <- matrix(,nrow=N,ncol=TT)
   log_weights[,1] <- -log(N)*rep(1,N)

@@ -25,14 +25,14 @@ clean_options <- function(options, N, d_full){
     if (d==1 & !("polyorder_max" %in% names(options[[i]]))){
       options[[i]]$polyorder_max <- Inf
     } else if (d > 1){ # Check for potentially large design matrices when d>1
-      temp_max_polyorder <- 1 # identify the largest polynomial order such that the regression design matrix has no more than 10^6 elements
+      temp_max_polyorder <- 1 # identify the largest polynomial order such that the regression design matrix has no more than 10^7 elements
       while (N*choose(d + temp_max_polyorder,d)<10^7){ 
         temp_max_polyorder <- temp_max_polyorder + 1
       }
       
       if (is.infinite(options[[i]]$polyorder) & !("polyorder_max" %in% names(options[[i]]))) { # Tell users about maximum polynomial orders
         options[[i]]$polyorder_max <- temp_max_polyorder
-        warning(sprintf("To prevent memory issues, the maximum polynomial order for option %d has been set to %d.\n",i,temp_max_polyorder))
+        # warning(sprintf("To prevent memory issues, the maximum polynomial order for option %d has been set to %d.\n",i,temp_max_polyorder))
       } else if (!is.infinite(options[[i]]$polyorder) & temp_max_polyorder < options[[i]]$polyorder){
         input_continue <- readline(prompt=sprintf("\nThe polynomial order for option %d will result in a design matrix\n of size %d by %d. This may require long computation time\n or large amounts of memory. Are you sure you wish to\n continue? Y/N: ",i,N,choose(d+options[[i]]$polyorder,d)))
         input_continue <- as.character(input_continue)

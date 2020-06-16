@@ -3,14 +3,14 @@
 #' @description This function is used to adjust the temperature schedule so that it is more (or less) strict than the original.
 #'
 #' @param temperatures      A vector of length \eqn{T} temperatures for the power posterior temperatures.
-#' @param loglike       An \eqn{N} by \eqn{T} matrix of log likelihood values corresponding to \code{samples}.
-#' @param rho         The tolerance for the new temperatures, which are selected so that the CESS at each temperature is \eqn{\rho*N} where \eqn{N} is the population size.
+#' @param loglike       An \eqn{N} by \eqn{T} matrix of log likelihood values corresponding to the samples.
+#' @param rho         The tolerance for the new temperatures. Temperatures are selected so that the conditional effective sample size (CESS) at each temperature is \eqn{\rho*N} where \eqn{N} is the population size.
 #' @param bisec_tol     The tolerance for the bisection method used in selecting temperatures. The default is \code{.Machine$double.eps^0.25}
 
 #' @return 				A list is returned, containing the following components:
 #' \itemize{
 #' \item \code{temperatures_all}: The new set of temperatures of length \eqn{tau}.
-#' \item \code{relevant_samples}: A vector of length \eqn{tau} containinng indices to show which particle sets the new temperatures are based on.
+#' \item \code{relevant_samples}: A vector of length \eqn{tau} containing indices to show which particle sets the new temperatures are based on.
 #' \item \code{logw}: An \eqn{N} by \eqn{tau} matrix of log normalised weights of the particles
 #' }
 #'

@@ -33,12 +33,12 @@
 #' } 
 #'
 #' @inheritSection K0_fn On the choice of \eqn{\sigma}, the kernel and the Stein order
-#'
+#' 
 #' @references
 #' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 #'
 #' @author Leah F. South
-#' @seealso \code{\link{aSECF_crossval}} for a function to choose between different kernels for this estimator.
+#' @seealso See \link{ZVCV} for examples and related functions. See \code{\link{aSECF_crossval}} for a function to choose between different kernels for this estimator.
 aSECF <- function(integrands,samples,derivatives, polyorder = NULL, steinOrder = NULL, kernel_function = NULL, sigma = NULL, K0 = NULL,nystrom_inds = NULL, est_inds = NULL, apriori = NULL, conjugate_gradient = TRUE, reltol = 1e-02, diagnostics = FALSE){
   
   N <- NROW(samples)
@@ -177,14 +177,14 @@ aSECF <- function(integrands,samples,derivatives, polyorder = NULL, steinOrder =
 #'
 #' @section Warning:
 #' Solving the linear system in CF has \eqn{O(N^3)} complexity and is therefore not suited to large \eqn{N}. Using \eqn{est_inds} will instead have an \eqn{O(N_0^3)} cost in solving the linear system and an \eqn{O((N-N_0)^2)} cost in handling the remaining samples, where \eqn{N_0} is the length of \eqn{est_inds}. This can be much cheaper for large \eqn{N}.
-#'
+#' 
 #' @references
 #' Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.
 #'
 #' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 #'
 #' @author Leah F. South
-#' @seealso \code{\link{CF_crossval}} for a function to choose between different kernels for this estimator.
+#' @seealso See \link{ZVCV} for examples and related functions. See \code{\link{CF_crossval}} for a function to choose between different kernels for this estimator.
 CF <- function(integrands, samples, derivatives, steinOrder = NULL, kernel_function = NULL, sigma = NULL, K0 = NULL, est_inds = NULL, one_in_denom = FALSE, diagnostics = FALSE){
   
   N <- NROW(samples)
@@ -261,14 +261,14 @@ CF <- function(integrands, samples, derivatives, steinOrder = NULL, kernel_funct
 #'
 #' @section Warning:
 #' Solving the linear system in CF has \eqn{O(N^3)} complexity and is therefore not suited to large \eqn{N}. Using \eqn{est_inds} will instead have an \eqn{O(N_0^3)} cost in solving the linear system and an \eqn{O((N-N_0)^2)} cost in handling the remaining samples, where \eqn{N_0} is the length of \eqn{est_inds}. This can be much cheaper for large \eqn{N}.
-#'
+#' 
 #' @references
 #' Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.
 #'
 #' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 #'
 #' @author Leah F. South
-#' @seealso \code{\link{CF}} for a function to perform control functionals with fixed kernel specifications.
+#' @seealso See \link{ZVCV} for examples and related functions. See \code{\link{CF}} for a function to perform control functionals with fixed kernel specifications.
 CF_crossval <- function(integrands, samples, derivatives, steinOrder = NULL, kernel_function = NULL, sigma_list = NULL, K0_list = NULL, est_inds = NULL, log_weights = NULL, one_in_denom = FALSE, folds = NULL, diagnostics = FALSE){
   
   N <- NROW(samples)
@@ -291,8 +291,10 @@ CF_crossval <- function(integrands, samples, derivatives, steinOrder = NULL, ker
       # adjusting the weights
       inds <- order(samples[inds_unique,1]) # find ordering of unique values (with have to undo ordering after below command which automatically reorders)
       num_dups <- data.frame(a=samples[,1]) %>% group_by(a) %>% group_size() # find the number of duplicates using dplyr
-      log_weights <- log_weights[inds_unique] # adjusting weights
-      log_weights <- log_weights + log(num_dups[order(inds)]) # adjusting weights 
+      if (!is.null(log_weights)){
+        log_weights <- log_weights[inds_unique] # adjusting weights
+        log_weights <- log_weights + log(num_dups[order(inds)]) # adjusting weights 
+      }
       
       samples <- samples[inds_unique,,drop=FALSE]
       derivatives <- derivatives[inds_unique,,drop=FALSE]
@@ -326,7 +328,13 @@ CF_crossval <- function(integrands, samples, derivatives, steinOrder = NULL, ker
     }
   }
   
-  temp <- CF_crossval_cpp(integrands, samples, derivatives, steinOrder, kernel_function, sigma_list, K0_list, folds, est_inds, exp(log_weights), one_in_denom, diagnostics)
+  if (is.null(log_weights)){
+    temp <- CF_crossval_cpp(integrands, samples, derivatives, steinOrder, kernel_function, sigma_list, K0_list, folds, est_inds, NULL, one_in_denom, diagnostics)
+  } else {
+    temp <- CF_crossval_cpp(integrands, samples, derivatives, steinOrder, kernel_function, sigma_list, K0_list, folds, est_inds, exp(log_weights), one_in_denom, diagnostics)
+  }
+  
+  
   
   return (temp)
 }
@@ -357,14 +365,14 @@ CF_crossval <- function(integrands, samples, derivatives, steinOrder = NULL, ker
 #' An alternative would be to use \eqn{est_inds} which has \eqn{O(N_0^3 + Q^3)} complexity in solving the linear system and \eqn{O((N-N_0)^2)} complexity in
 #' handling the remaining samples, where \eqn{N_0} is the length of \eqn{est_inds}. This can be much cheaper for small \eqn{N_0} but the estimation of the
 #' Gaussian process model is only done using \eqn{N_0} samples and the evaluation of the integral only uses \eqn{N-N_0} samples.
-#'
+#' 
 #' @references
 #' Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.
 #'
 #' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 #'
 #' @author Leah F. South
-#' @seealso \code{\link{SECF_crossval}} for a function to choose between different kernels for this estimator.
+#' @seealso See \link{ZVCV} for examples and related functions. See \code{\link{SECF_crossval}} for a function to choose between different kernels for this estimator.
 SECF <- function(integrands,samples,derivatives, polyorder = NULL, steinOrder = NULL, kernel_function = NULL, sigma = NULL, K0 = NULL, est_inds = NULL,apriori = NULL, diagnostics = FALSE){
   
   N <- NROW(samples)
@@ -459,14 +467,14 @@ SECF <- function(integrands,samples,derivatives, polyorder = NULL, steinOrder = 
 #' An alternative would be to use \eqn{est_inds} which has \eqn{O(N_0^3 + Q^3)} complexity in solving the linear system and \eqn{O((N-N_0)^2)} complexity in
 #' handling the remaining samples, where \eqn{N_0} is the length of \eqn{est_inds}. This can be much cheaper for large \eqn{N} but the estimation of the
 #' Gaussian process model is only done using \eqn{N_0} samples and the evaluation of the integral only uses \eqn{N-N_0} samples.
-#'
+#' 
 #' @references
 #' Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.
 #'
 #' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 #'
 #' @author Leah F. South
-#' @seealso \code{\link{SECF}} for a function to perform semi-exact control functionals with fixed kernel specifications.
+#' @seealso See \link{ZVCV} for examples and related functions. See \code{\link{SECF}} for a function to perform semi-exact control functionals with fixed kernel specifications.
 SECF_crossval <- function(integrands,samples,derivatives, polyorder = NULL, steinOrder = NULL, kernel_function = NULL, sigma_list = NULL, K0_list = NULL, est_inds = NULL, apriori = NULL, folds = NULL, diagnostics = FALSE){
   
   N <- NROW(samples)
@@ -591,7 +599,6 @@ aSECF_mse_linsolve <- function(integrands,samples,derivatives, polyorder = NULL,
 #'
 #' @inheritParams aSECF
 #' @param sigma_list (optional between this and \code{K0_list})			A list of tuning parameters for the specified kernel. This involves a list of single length-scale parameter in "gaussian" and "RQ", a list of vectors containing length-scale and smoothness parameters in "matern" and a list of vectors of the two parameters in "product" and "prodsim". See below for further details. When \code{sigma_list} is specified and not \code{K0_list}, the \eqn{K0} matrix is computed twice for each selected tuning parameter.
-#' @param K0_list (optional between this and \code{sigma_list}) A list of kernel matrices, which can be calculated using \code{\link{K0_fn}}.
 #' @param num_nystrom (optional) The number of samples to use in the Nystrom approximation, with a default of ceiling(sqrt(N)). The nystrom indices cannot be passed in here because of the way the cross-validation has been set up.
 #' @param folds (optional) The number of folds for cross-validation. The default is five.
 #'
@@ -610,12 +617,12 @@ aSECF_mse_linsolve <- function(integrands,samples,derivatives, polyorder = NULL,
 #' } 
 #'
 #' @inheritSection K0_fn On the choice of \eqn{\sigma}, the kernel and the Stein order
-#'
+#' 
 #' @references
 #' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 #'
 #' @author Leah F. South
-#' @seealso \code{\link{aSECF_crossval}} for a function to choose between different kernels for this estimator.
+#' @seealso See \link{ZVCV} for examples and related functions. See \code{\link{aSECF_crossval}} for a function to choose between different kernels for this estimator.
 aSECF_crossval <- function(integrands,samples,derivatives, polyorder = NULL, steinOrder = NULL, kernel_function = NULL, sigma_list = NULL, est_inds = NULL, apriori = NULL, num_nystrom = NULL, conjugate_gradient = TRUE, reltol = 1e-02, folds = NULL, diagnostics = FALSE){
   
   N <- NROW(samples)

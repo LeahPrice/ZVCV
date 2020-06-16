@@ -17,10 +17,9 @@ evidence_CTI(
   temperatures,
   temperatures_all,
   most_recent,
-  obs_estim_choose,
-  obs_estim,
+  est_inds,
   options,
-  folds_choose = 5
+  folds = 5
 )
 
 evidence_CTI_CF(
@@ -31,6 +30,7 @@ evidence_CTI_CF(
   temperatures,
   temperatures_all,
   most_recent,
+  est_inds,
   steinOrder,
   kernel_function,
   sigma_list,
@@ -45,10 +45,9 @@ evidence_SMC(
   temperatures,
   temperatures_all,
   most_recent,
-  obs_estim_choose,
-  obs_estim,
+  est_inds,
   options,
-  folds_choose = 5
+  folds = 5
 )
 
 evidence_SMC_CF(
@@ -59,6 +58,7 @@ evidence_SMC_CF(
   temperatures,
   temperatures_all,
   most_recent,
+  est_inds,
   steinOrder,
   kernel_function,
   sigma_list,
@@ -80,21 +80,17 @@ evidence_SMC_CF(
 
 \item{most_recent}{A vector of length \eqn{tau} which gives the indices in the original temperatures that the new temperatures correspond to.}
 
-\item{obs_estim_choose}{See \code{\link{zvcv}}.}
+\item{est_inds}{(optional) A vector of indices for the estimation-only samples. The default when \code{est_inds} is missing or \code{NULL} is to perform both estimation of the control variates and evaluation of the integral using all samples. Otherwise, the samples from \code{est_inds} are used in estimating the control variates and the remainder are used in evaluating the integral. Splitting the indices in this way can be used to reduce bias from adaption and to make computation feasible for very large sample sizes (small \code{est_inds} is faster), but in general in will increase the variance of the estimator.}
 
-\item{obs_estim}{See \code{\link{zvcv}}.}
+\item{options}{A list of control variate specifications for ZV-CV. This can be a single list containing the elements below (the defaults are used for elements which are not specified). Alternatively, it can be a list of lists containing any or all of the elements below. Where the latter is used, the function \code{zvcv} automatically selects the best performing option based on cross-validation.}
 
-\item{options}{See \code{\link{zvcv}}.}
-
-\item{folds_choose}{The number of folds used in k-fold cross-validation for selecting the optimal control variate. Depending on the \code{options}, this may include selection of the optimal polynomial order, regression type and subset of parameters in the polynomial. The default is five.}
+\item{folds}{The number of folds used in k-fold cross-validation for selecting the optimal control variate. For ZV-CV, this may include selection of the optimal polynomial order, regression type and subset of parameters depending on \code{options}. For CF, this includes the selection of the optimal tuning parameters in \code{sigma_list}. The default is five.}
 
 \item{steinOrder}{(optional)    This is the order of the Stein operator. The default is \code{1} in the control functionals paper (Oates et al, 2017) and \code{2} in the semi-exact control functionals paper (South et al, 2020).  The following values are currently available: \code{1} for all kernels and \code{2} for "gaussian", "matern" and "RQ". See below for further details.}
 
 \item{kernel_function}{(optional)        Choose between "gaussian", "matern", "RQ", "product" or "prodsim". See below for further details.}
 
 \item{sigma_list}{(optional between this and \code{K0_list})            A list of tuning parameters for the specified kernel. This involves a list of single length-scale parameter in "gaussian" and "RQ", a list of vectors containing length-scale and smoothness parameters in "matern" and a list of vectors of the two parameters in "product" and "prodsim". See below for further details. When \code{sigma_list} is specified and not \code{K0_list}, the \eqn{K0} matrix is computed twice for each selected tuning parameter.}
-
-\item{folds}{(optional) The number of folds for cross-validation. The default is five.}
 }
 \value{
 The function \code{evidence_CTI}  returns a list, containing the following components:
@@ -105,12 +101,14 @@ The function \code{evidence_CTI}  returns a list, containing the following compo
 \item \code{regression_vLL}: The set of \eqn{tau} \code{zvcv} type returns for the 2nd order quadrature expectations
 }
 
-The function \code{evidence_CTI}  returns a list, containing the following components:
+The function \code{evidence_CTI_CF}  returns a list, containing the following components:
 \itemize{
 \item \code{log_evidence_PS1}: The 1st order quadrature estimate for the log normalising constant
 \item \code{log_evidence_PS2}: The 2nd order quadrature estimate for the log normalising constant
-\item \code{regression_LL}: The set of \eqn{tau} \code{zvcv} type returns for the 1st order quadrature expectations
-\item \code{regression_vLL}: The set of \eqn{tau} \code{zvcv} type returns for the 2nd order quadrature expectations
+\item \code{regression_LL}: The set of \eqn{tau} \code{CF_crossval} type returns for the 1st order quadrature expectations
+\item \code{regression_vLL}: The set of \eqn{tau} \code{CF_crossval} type returns for the 2nd order quadrature expectations
+\item \code{selected_LL_CF}: The set of \eqn{tau} selected tuning parameters from \code{sigma_list} for the 1st order quadrature expectations.
+\item \code{selected_vLL_CF}: The set of \eqn{tau} selected tuning parameters from \code{sigma_list} for the 2nd order quadrature expectations.
 }
 
 The function \code{evidence_SMC}  returns a list, containing the following components:
@@ -119,33 +117,51 @@ The function \code{evidence_SMC}  returns a list, containing the following compo
 \item \code{regression_SMC}: The set of \eqn{tau} \code{zvcv} type returns for the expectations
 }
 
-The function \code{evidence_SMC}  returns a list, containing the following components:
+The function \code{evidence_SMC_CF}  returns a list, containing the following components:
 \itemize{
 \item \code{log_evidence}: The logged SMC estimate for the normalising constant
-\item \code{regression_SMC}: The set of \eqn{tau} \code{zvcv} type returns for the expectations
+\item \code{regression_SMC}: The set of \eqn{tau} \code{CF_crossval} type returns for the expectations
+\item \code{selected_CF}: The set of \eqn{tau} selected tuning parameters from \code{sigma_list} for the expectations
 }
 }
 \description{
-The function \code{evidence_CTI} uses ZV-CV on the controlled thermodynamic integration estimator for the normalising constant.
-
-The function \code{evidence_CTI} uses ZV-CV on the controlled thermodynamic integration estimator for the normalising constant.
+The functions \code{evidence_CTI} and \code{evidence_CTI_CF} can be used to improve upon the thermodynamic integration (TI) estimate of the normalising constant with ZV-CV and CF, respectively. The functions \code{evidence_SMC} and \code{evidence_SMC_CF} do the same thing for the sequential Monte Carlo (SMC) normalising constant identity.
 }
+\section{On the choice of \eqn{\sigma}, the kernel and the Stein order}{
+
+The kernel in Stein-based kernel methods is \eqn{L_x L_y k(x,y)} where \eqn{L_x} is a first or second order Stein operator in \eqn{x} and \eqn{k(x,y)} is some generic kernel to be specified.
+
+The Stein operators for distribution \eqn{p(x)} are defined as:
+\itemize{
+\item \strong{\code{steinOrder=1}}: \eqn{L_x g(x) = \nabla_x^T g(x) + \nabla_x \log p(x)^T g(x)} (see e.g. Oates el al (2017))
+\item \strong{\code{steinOrder=2}}: \eqn{L_x g(x) = \Delta_x g(x) + \nabla_x log p(x)^T \nabla_x g(x)} (see e.g. South el al (2020))
+}
+Here \eqn{\nabla_x} is the first order derivative wrt \eqn{x} and \eqn{\Delta_x = \nabla_x^T \nabla_x} is the Laplacian operator.
+
+The generic kernels which are implemented in this package are listed below.  Note that the input parameter \strong{\code{sigma}} defines the kernel parameters \eqn{\sigma}. 
+\itemize{
+\item \strong{\code{"gaussian"}}: A Gaussian kernel,
+\deqn{k(x,y) = exp(-z(x,y)/\sigma^2)}
+\item \strong{{\code{"matern"}}}: A Matern kernel with \eqn{\sigma = (\lambda,\nu)},
+\deqn{k(x,y) = bc^{\nu}z(x,y)^{\nu/2}K_{\nu}(c z(x,y)^{0.5})} where \eqn{b=2^{1-\nu}(\Gamma(\nu))^{-1}}, \eqn{c=(2\nu)^{0.5}\lambda^{-1}} and \eqn{K_{\nu}(x)} is the modified Bessel function of the second kind. Note that \eqn{\lambda} is the length-scale parameter and \eqn{\nu} is the smoothness parameter (which defaults to 2.5 for \eqn{steinOrder=1} and 4.5 for \eqn{steinOrder=2}).
+\item \strong{\code{"RQ"}}: A rational quadratic kernel,
+\deqn{k(x,y) = (1+\sigma^{-2}z(x,y))^{-1}}
+\item \strong{\code{"product"}}: The product kernel that appears in Oates et al (2017) with \eqn{\sigma = (a,b)}
+\deqn{k(x,y) = (1+a z(x) + a z(y))^{-1} exp(-0.5 b^{-2} z(x,y)) }
+\item \strong{\code{"prodsim"}}: A slightly different product kernel with \eqn{\sigma = (a,b)} (see e.g. \url{https://www.imperial.ac.uk/inference-group/projects/monte-carlo-methods/control-functionals/}),
+\deqn{k(x,y) = (1+a z(x))^{-1}(1 + a z(y))^{-1} exp(-0.5 b^{-2} z(x,y)) }
+}
+In the above equations, \eqn{z(x) = \sum_j x[j]^2} and \eqn{z(x,y) = \sum_j (x[j] - y[j])^2}. For the last two kernels, the code only has implementations for \code{steinOrder}=\code{1}. Each combination of \code{steinOrder} and \code{kernel_function} above is currently hard-coded but it may be possible to extend this to other kernels in future versions using autodiff. The calculations for the first three kernels above are detailed in South et al (2020).
+}
+
 \references{
-Mira, A., Solgi, R., & Imparato, D. (2013). Zero variance Markov chain Monte Carlo for Bayesian estimators. Statistics and Computing, 23(5), 653-662.
-
-South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2019). Regularised zero variance control variates for high-dimensional variance reduction. \url{https://arxiv.org/abs/1811.05073}
-
 Mira, A., Solgi, R., & Imparato, D. (2013). Zero variance Markov chain Monte Carlo for Bayesian estimators. Statistics and Computing, 23(5), 653-662.
 
 South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2019). Regularised zero variance control variates for high-dimensional variance reduction. \url{https://arxiv.org/abs/1811.05073}
 }
 \seealso{
-See \code{\link{Expand_Temperatures}} for a function that can be used to find stricter (or less stricter) temperature schedules based on the conditional effective sample size. See an example at \code{\link{VDP}} and see \link{ZVCV} for more package details.
-
-See \code{\link{Expand_Temperatures}} for a function that can be used to find stricter (or less stricter) temperature schedules based on the conditional effective sample size. See an example at \code{\link{VDP}} and see \link{ZVCV} for more package details.
+See an example at \code{\link{VDP}} and see \link{ZVCV} for more package details. See \code{\link{Expand_Temperatures}} for a function that can be used to find stricter (or less stricter) temperature schedules based on the conditional effective sample size.
 }
 \author{
-Leah F. South
-
 Leah F. South
 }

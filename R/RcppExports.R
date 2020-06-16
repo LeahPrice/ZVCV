@@ -79,7 +79,7 @@ medianTune <- function(samples, Z = NULL) {
 #' \item \strong{\code{"prodsim"}}: A slightly different product kernel with \eqn{\sigma = (a,b)} (see e.g. \url{https://www.imperial.ac.uk/inference-group/projects/monte-carlo-methods/control-functionals/}),
 #' \deqn{k(x,y) = (1+a z(x))^{-1}(1 + a z(y))^{-1} exp(-0.5 b^{-2} z(x,y)) }
 #' }
-#' In the above equations, \eqn{z(x) = \sum_j x[j]^2} and \eqn{z(x,y) = \sum_j (x[j] - y[j])^2}. For the last two kernels, \code{steinOrder} must be \code{1}. Each combination of \code{steinOrder} and \code{kernel_function} above is currently hard-coded but it may be possible to extend this to other kernels in future versions using autodiff. The calculations for the first three kernels above are detailed in South et al (2020).
+#' In the above equations, \eqn{z(x) = \sum_j x[j]^2} and \eqn{z(x,y) = \sum_j (x[j] - y[j])^2}. For the last two kernels, the code only has implementations for \code{steinOrder}=\code{1}. Each combination of \code{steinOrder} and \code{kernel_function} above is currently hard-coded but it may be possible to extend this to other kernels in future versions using autodiff. The calculations for the first three kernels above are detailed in South et al (2020).
 #'
 #' @references
 #' Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.
@@ -111,8 +111,8 @@ nearPD <- function(K0) {
     .Call(`_ZVCV_nearPD`, K0)
 }
 
-Phi_fn_cpp <- function(samples, derivatives, getX, polyorder = NULL, subset = NULL) {
-    .Call(`_ZVCV_Phi_fn_cpp`, samples, derivatives, getX, polyorder, subset)
+Phi_fn_cpp <- function(samples, derivatives, getX, polyorder = NULL, apriori = NULL) {
+    .Call(`_ZVCV_Phi_fn_cpp`, samples, derivatives, getX, polyorder, apriori)
 }
 
 CF_cpp <- function(integrands, samples, derivatives, steinOrder = NULL, kernel_function = NULL, sigma = NULL, K0 = NULL, one_in_denom = FALSE, diagnostics = FALSE) {
@@ -127,28 +127,28 @@ CF_crossval_cpp <- function(integrands, samples, derivatives, steinOrder = NULL,
     .Call(`_ZVCV_CF_crossval_cpp`, integrands, samples, derivatives, steinOrder, kernel_function, sigma, K0, folds, est_inds, input_weights, one_in_denom, diagnostics)
 }
 
-SECF_cpp <- function(integrands, samples, derivatives, getX, polyorder = NULL, steinOrder = NULL, kernel_function = NULL, sigma = NULL, K0 = NULL, subset = NULL, diagnostics = FALSE) {
-    .Call(`_ZVCV_SECF_cpp`, integrands, samples, derivatives, getX, polyorder, steinOrder, kernel_function, sigma, K0, subset, diagnostics)
+SECF_cpp <- function(integrands, samples, derivatives, getX, polyorder = NULL, steinOrder = NULL, kernel_function = NULL, sigma = NULL, K0 = NULL, apriori = NULL, diagnostics = FALSE) {
+    .Call(`_ZVCV_SECF_cpp`, integrands, samples, derivatives, getX, polyorder, steinOrder, kernel_function, sigma, K0, apriori, diagnostics)
 }
 
-SECF_unbiased_cpp <- function(integrands, samples, derivatives, est_inds, getX, polyorder = NULL, steinOrder = NULL, kernel_function = NULL, sigma = NULL, K0 = NULL, subset = NULL, diagnostics = FALSE) {
-    .Call(`_ZVCV_SECF_unbiased_cpp`, integrands, samples, derivatives, est_inds, getX, polyorder, steinOrder, kernel_function, sigma, K0, subset, diagnostics)
+SECF_unbiased_cpp <- function(integrands, samples, derivatives, est_inds, getX, polyorder = NULL, steinOrder = NULL, kernel_function = NULL, sigma = NULL, K0 = NULL, apriori = NULL, diagnostics = FALSE) {
+    .Call(`_ZVCV_SECF_unbiased_cpp`, integrands, samples, derivatives, est_inds, getX, polyorder, steinOrder, kernel_function, sigma, K0, apriori, diagnostics)
 }
 
-SECF_crossval_cpp <- function(integrands, samples, derivatives, getX, polyorder = NULL, steinOrder = NULL, kernel_function = NULL, sigma = NULL, K0 = NULL, subset = NULL, folds = NULL, est_inds = NULL, diagnostics = FALSE) {
-    .Call(`_ZVCV_SECF_crossval_cpp`, integrands, samples, derivatives, getX, polyorder, steinOrder, kernel_function, sigma, K0, subset, folds, est_inds, diagnostics)
+SECF_crossval_cpp <- function(integrands, samples, derivatives, getX, polyorder = NULL, steinOrder = NULL, kernel_function = NULL, sigma = NULL, K0 = NULL, apriori = NULL, folds = NULL, est_inds = NULL, diagnostics = FALSE) {
+    .Call(`_ZVCV_SECF_crossval_cpp`, integrands, samples, derivatives, getX, polyorder, steinOrder, kernel_function, sigma, K0, apriori, folds, est_inds, diagnostics)
 }
 
-aSECF_cpp_prep <- function(integrands, samples, derivatives, getX, polyorder = NULL, steinOrder = NULL, kernel_function = NULL, sigma = NULL, K0 = NULL, subset = NULL, nystrom_inds = NULL, conjugate_gradient = TRUE) {
-    .Call(`_ZVCV_aSECF_cpp_prep`, integrands, samples, derivatives, getX, polyorder, steinOrder, kernel_function, sigma, K0, subset, nystrom_inds, conjugate_gradient)
+aSECF_cpp_prep <- function(integrands, samples, derivatives, getX, polyorder = NULL, steinOrder = NULL, kernel_function = NULL, sigma = NULL, K0 = NULL, apriori = NULL, nystrom_inds = NULL, conjugate_gradient = TRUE) {
+    .Call(`_ZVCV_aSECF_cpp_prep`, integrands, samples, derivatives, getX, polyorder, steinOrder, kernel_function, sigma, K0, apriori, nystrom_inds, conjugate_gradient)
 }
 
-aSECF_unbiased_cpp_prep <- function(integrands, samples, derivatives, est_inds, getX, aSECF_mse_linsolve, polyorder = NULL, steinOrder = NULL, kernel_function = NULL, sigma = NULL, K0 = NULL, subset = NULL, nystrom_inds = NULL, conjugate_gradient = TRUE, reltol = 0.01, diagnostics = FALSE) {
-    .Call(`_ZVCV_aSECF_unbiased_cpp_prep`, integrands, samples, derivatives, est_inds, getX, aSECF_mse_linsolve, polyorder, steinOrder, kernel_function, sigma, K0, subset, nystrom_inds, conjugate_gradient, reltol, diagnostics)
+aSECF_unbiased_cpp_prep <- function(integrands, samples, derivatives, est_inds, getX, aSECF_mse_linsolve, polyorder = NULL, steinOrder = NULL, kernel_function = NULL, sigma = NULL, K0 = NULL, apriori = NULL, nystrom_inds = NULL, conjugate_gradient = TRUE, reltol = 0.01, diagnostics = FALSE) {
+    .Call(`_ZVCV_aSECF_unbiased_cpp_prep`, integrands, samples, derivatives, est_inds, getX, aSECF_mse_linsolve, polyorder, steinOrder, kernel_function, sigma, K0, apriori, nystrom_inds, conjugate_gradient, reltol, diagnostics)
 }
 
-aSECF_crossval_cpp <- function(integrands, samples, derivatives, getX, aSECF_mse_linsolve, num_nystrom, polyorder = NULL, steinOrder = NULL, kernel_function = NULL, sigma = NULL, subset = NULL, folds = NULL, conjugate_gradient = TRUE, reltol = 0.01, est_inds = NULL) {
-    .Call(`_ZVCV_aSECF_crossval_cpp`, integrands, samples, derivatives, getX, aSECF_mse_linsolve, num_nystrom, polyorder, steinOrder, kernel_function, sigma, subset, folds, conjugate_gradient, reltol, est_inds)
+aSECF_crossval_cpp <- function(integrands, samples, derivatives, getX, aSECF_mse_linsolve, num_nystrom, polyorder = NULL, steinOrder = NULL, kernel_function = NULL, sigma = NULL, apriori = NULL, folds = NULL, conjugate_gradient = TRUE, reltol = 0.01, est_inds = NULL) {
+    .Call(`_ZVCV_aSECF_crossval_cpp`, integrands, samples, derivatives, getX, aSECF_mse_linsolve, num_nystrom, polyorder, steinOrder, kernel_function, sigma, apriori, folds, conjugate_gradient, reltol, est_inds)
 }
 
 get_all_combins <- function(mymat, polyorder) {

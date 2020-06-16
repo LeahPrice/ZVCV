@@ -17,7 +17,7 @@
 data(VDP)
 }
 \description{
-This example illustrates how ZV-CV can be used for post-processing of results from SMC. In particular, we use ZV-CV to estimate posterior expectations and the evidence for a single SMC run of this example based on the Van der Pol oscillatory differential equations (Van der Pol, 1926). Further details about this example and applications to ZV-CV can be found in Oates et al. (2017) and South et al. (2019).
+This example illustrates how ZV-CV can be used for post-processing of results from likelihood-annealing SMC. In particular, we use ZV-CV to estimate posterior expectations and the evidence for a single SMC run of this example based on the Van der Pol oscillatory differential equations (Van der Pol, 1926). Further details about this example and applications to ZV-CV can be found in Oates et al. (2017) and South et al. (2019).
 
 Given that the focus of this R package is on ZV-CV, we assume that samples have already been obtained from SMC and put into the correct format. One could use the R package \code{RcppSMC} or implement their own sampler in order to obtain results like this. The key is to make sure the derivatives of the log likelihood and log prior are stored, along with the inverse temperatures.
 
@@ -50,29 +50,33 @@ posterior$polyorder # The selected polynomial order
 # Evidence estimation - The true logged evidence is 10.36 to 2 decimal places
 ##############################
 
-\dontrun{
 # Getting additional temperatures based on maintaing a CESS of 0.99N rather than 0.9N
 temp <- Expand_Temperatures(VDP$temperatures, VDP$loglike, 0.99)
 VDP$temperatures_new <- temp$temperatures_all # the new temperatures
 VDP$most_recent <- temp$relevant_samples # the samples associated with the new temperatures
-}
 
-\dontshow{
-# Getting additional temperatures based on maintaing a CESS of 0.91N rather than 0.9N
-temp <- Expand_Temperatures(VDP$temperatures, VDP$loglike, 0.91)
-VDP$temperatures_new <- temp$temperatures_all # the new temperatures
-VDP$most_recent <- temp$relevant_samples # the samples associated with the new temperatures
-}
+n_sigma <- 15
+sigma_list <- as.list( 10^(0.5*seq(-3,4,length.out=n_sigma)) )
 
 # Evidence estimation using the SMC identity
 Z_SMC <- evidence_SMC(VDP$samples, VDP$loglike, VDP$der_loglike, VDP$der_logprior,
 VDP$temperatures, VDP$temperatures_new, VDP$most_recent, options = options)
 Z_SMC$log_evidence
 
+# Evidence estimation using the SMC identity
+Z_SMC_CF <- evidence_SMC_CF(VDP$samples, VDP$loglike, VDP$der_loglike, VDP$der_logprior,
+VDP$temperatures, VDP$temperatures_new, VDP$most_recent, steinOrder = 2, kernel_function = "gaussian", sigma_list = sigma_list, folds = 2)
+Z_SMC_CF$log_evidence
+
 # Evidence estimation using the CTI identity
 Z_CTI <- evidence_CTI(VDP$samples, VDP$loglike, VDP$der_loglike, VDP$der_logprior,
 VDP$temperatures, VDP$temperatures_new, VDP$most_recent, options = options)
 Z_CTI$log_evidence_PS2
+
+# Evidence estimation using the CTI identity
+Z_CTI_CF <- evidence_CTI_CF(VDP$samples, VDP$loglike, VDP$der_loglike, VDP$der_logprior,
+VDP$temperatures, VDP$temperatures_new, VDP$most_recent, steinOrder = 2, kernel_function = "gaussian", sigma_list = sigma_list, folds = 2)
+Z_CTI_CF$log_evidence_PS2
 }
 \references{ 
 Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.

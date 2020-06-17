@@ -1,7 +1,7 @@
+#define BOOST_DISABLE_ASSERTS
+
 #ifndef ZVCV_KERNELS_H
 #define ZVCV_KERNELS_H 1.0
-
-#include <RcppArmadillo.h>
 
 #include <cstdio> 
 #include <cstdlib>
@@ -11,6 +11,8 @@
 #include <cmath>
 
 #include <boost/math/special_functions/bessel.hpp>
+
+#include <RcppArmadillo.h>
 
 //#include <algorithm>
 

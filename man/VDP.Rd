@@ -50,12 +50,13 @@ posterior$polyorder # The selected polynomial order
 # Evidence estimation - The true logged evidence is 10.36 to 2 decimal places
 ##############################
 
-# Getting additional temperatures based on maintaing a CESS of 0.99N rather than 0.9N
-temp <- Expand_Temperatures(VDP$temperatures, VDP$loglike, 0.99)
+# Getting additional temperatures based on maintaing a CESS of 0.91N rather than 0.9N.
+# The value 0.91 is used for speed but South et al. (2019) use 0.99.
+temp <- Expand_Temperatures(VDP$temperatures, VDP$loglike, 0.91)
 VDP$temperatures_new <- temp$temperatures_all # the new temperatures
 VDP$most_recent <- temp$relevant_samples # the samples associated with the new temperatures
 
-n_sigma <- 15
+n_sigma <- 3 # For speed, South et al. (2019) uses 15
 sigma_list <- as.list( 10^(0.5*seq(-3,4,length.out=n_sigma)) )
 
 # Evidence estimation using the SMC identity
@@ -65,7 +66,8 @@ Z_SMC$log_evidence
 
 # Evidence estimation using the SMC identity
 Z_SMC_CF <- evidence_SMC_CF(VDP$samples, VDP$loglike, VDP$der_loglike, VDP$der_logprior,
-VDP$temperatures, VDP$temperatures_new, VDP$most_recent, steinOrder = 2, kernel_function = "gaussian", sigma_list = sigma_list, folds = 2)
+VDP$temperatures, VDP$temperatures_new, VDP$most_recent, steinOrder = 2,
+kernel_function = "gaussian", sigma_list = sigma_list, folds = 2)
 Z_SMC_CF$log_evidence
 
 # Evidence estimation using the CTI identity
@@ -75,7 +77,8 @@ Z_CTI$log_evidence_PS2
 
 # Evidence estimation using the CTI identity
 Z_CTI_CF <- evidence_CTI_CF(VDP$samples, VDP$loglike, VDP$der_loglike, VDP$der_logprior,
-VDP$temperatures, VDP$temperatures_new, VDP$most_recent, steinOrder = 2, kernel_function = "gaussian", sigma_list = sigma_list, folds = 2)
+VDP$temperatures, VDP$temperatures_new, VDP$most_recent, steinOrder = 2,
+kernel_function = "gaussian", sigma_list = sigma_list, folds = 2)
 Z_CTI_CF$log_evidence_PS2
 }
 \references{ 

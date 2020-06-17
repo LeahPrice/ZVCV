@@ -126,7 +126,6 @@ arma::mat gaussian_k(unsigned int steinOrder, const arma::mat & samples, const a
     return(K0);
   }
   
-  Rcpp::Rcout << "Error in gaussian_k" << std::endl;
   return ( std::numeric_limits<arma::mat>::quiet_NaN() );
   
 }
@@ -272,7 +271,6 @@ arma::mat matern_k(unsigned int steinOrder, const arma::mat & samples, const arm
     return(K0);
   }
   
-  Rcpp::Rcout << "Error in matern_k" << std::endl;
   return ( std::numeric_limits<arma::mat>::quiet_NaN() );
   
 }
@@ -415,7 +413,6 @@ arma::mat RQ_k(unsigned int steinOrder, const arma::mat & samples, const arma::m
     return(K0);
   }
   
-  Rcpp::Rcout << "Error in RQ_k" << std::endl;
   return ( std::numeric_limits<arma::mat>::quiet_NaN() );
   
 }
@@ -448,7 +445,6 @@ arma::mat product_k(unsigned int steinOrder, const arma::mat & samples, const ar
         
         // First part of product, (1 + alpha_1*norm(x)^2 + alpha_1*norm(y)^2)^(-1)
         f = 1+a*(pow(norm(x,2),2.0) + pow(norm(y,2),2.0)); // pow(1+a*(pow(norm(x,2),2.0) + pow(norm(y,2),2.0)),-1.0);
-        //Rcpp::Rcout << "f is " << f << std::endl;
         dx1_f = -2*a*x*pow(f,-2.0);
         dy1_f = -2*a*y*pow(f,-2.0);
         dx1dy1_f = 8*pow(a,2.0)*x*y.t()*pow(f,-3.0);
@@ -542,7 +538,6 @@ arma::mat product_k(unsigned int steinOrder, const arma::mat & samples, const ar
         
         // First part of product, (1 + alpha_1*norm(x)^2 + alpha_1*norm(y)^2)^(-1)
         f = 1+a*(pow(norm(x,2),2.0) + pow(norm(y,2),2.0)); // pow(1+a*(pow(norm(x,2),2.0) + pow(norm(y,2),2.0)),-1.0);
-        //Rcpp::Rcout << "f is " << f << std::endl;
         dx1_f = -2*a*x*pow(f,-2.0);
         dy1_f = -2*a*y*pow(f,-2.0);
         dx1dy1_f = 8*pow(a,2.0)*x*y.t()*pow(f,-3.0);
@@ -619,7 +614,6 @@ arma::mat product_k(unsigned int steinOrder, const arma::mat & samples, const ar
     return(K0);
   }
   
-  Rcpp::Rcout << "Error in product_k" << std::endl;
   return ( std::numeric_limits<arma::mat>::quiet_NaN() );
   
 }
@@ -839,7 +833,6 @@ arma::mat prodsim_k(unsigned int steinOrder, const arma::mat & samples, const ar
     return(K0);
   }
   
-  Rcpp::Rcout << "Error in prodsim_k" << std::endl;
   return ( std::numeric_limits<arma::mat>::quiet_NaN() );
   
 }

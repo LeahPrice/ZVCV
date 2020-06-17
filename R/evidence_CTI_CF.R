@@ -49,7 +49,7 @@ evidence_CTI_CF <- function(samples, loglike, der_loglike, der_logprior, tempera
       if (sum(inds_unique)!=N){
         # adjusting the weights
         inds <- order(samples[inds_unique,1]) # find ordering of unique values (with have to undo ordering after below command which automatically reorders)
-        num_dups <- data.frame(a=samples[,1]) %>% group_by(a) %>% group_size() # find the number of duplicates using dplyr
+        num_dups <- data.frame(temp_for_dups=samples[,1]) %>% group_by(temp_for_dups) %>% group_size() # find the number of duplicates using dplyr
         log_weights_curr <- log_weights_curr[inds_unique] # adjusting weights
         log_weights_curr <- log_weights_curr + log(num_dups[order(inds)]) # adjusting weights
       }

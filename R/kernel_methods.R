@@ -290,7 +290,7 @@ CF_crossval <- function(integrands, samples, derivatives, steinOrder = NULL, ker
     if (sum(inds_unique)!=N){
       # adjusting the weights
       inds <- order(samples[inds_unique,1]) # find ordering of unique values (with have to undo ordering after below command which automatically reorders)
-      num_dups <- data.frame(a=samples[,1]) %>% group_by(a) %>% group_size() # find the number of duplicates using dplyr
+      num_dups <- data.frame(temp_for_dups=samples[,1]) %>% group_by(temp_for_dups) %>% group_size() # find the number of duplicates using dplyr
       if (!is.null(log_weights)){
         log_weights <- log_weights[inds_unique] # adjusting weights
         log_weights <- log_weights + log(num_dups[order(inds)]) # adjusting weights 

@@ -50,8 +50,6 @@ using \code{\link{squareNorm}}, as long as the \code{nystrom_inds} are \code{NUL
 \item{folds}{(optional) The number of folds for cross-validation. The default is five.}
 
 \item{diagnostics}{(optional) A flag for whether to return the necessary outputs for plotting or estimating using the fitted model. The default is \code{false} since this requires some additional computation when \code{est_inds} is \code{NULL}.}
-
-\item{K0_list}{(optional between this and \code{sigma_list}) A list of kernel matrices, which can be calculated using \code{\link{K0_fn}}.}
 }
 \value{
 A list with the following elements:

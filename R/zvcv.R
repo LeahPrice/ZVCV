@@ -38,70 +38,54 @@
 #' }
 #'
 #' @examples
-#' ####################################################################
-#' # The Gaussian example from South et al (2020)
-#'
-#' set.seed(10)
-#' 
-#' N <- 100
-#' d <- 4
-#' 
-#' integrand_fn <- function(x){ return (1 + x[,2] + 0.1*x[,1]*x[,2]*x[,3] + sin(x[,1])*exp(-(x[,2]*x[,3])^2)) }
-#' 
-#' # Multiple repeats of the below process, as in the examples from \code{\link{ZVCV}}, would be required to see variance reductions
-#' # but in practice one only has a single set of samples.
-#'
-#' x <- matrix(rnorm(N*d),ncol=d)
-#' u <- -x
-#' f <- integrand_fn(x)
-#' 
-#' sprintf("Vanilla MC: %.5f",mean(f))
-#' sprintf("ZV-CV with 1st order polynomial and OLS: %.5f",zvcv(f,x,u,options=list(polyorder=1,regul_reg=FALSE))$expectation)
-#' sprintf("ZV-CV with 2nd order polynomial and OLS: %.5f",zvcv(f,x,u,options=list(polyorder=2,regul_reg=FALSE))$expectation)
-#' sprintf("ZV-CV with 3rd order polynomial and LASSO: %.5f",zvcv(f,x,u,options=list(polyorder=3,nfolds=4))$expectation)
-#' myopts <- list(list(polyorder=Inf,regul_reg=FALSE,polyorder_max=2),list(polyorder=Inf,nfolds=4))
-#' sprintf("Cross-val ZV-CV: %.5f",zvcv(f,x,u,options=myopts,folds=2)$expectation)
-#'
-#' ####################################################################
 #' # An example where ZV-CV can result in zero-variance estimators
 #'
 #' # Estimating some expectations when theta is bivariate normally distributed with:
-#' mymean <- c(1,2)
+#' mymean <- c(-1.5,1.5)
 #' mycov <- matrix(c(1,0.5,0.5,2),nrow=2)
 #' 
 #' # Perfect draws from the target distribution (could be replaced with
 #' # approximate draws from e.g. MCMC or SMC)
-#' N <- 100
+#' N <- 30
 #' require(mvtnorm)
 #' set.seed(1)
 #' samples <- rmvnorm(N, mean = mymean, sigma = mycov)
-#' derivatives <- t( apply(samples,1,function(x) -solve(mycov)%*%(x - mymean)) ) # derivatives of Gaussian wrt x
+#' # derivatives of Gaussian wrt x
+#' derivatives <- t( apply(samples,1,function(x) -solve(mycov)%*%(x - mymean)) )
 #' 
-#' # The integrands are the marginal posterior means of theta, the variances and the covariance (true values are c(1,2,1,2,0.5))
-#' integrand <- cbind(samples[,1],samples[,2],(samples[,1] - mymean[1])^2,(samples[,2] - mymean[2])^2, (samples[,1] - mymean[1])*(samples[,2] - mymean[2]))
+#' # The integrands are the marginal posterior means of theta, the variances and the
+#' # covariance (true values are c(-1.5,1.5,1,2,0.5))
+#' integrand <- cbind(samples[,1],samples[,2],(samples[,1] - mymean[1])^2,
+#'     (samples[,2] - mymean[2])^2, (samples[,1] - mymean[1])*(samples[,2] - mymean[2]))
 #' 
 #' # Estimates without ZV-CV (i.e. vanilla Monte Carlo integration)
-#' print("Vanilla Monte Carlo")
-#' print(sprintf("%.15f",colMeans(integrand)))
+#' # Vanilla Monte Carlo
+#' sprintf("%.15f",colMeans(integrand))
 #' 
 #' # ZV-CV with fixed specifications
-#' # For this example, polyorder = 1 with OLS is exact for the first two integrands and polyorder = 2 with OLS is exact for the last three integrands
-#' print("ZV-CV with 2nd order polynomial and LASSO")
-#' print(sprintf("%.15f",zvcv(integrand, samples, derivatives)$expectation))
-#' print("ZV-CV with 2nd order polynomial, OLS and a polynomial based on only x_1. For diagonal mycov, this would be exact for the first and third expectations.")
-#' print(sprintf("%.15f",zvcv(integrand, samples, derivatives, options = list(polyorder = 2, regul_reg = FALSE, apriori = 1))$expectation))
-#' print("ZV-CV with 1st order polynomial and OLS (exact for the first two integrands)")
-#' print(sprintf("%.15f",zvcv(integrand, samples, derivatives, options = list(polyorder = 1, regul_reg = FALSE))$expectation))
-#' print("ZV-CV with 2nd order polynomial and OLS (exact for all)")
-#' print(sprintf("%.15f",zvcv(integrand, samples, derivatives, options = list(polyorder = 2, regul_reg = FALSE))$expectation)) 
+#' # For this example, polyorder = 1 with OLS is exact for the first two integrands and
+#' # polyorder = 2 with OLS is exact for the last three integrands
+#' 
+#' # ZV-CV with 2nd order polynomial, OLS and a polynomial based on only x_1.
+#' # For diagonal mycov, this would be exact for the first and third expectations.
+#' sprintf("%.15f",zvcv(integrand, samples, derivatives,
+#'     options = list(polyorder = 2, regul_reg = FALSE, apriori = 1))$expectation)
+#' 
+#' # ZV-CV with 1st order polynomial and OLS (exact for the first two integrands)
+#' sprintf("%.15f",zvcv(integrand, samples, derivatives,
+#'     options = list(polyorder = 1, regul_reg = FALSE))$expectation)
+#' 
+#' # ZV-CV with 2nd order polynomial and OLS (exact for all)
+#' sprintf("%.15f",zvcv(integrand, samples, derivatives,
+#'     options = list(polyorder = 2, regul_reg = FALSE))$expectation) 
 #' 
 #' # ZV-CV with cross validation
 #' myopts <- list(list(polyorder = Inf, regul_reg = FALSE),list(polyorder = Inf, nfolds = 4)) 
 #' temp <- zvcv(integrand,samples,derivatives,options = myopts, folds = 2) 
 #' temp$polyorder # The chosen control variate order
 #' temp$regul_reg # Flag for if the chosen control variate uses regularisation
-#' print("Cross-val ZV-CV to choose the polynomial order and whether to perform OLS or LASSO")
-#' print(sprintf("%.15f",temp$expectation)) # The expectation based on the minimum MSE control variate
+#' # Cross-val ZV-CV to choose the polynomial order and whether to perform OLS or LASSO
+#' sprintf("%.15f",temp$expectation) # Estimate based on the chosen control variate
 #' 
 #' 
 #' @references

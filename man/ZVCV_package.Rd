@@ -59,30 +59,36 @@ The function \code{\link{Expand_Temperatures}} can be used to adjust the tempera
 }
 
 \examples{
+# A real data example using ZV-CV is available at \link{VDP}.
+# This involves estimating posterior expectations and the evidence from SMC samples.
 
-# A real data example using ZV-CV is available at \link{VDP}. This involves estimating posterior expectations and the evidence from SMC samples.
+# The remainder of this section is duplicating (albeit with a different random
+# seed) Figure 2a of South et al. (2020).
 
-# The remainder of this section is duplicating (albeit with a different random seed) Figure 2a of South et al. (2020).
-
-N_repeats <- 10 # For speed, the actual code uses 100 
-N_all <- c(25,50,100) # For speed, the actual code uses c(10,25,50,100,250,500,1000) 
+N_repeats <- 2 # For speed, the actual code uses 100 
+N_all <- 25 # For speed, the actual code uses c(10,25,50,100,250,500,1000) 
 sigma_list <- list(10^(-1.5),10^(-1),10^(-0.5),1,10^(0.5),10)
-folds <- 5
+nfolds <- 4 # For speed, the actual code uses 10
+folds <- 2 # For speed, the actual code uses 5
 d <- 4
 
-integrand_fn <- function(x){ return (1 + x[,2] + 0.1*x[,1]*x[,2]*x[,3] + sin(x[,1])*exp(-(x[,2]*x[,3])^2)) }
+integrand_fn <- function(x){
+  return (1 + x[,2] + 0.1*x[,1]*x[,2]*x[,3] + sin(x[,1])*exp(-(x[,2]*x[,3])^2))
+}
 
 results <- data.frame()
 for (N in N_all){
 
   # identify the largest polynomial order that can be fit without regularisation for auto ZV-CV
   max_r <- 0
-  while (choose(d + max_r + 1,d)<(0.5*N)){ # 0.5*N because of the 2-fold cross-validation
+  while (choose(d + max_r + 1,d)<((folds-1)/folds*N)){
   	max_r <- max_r + 1
   }
 
-  MC <- ZV1 <- ZV2 <- ZVchoose <- CF <- SECF1 <- aSECF1 <- SECF2 <- aSECF2 <- rep(NaN,N_repeats)
-  CF_medHeur <- SECF1_medHeur <- aSECF1_medHeur <- SECF2_medHeur <- aSECF2_medHeur <- rep(NaN,N_repeats)
+  MC <- ZV1 <- ZV2 <- ZVchoose <- rep(NaN,N_repeats)
+  CF <- SECF1 <- aSECF1 <- SECF2 <- aSECF2 <- rep(NaN,N_repeats)
+  CF_medHeur <- SECF1_medHeur <- aSECF1_medHeur <- rep(NaN,N_repeats)
+  SECF2_medHeur <- aSECF2_medHeur <- rep(NaN,N_repeats)
   for (i in 1:N_repeats){     
     x <- matrix(rnorm(N*d),ncol=d)
     u <- -x
@@ -90,11 +96,13 @@ for (N in N_all){
     
     MC[i] <- mean(f)
     ZV1[i] <- zvcv(f,x,u,options=list(polyorder=1,regul_reg=FALSE))$expectation
-    if (N > choose(d+2,d)){  # Checking if the sample size is large enough to accommodation a second order polynomial
+    # Checking if the sample size is large enough to accommodation a second order polynomial
+    if (N > choose(d+2,d)){
       ZV2[i] <- zvcv(f,x,u,options=list(polyorder=2,regul_reg=FALSE))$expectation
     }
-    myopts <- list(list(polyorder=Inf,regul_reg=FALSE,polyorder_max=max_r),list(polyorder=Inf,nfolds=4))
-    ZVchoose[i] <- zvcv(f,x,u,options=myopts,folds = 2)$expectation
+    myopts <- list(list(polyorder=Inf,regul_reg=FALSE,polyorder_max=max_r),
+        list(polyorder=Inf,nfolds=nfolds))
+    ZVchoose[i] <- zvcv(f,x,u,options=myopts,folds = folds)$expectation
     
     # Calculating the kernel matrix in advance for CF and SECF
     K0_list <- list()
@@ -102,60 +110,82 @@ for (N in N_all){
       K0_list[[j]] <- K0_fn(x,u,sigma_list[[j]],steinOrder=2,kernel_function="RQ")
     }
     
-    CF[i] <- CF_crossval(f,x,u,K0_list=K0_list,folds = 2)$expectation
-    SECF1[i] <- SECF_crossval(f,x,u,K0_list=K0_list,folds = 2)$expectation
-    aSECF1[i] <- aSECF_crossval(f,x,u,steinOrder=2,kernel_function="RQ",sigma_list=sigma_list,reltol=1e-05,folds = 2)$expectation
+    CF[i] <- CF_crossval(f,x,u,K0_list=K0_list,folds = folds)$expectation
+    SECF1[i] <- SECF_crossval(f,x,u,K0_list=K0_list,folds = folds)$expectation
+    aSECF1[i] <- aSECF_crossval(f,x,u,steinOrder=2,kernel_function="RQ",
+        sigma_list=sigma_list,reltol=1e-05,folds = folds)$expectation
     if (max_r>=2){
-      SECF2[i] <- SECF_crossval(f,x,u,polyorder=2,K0_list=K0_list,folds = 2)$expectation
-      aSECF2[i] <- aSECF_crossval(f,x,u,polyorder=2,steinOrder=2,kernel_function="RQ",sigma_list=sigma_list,reltol=1e-05,folds = 2)$expectation
+      SECF2[i] <- SECF_crossval(f,x,u,polyorder=2,K0_list=K0_list,folds = folds)$expectation
+      aSECF2[i] <- aSECF_crossval(f,x,u,polyorder=2,steinOrder=2,kernel_function="RQ",
+          sigma_list=sigma_list,reltol=1e-05,folds = folds)$expectation
     }
 
     medHeur <- medianTune(x)
     K0_medHeur <- K0_fn(x,u,medHeur,steinOrder=2,kernel_function="RQ")
     CF_medHeur[i] <- CF(f,x,u,K0=K0_medHeur)$expectation
     SECF1_medHeur[i] <- SECF(f,x,u,K0=K0_medHeur)$expectation
-    aSECF1_medHeur[i] <- aSECF(f,x,u,steinOrder=2,kernel_function="RQ",sigma=medHeur,reltol=1e-05)$expectation
+    aSECF1_medHeur[i] <- aSECF(f,x,u,steinOrder=2,kernel_function="RQ",
+          sigma=medHeur,reltol=1e-05)$expectation
     if (max_r>=2){
       SECF2_medHeur[i] <- SECF(f,x,u,polyorder=2,K0=K0_medHeur)$expectation
-      aSECF2_medHeur[i] <- aSECF(f,x,u,polyorder=2,steinOrder=2,kernel_function="RQ",sigma=medHeur,reltol=1e-05)$expectation
+      aSECF2_medHeur[i] <- aSECF(f,x,u,polyorder=2,steinOrder=2,kernel_function="RQ",
+          sigma=medHeur,reltol=1e-05)$expectation
     }
     
-    print(sprintf("--\%d",i))
+    # print(sprintf("--\%d",i))
   }
   # Adding the results to a data frame
   MSE_crude <- mean((MC - 1)^2)
-  results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = 1, type = "MC")) 
-  results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = MSE_crude/mean((ZV1 - 1)^2), type = "ZV")) 
-  results <- rbind(results,data.frame(N=N, order = "2", efficiency = MSE_crude/mean((ZV2 - 1)^2), type = "ZV")) 
-  results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = MSE_crude/mean((ZVchoose - 1)^2), type = "ZVchoose")) 
-  results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = MSE_crude/mean((CF - 1)^2), type = "CF")) 
-  results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = MSE_crude/mean((SECF1 - 1)^2), type = "SECF")) 
-  results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = MSE_crude/mean((aSECF1 - 1)^2), type = "aSECF")) 
-  if ((0.5*N) > choose(d+2,d)){
-    results <- rbind(results,data.frame(N=N, order = "2", efficiency = MSE_crude/mean((SECF2 - 1)^2), type = "SECF")) 
-    results <- rbind(results,data.frame(N=N, order = "2", efficiency = MSE_crude/mean((aSECF2 - 1)^2), type = "aSECF")) 
+  results <- rbind(results,data.frame(N=N, order = "1 or NA",
+      efficiency = 1, type = "MC")) 
+  results <- rbind(results,data.frame(N=N, order = "1 or NA",
+      efficiency = MSE_crude/mean((ZV1 - 1)^2), type = "ZV")) 
+  results <- rbind(results,data.frame(N=N, order = "2",
+      efficiency = MSE_crude/mean((ZV2 - 1)^2), type = "ZV")) 
+  results <- rbind(results,data.frame(N=N, order = "1 or NA",
+      efficiency = MSE_crude/mean((ZVchoose - 1)^2), type = "ZVchoose")) 
+  results <- rbind(results,data.frame(N=N, order = "1 or NA",
+      efficiency = MSE_crude/mean((CF - 1)^2), type = "CF")) 
+  results <- rbind(results,data.frame(N=N, order = "1 or NA",
+      efficiency = MSE_crude/mean((SECF1 - 1)^2), type = "SECF")) 
+  results <- rbind(results,data.frame(N=N, order = "1 or NA",
+      efficiency = MSE_crude/mean((aSECF1 - 1)^2), type = "aSECF")) 
+  if (((folds-1)/folds*N) > choose(d+2,d)){
+    results <- rbind(results,data.frame(N=N, order = "2",
+      efficiency = MSE_crude/mean((SECF2 - 1)^2), type = "SECF")) 
+    results <- rbind(results,data.frame(N=N, order = "2",
+      efficiency = MSE_crude/mean((aSECF2 - 1)^2), type = "aSECF")) 
   }
 
-  results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = MSE_crude/mean((CF_medHeur - 1)^2), type = "CF_medHeur")) 
-  results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = MSE_crude/mean((SECF1_medHeur - 1)^2), type = "SECF_medHeur")) 
-  results <- rbind(results,data.frame(N=N, order = "1 or NA", efficiency = MSE_crude/mean((aSECF1_medHeur - 1)^2), type = "aSECF_medHeur")) 
-  if ((0.5*N) > choose(d+2,d)){
-    results <- rbind(results,data.frame(N=N, order = "2", efficiency = MSE_crude/mean((SECF2_medHeur - 1)^2), type = "SECF_medHeur")) 
-    results <- rbind(results,data.frame(N=N, order = "2", efficiency = MSE_crude/mean((aSECF2_medHeur - 1)^2), type = "aSECF_medHeur")) 
+  results <- rbind(results,data.frame(N=N, order = "1 or NA",
+      efficiency = MSE_crude/mean((CF_medHeur - 1)^2), type = "CF_medHeur")) 
+  results <- rbind(results,data.frame(N=N, order = "1 or NA",
+      efficiency = MSE_crude/mean((SECF1_medHeur - 1)^2), type = "SECF_medHeur")) 
+  results <- rbind(results,data.frame(N=N, order = "1 or NA",
+      efficiency = MSE_crude/mean((aSECF1_medHeur - 1)^2), type = "aSECF_medHeur")) 
+  if (((folds-1)/folds*N) > choose(d+2,d)){
+    results <- rbind(results,data.frame(N=N, order = "2",
+      efficiency = MSE_crude/mean((SECF2_medHeur - 1)^2), type = "SECF_medHeur")) 
+    results <- rbind(results,data.frame(N=N, order = "2",
+      efficiency = MSE_crude/mean((aSECF2_medHeur - 1)^2), type = "aSECF_medHeur")) 
   }
-  print(N)
+  # print(N)
 }
 
 
+\dontrun{
 # Plotting results where cross-validation is used for kernel methods
 require(ggplot2)
 require(ggthemes)
-a <- ggplot(data=subset(results,!(type \%in\% c("CF_medHeur","SECF_medHeur","aSECF_medHeur","SECF_medHeur","aSECF_medHeur"))),
-            aes(x=N,y=efficiency,col=type,linetype=order)) + scale_color_pander() + 
+a <- ggplot(data=subset(results,!(type \%in\% c("CF_medHeur","SECF_medHeur",
+  "aSECF_medHeur","SECF_medHeur","aSECF_medHeur"))),
+  aes(x=N,y=efficiency,col=type,linetype=order)) + scale_color_pander() + 
   ggtitle("") + geom_line(size=1.5) + scale_x_log10() + scale_y_log10() + 
-  annotation_logticks(base=10) + labs(x="N",y="Efficiency",color="Method",linetype="Polynomial Order") + theme_minimal(base_size = 15) +
+  annotation_logticks(base=10) + labs(x="N",y="Efficiency",color="Method",
+  linetype="Polynomial Order") + theme_minimal(base_size = 15) +
   theme(legend.key.size = unit(0.5, "cm"),legend.key.width =  unit(1, "cm")) +
-  guides(linetype = guide_legend(override.aes = list(size=1),title.position = "top"), color = guide_legend(override.aes = list(size=1),title.position = "top"))
+  guides(linetype = guide_legend(override.aes = list(size=1),title.position = "top"),
+  color = guide_legend(override.aes = list(size=1),title.position = "top"))
 print(a)
 
 
@@ -163,11 +193,13 @@ print(a)
 b <- ggplot(data=subset(results,!(type \%in\% c("CF","SECF","aSECF","SECF","aSECF"))),
             aes(x=N,y=efficiency,col=type,linetype=order)) + scale_color_pander() + 
   ggtitle("") + geom_line(size=1.5) + scale_x_log10() + scale_y_log10() + 
-  annotation_logticks(base=10) + labs(x="N",y="Efficiency",color="Method",linetype="Polynomial Order") + theme_minimal(base_size = 15) +
+  annotation_logticks(base=10) + labs(x="N",y="Efficiency",color="Method",
+  linetype="Polynomial Order") + theme_minimal(base_size = 15) +
   theme(legend.key.size = unit(0.5, "cm"),legend.key.width =  unit(1, "cm")) +
-  guides(linetype = guide_legend(override.aes = list(size=1),title.position = "top"), color = guide_legend(override.aes = list(size=1),title.position = "top"))
+  guides(linetype = guide_legend(override.aes = list(size=1),title.position = "top"),
+  color = guide_legend(override.aes = list(size=1),title.position = "top"))
 print(b)
-
+}
 
 }
 \references{
@@ -176,6 +208,13 @@ Mira, A., Solgi, R., & Imparato, D. (2013). Zero variance Markov chain Monte Car
 South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
 
 South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2018). Regularised zero-variance control variates for high-dimensional variance reduction. \url{https://arxiv.org/abs/1811.05073}
+}
+\seealso{
+Useful links:
+\itemize{
+  \item Report bugs at \url{https://github.com/LeahPrice/ZVCV/issues}
+}
+
 }
 \author{
 Leah F. South

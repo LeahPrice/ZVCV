@@ -88,7 +88,7 @@ double medianTune(const arma::mat & samples, const Rcpp::Nullable<Rcpp::NumericM
     }
   }
   
-  return( sqrt(arma::median(dists)/2) );
+  return( sqrt(arma::median(dists)/2.0) );
 }
 
 
@@ -241,7 +241,7 @@ arma::mat nearPD(arma::mat K0){
 		}
 		
 		// symmetry
-		K0 = (K0 + K0.t())/2;
+		K0 = (K0 + K0.t())/2.0;
 		
 		// svd
 		arma::mat U;
@@ -251,10 +251,10 @@ arma::mat nearPD(arma::mat K0){
 		arma::svd(U,s,V,K0);
 		arma::mat H = V*arma::diagmat(s)*V.t();
 		
-		K0 = (K0+H)/2;
+		K0 = (K0+H)/2.0;
 		
 		// symmetry
-		K0 = (K0 + K0.t())/2;
+		K0 = (K0 + K0.t())/2.0;
 		
 		bool SPDcheck = false;
 		double k = 0.0;
@@ -382,7 +382,7 @@ Rcpp::List CF_unbiased_cpp(const arma::mat & integrands, const arma::mat & sampl
   arma::mat diff = f_est - arma::ones<arma::vec>(N_est)*beta;
   arma::mat a = K0inv*diff;
   arma::mat f_hat = arma::ones<arma::vec>(N - N_est)*beta + K0mat_eval*a;
-  arma::vec expectation = 1/(N - N_est)*arma::sum(f_eval - f_hat,0).t() + beta.t();
+  arma::vec expectation = 1.0/static_cast<double>(N - N_est)*arma::sum(f_eval - f_hat,0).t() + beta.t();
   
   if (!diagnostics){
     return ( Rcpp::List::create(Rcpp::Named("expectation") = expectation, Rcpp::Named("f_true") = f_eval, Rcpp::Named("f_hat") = f_hat));
@@ -621,7 +621,7 @@ Rcpp::List SECF_unbiased_cpp(const arma::mat & integrands, const arma::mat & sam
   arma::mat diff = f_est-phi_est * beta;
   arma::mat a = K0inv*diff;
   arma::mat f_hat = phi_eval * beta + K0mat_eval * a;
-  arma::vec expectation =  1/(N - N_est)*arma::sum(f_eval - f_hat,0).t() + beta.row(0).t();
+  arma::vec expectation =  1.0/static_cast<double>(N - N_est)*arma::sum(f_eval - f_hat,0).t() + beta.row(0).t();
   
   if (!diagnostics){
     return ( Rcpp::List::create(Rcpp::Named("expectation") = expectation, Rcpp::Named("f_true") = f_eval, Rcpp::Named("f_hat") = f_hat) );
@@ -959,7 +959,7 @@ Rcpp::List aSECF_unbiased_cpp_prep(const arma::mat & integrands, const arma::mat
     
     f_hat.col(i) = phi_eval * beta.col(i) + K0_eval * a.col(i);
     
-    expectation(i) =  1/(N - N_est)*arma::sum(f_eval.col(i) - f_hat.col(i)) + arma::as_scalar(beta(0,i));
+    expectation(i) =  1.0/static_cast<double>(N - N_est)*arma::sum(f_eval.col(i) - f_hat.col(i)) + arma::as_scalar(beta(0,i));
   }
   
   

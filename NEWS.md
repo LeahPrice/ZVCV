@@ -33,3 +33,7 @@
 - obs_estim --> est_inds and is used to specify the estimation/fitting only samples (with the remainder being used for evaluation of the integrand
 - REMOVED obs_estim_choose, the option to specify the samples for each cross-validation fold. I think this level of flexibility would rarely be required and it cause confusion when est_inds is specified.
 
+# ZVCV 2.1.1
+
+* Fixing a bug in the sample pre-processing for the special case of no duplicates + split estimation
+* Other small bug fixes

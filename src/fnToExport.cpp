@@ -412,8 +412,8 @@ Rcpp::List CF_crossval_cpp(arma::mat integrands, arma::mat samples, arma::mat de
   Rcpp::List sig_list;
   Rcpp::List K0_list;
   
-  if ( (est_inds.isNotNull()) & (input_weights.isNotNull()) ){
-    throw(Rcpp::exception("Weights are given along with split indices. This is not currently implemented because typically split indices would be used to get unbiased estimators and using weighted importance samples introduces bias."));
+  if ( (est_inds.isNotNull()) && (input_weights.isNotNull()) ){
+    throw(Rcpp::exception("Weights are given along with split indices. This is not currently implemented because the goal of split indices is typically to get unbiased estimators, whereas one typically introduces bias by using weighted importance samples."));
   }
   
   if (sigma.isNotNull()) {

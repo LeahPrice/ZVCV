@@ -13,4 +13,4 @@ Suggests: partitions, ggplot2, ggthemes
 LinkingTo: Rcpp, RcppArmadillo, BH
 LazyData: true
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.3.2

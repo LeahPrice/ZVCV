@@ -4,6 +4,7 @@
 \name{ZVCV_package}
 \alias{ZVCV}
 \alias{ZVCV-package}
+\alias{ZVCV_package}
 \title{Zero-Variance Control Variates}
 \description{
 This package can be used to perform post-hoc variance reduction of Monte Carlo estimators when the derivatives of the log target are available.

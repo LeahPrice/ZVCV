@@ -105,9 +105,9 @@ zv <- function(integrand, samples, derivatives, log_weights, integrand_logged, e
 			
 		} else {
 			if (intercept){
-				fit <- lm(y_estim ~ X_estim, weights = weight_estim)
+				fit <- lm(y_estim ~ X_estim, weights = weight_estim, tol = .Machine$double.xmin)
 			} else {
-				fit <- lm(y_estim ~ X_estim - 1, weights = weight_estim)
+				fit <- lm(y_estim ~ X_estim - 1, weights = weight_estim, tol = .Machine$double.xmin)
 			}
 			coefs <- coef(fit) # columns are different integrands
 			num_select <- rep(NCOL(X_estim),NCOL(y_estim))

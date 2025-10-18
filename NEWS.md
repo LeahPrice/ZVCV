@@ -37,3 +37,11 @@
 
 * Fixing a bug in the sample pre-processing for the special case of no duplicates + split estimation
 * Other small bug fixes
+
+# ZVCV 2.1.2
+
+* Adjustments for CRAN request
+
+# ZVCV 2.1.3
+
+* Adjusting for RcppArmadillo updates, as per CRAN request

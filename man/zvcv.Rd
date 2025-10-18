@@ -11,8 +11,8 @@ zvcv(
   log_weights,
   integrand_logged = FALSE,
   est_inds,
-  options = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds = 10, apriori
-    = (1:NCOL(samples)), intercept = TRUE, polyorder_max = Inf),
+  options = list(polyorder = 2, regul_reg = TRUE, alpha_elnet = 1, nfolds = 10, apriori =
+    (1:NCOL(samples)), intercept = TRUE, polyorder_max = Inf),
   folds = 5
 )
 }

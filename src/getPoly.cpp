@@ -263,8 +263,11 @@ arma::umat combn(arma::uvec x, unsigned int m){ // Converted from base R's combn
 // Gets the vector of elements that are in x but not y
 arma::uvec setdiff(arma::uvec x, arma::uvec y){
 	for (unsigned int j = 0; j < y.n_rows; j++) {
-		arma::uword q1 = arma::conv_to<arma::uword>::from(arma::find(x == y(j)));
-		x.shed_row(q1);
+		arma::uvec idx = arma::find(x == y(j));
+		if (!idx.is_empty()) {
+			arma::uword q1 = idx(0);
+			x.shed_row(q1);
+		}
 	}
 	return x;
 }

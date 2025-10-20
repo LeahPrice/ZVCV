@@ -105,7 +105,7 @@ double medianTune(const arma::mat & samples, const Rcpp::Nullable<Rcpp::NumericM
 //' @param samples An \eqn{N} by \eqn{d} matrix of samples from the target
 //' @param derivatives	An \eqn{N} by \eqn{d} matrix of derivatives of the log target with respect to the parameters
 //' @param sigma			The tuning parameters of the specified kernel. This involves a single length-scale parameter in "gaussian" and "RQ", a length-scale and a smoothness parameter in "matern" and two parameters in "product" and "prodsim". See below for further details.
-//' @param steinOrder	This is the order of the Stein operator. The default is \code{1} in the control functionals paper (Oates et al, 2017) and \code{2} in the semi-exact control functionals paper (South et al, 2020).  The following values are currently available: \code{1} for all kernels and \code{2} for "gaussian", "matern" and "RQ". See below for further details.
+//' @param steinOrder	This is the order of the Stein operator. The default is \code{1} in the control functionals paper (Oates et al, 2017) and \code{2} in the semi-exact control functionals paper (South et al, 2022).  The following values are currently available: \code{1} for all kernels and \code{2} for "gaussian", "matern" and "RQ". See below for further details.
 //' @param kernel_function		Choose between "gaussian", "matern", "RQ", "product" or "prodsim". See below for further details.
 //' @param Z (optional) An \eqn{N} by \eqn{N} (or \eqn{N} by \eqn{m} where \eqn{m} is the length of \code{nystrom_inds}). This can be calculated using \code{\link{squareNorm}}.
 //' @param nystrom_inds (optional) The sample indices to be used in the Nystrom approximation (for when using aSECF).
@@ -118,7 +118,7 @@ double medianTune(const arma::mat & samples, const Rcpp::Nullable<Rcpp::NumericM
 //' The Stein operators for distribution \eqn{p(x)} are defined as:
 //' \itemize{
 //' \item \strong{\code{steinOrder=1}}: \eqn{L_x g(x) = \nabla_x^T g(x) + \nabla_x \log p(x)^T g(x)} (see e.g. Oates el al (2017))
-//' \item \strong{\code{steinOrder=2}}: \eqn{L_x g(x) = \Delta_x g(x) + \nabla_x log p(x)^T \nabla_x g(x)} (see e.g. South el al (2020))
+//' \item \strong{\code{steinOrder=2}}: \eqn{L_x g(x) = \Delta_x g(x) + \nabla_x log p(x)^T \nabla_x g(x)} (see e.g. South el al (2022))
 //' }
 //' Here \eqn{\nabla_x} is the first order derivative wrt \eqn{x} and \eqn{\Delta_x = \nabla_x^T \nabla_x} is the Laplacian operator.
 //'
@@ -135,12 +135,12 @@ double medianTune(const arma::mat & samples, const Rcpp::Nullable<Rcpp::NumericM
 //' \item \strong{\code{"prodsim"}}: A slightly different product kernel with \eqn{\sigma = (a,b)} (see e.g. \url{https://www.imperial.ac.uk/inference-group/projects/monte-carlo-methods/control-functionals/}),
 //' \deqn{k(x,y) = (1+a z(x))^{-1}(1 + a z(y))^{-1} exp(-0.5 b^{-2} z(x,y)) }
 //' }
-//' In the above equations, \eqn{z(x) = \sum_j x[j]^2} and \eqn{z(x,y) = \sum_j (x[j] - y[j])^2}. For the last two kernels, the code only has implementations for \code{steinOrder}=\code{1}. Each combination of \code{steinOrder} and \code{kernel_function} above is currently hard-coded but it may be possible to extend this to other kernels in future versions using autodiff. The calculations for the first three kernels above are detailed in South et al (2020).
+//' In the above equations, \eqn{z(x) = \sum_j x[j]^2} and \eqn{z(x,y) = \sum_j (x[j] - y[j])^2}. For the last two kernels, the code only has implementations for \code{steinOrder}=\code{1}. Each combination of \code{steinOrder} and \code{kernel_function} above is currently hard-coded but it may be possible to extend this to other kernels in future versions using autodiff. The calculations for the first three kernels above are detailed in South et al (2022).
 //'
 //' @references
 //' Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.
 //'
-//' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
+//' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2022). Semi-Exact Control Functionals From Sard's Method.  Biometrika, 109(2), 351–367.
 //'
 //' @author Leah F. South
 // [[Rcpp::export]]

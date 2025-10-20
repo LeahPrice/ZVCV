@@ -15,7 +15,7 @@
 #' }
 #'
 #' @references
-#' South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2019). Regularised zero variance control variates for high-dimensional variance reduction. \url{https://arxiv.org/abs/1811.05073}
+#' South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2023). Regularised zero variance control variates for high-dimensional variance reduction. Bayesian Analysis, 18(3), 865-888.
 #'
 #' @author Leah F. South
 #' @seealso See \code{\link{evidence}} for functions to estimate the evidence, \code{\link{VDP}} for an example and \link{ZVCV} for more package details.

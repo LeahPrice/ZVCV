@@ -36,7 +36,7 @@ zvcv(
 \item \code{alpha_elnet}:   The alpha parameter for elastic net. The default is 1, which correponds to LASSO. A value of 0 would correspond to ridge regression.
 \item \code{nfolds}:   The number of folds used in cross-validation to select lambda for LASSO or elastic net. The default is 10.
 \item \code{apriori}:   A vector containing the subset of parameter indices to use in the polynomial. Typically this argument would only be used if the dimension of the problem is very large or if prior information about parameter dependencies is known. The default is to use all parameters \eqn{1:d} where \eqn{d} is the dimension of the target. In \code{zvcv}, this is equivalent to using only the relevant columns in \code{samples} and \code{derivatives}).
-\item \code{intercept}:   A flag for whether the intercept should be estimated or fixed to the empirical mean of the integrand in the estimation set. The default is to include an intercept (\code{intercept = TRUE}) as this tends to lead to better variance reductions. Note that an \code{intercept = TRUE} flag may be changed to \code{intercept = FALSE} within the function if \code{integrand_logged = TRUE} and a \code{NaN} is encountered. See South et al. (2018) for further details.
+\item \code{intercept}:   A flag for whether the intercept should be estimated or fixed to the empirical mean of the integrand in the estimation set. The default is to include an intercept (\code{intercept = TRUE}) as this tends to lead to better variance reductions. Note that an \code{intercept = TRUE} flag may be changed to \code{intercept = FALSE} within the function if \code{integrand_logged = TRUE} and a \code{NaN} is encountered. See South et al. (2023) for further details.
 \item \code{polyorder_max}:   The maximum allowable polynomial order. This may be used to prevent memory issues in the case that the polynomial order is selected automatically. A default maximum polynomial order based on the regression design matrix having no more than ten million elements will be selected if the \code{polyorder} is infinite and in this case a warning will be given. Recall that setting your default R settings to \code{options(warn=1)} will ensure that you receive these warnings in real time. Optimal polynomial order selection may go to at most this maximum value, or it may stop earlier. 
 }}
 
@@ -118,7 +118,7 @@ sprintf("\%.15f",temp$expectation) # Estimate based on the chosen control variat
 \references{
 Mira, A., Solgi, R., & Imparato, D. (2013). Zero variance Markov chain Monte Carlo for Bayesian estimators. Statistics and Computing, 23(5), 653-662.
 
-South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2019). Regularised zero variance control variates for high-dimensional variance reduction. \url{https://arxiv.org/abs/1811.05073}
+South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2023). Regularised zero variance control variates for high-dimensional variance reduction. Bayesian Analysis, 18(3), 865-888.
 }
 \seealso{
 See \link{ZVCV} and \code{\link{VDP}} for additional examples. See \code{\link{evidence}} for functions which use \code{zvcv} to estimate the normalising constant of the posterior.

@@ -1,6 +1,6 @@
 #' Approximate semi-exact control functionals (aSECF)
 #' 
-#' This function performs approximate semi-exact control functionals as described in South et al (2020). It uses a nystrom approximation and conjugate gradient to speed up SECF.
+#' This function performs approximate semi-exact control functionals as described in South et al (2022). It uses a nystrom approximation and conjugate gradient to speed up SECF.
 #' This is faster than \code{\link{SECF}} for large \eqn{N}. If you would like to choose
 #' between different kernels using cross-validation, then you can use \code{\link{aSECF_crossval}}.
 #'
@@ -8,7 +8,7 @@
 #' @param samples		An \eqn{N} by \eqn{d} matrix of samples from the target
 #' @param derivatives	An \eqn{N} by \eqn{d} matrix of derivatives of the log target with respect to the parameters
 #' @param polyorder (optional)		The order of the polynomial to be used in the parametric component, with a default of \eqn{1}. We recommend keeping this value low (e.g. only 1-2).
-#' @param steinOrder (optional)	This is the order of the Stein operator. The default is \code{1} in the control functionals paper (Oates et al, 2017) and \code{2} in the semi-exact control functionals paper (South et al, 2020).  The following values are currently available: \code{1} for all kernels and \code{2} for "gaussian", "matern" and "RQ". See below for further details.
+#' @param steinOrder (optional)	This is the order of the Stein operator. The default is \code{1} in the control functionals paper (Oates et al, 2017) and \code{2} in the semi-exact control functionals paper (South et al, 2022).  The following values are currently available: \code{1} for all kernels and \code{2} for "gaussian", "matern" and "RQ". See below for further details.
 #' @param kernel_function (optional)		Choose between "gaussian", "matern", "RQ", "product" or "prodsim". See below for further details.
 #' @param sigma (optional)			The tuning parameters of the specified kernel. This involves a single length-scale parameter in "gaussian" and "RQ", a length-scale and a smoothness parameter in "matern" and two parameters in "product" and "prodsim". See below for further details.
 #' @param K0 (optional) The kernel matrix. One can specify either this or all of \code{sigma}, \code{steinOrder} and \code{kernel_function}. The former involves pre-computing the kernel matrix using \code{\link{K0_fn}} and is more efficient when using multiple estimators out of \code{\link{CF}}, \code{\link{SECF}} and  \code{\link{aSECF}} or when using the cross-validation functions.
@@ -27,15 +27,15 @@
 #' \item \code{iter}: (Only if \code{conjugate_gradient} = \code{TRUE}) The number of conjugate gradient iterations
 #' \item \code{f_true}: (Only if \code{est_inds} is not \code{NULL}) The integrands for the evaluation set. This should be the same as integrands[setdiff(1:N,est_inds),].
 #' \item \code{f_hat}: (Only if \code{est_inds} is not \code{NULL}) The fitted values for the integrands in the evaluation set. This can be used to help assess the performance of the Gaussian process model.
-#' \item \code{a}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{a} as described in South et al (2020), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
-#' \item \code{b}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{b} as described in South et al (2020), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
+#' \item \code{a}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{a} as described in South et al (2022), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
+#' \item \code{b}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{b} as described in South et al (2022), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
 #' \item \code{ny_inds}: (Only if \code{diagnostics} = \code{TRUE}) The indices of the samples used in the nystrom approximation (this will match nystrom_inds if this argument was not \code{NULL}).
 #' } 
 #'
 #' @inheritSection K0_fn On the choice of \eqn{\sigma}, the kernel and the Stein order
 #' 
 #' @references
-#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
+#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2022). Semi-Exact Control Functionals From Sard's Method.  Biometrika, 109(2), 351–367.
 #'
 #' @author Leah F. South
 #' @seealso See \link{ZVCV} for examples and related functions. See \code{\link{aSECF_crossval}} for a function to choose between different kernels for this estimator.
@@ -170,9 +170,9 @@ aSECF <- function(integrands,samples,derivatives, polyorder = NULL, steinOrder =
 #' \item \code{expectation}: The estimate(s) of the (\eqn{k}) expectation(s).
 #' \item \code{f_true}: (Only if \code{est_inds} is not \code{NULL}) The integrands for the evaluation set. This should be the same as integrands[setdiff(1:N,est_inds),].
 #' \item \code{f_hat}: (Only if \code{est_inds} is not \code{NULL}) The fitted values for the integrands in the evaluation set. This can be used to help assess the performance of the Gaussian process model.
-#' \item \code{a}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{a} as described in South et al (2020), where predictions are of the form \eqn{f_hat = K0*a + 1*b} for heldout K0 and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b}.
-#' \item \code{b}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{b} as described in South et al (2020), where predictions are of the form \eqn{f_hat = K0*a + 1*b} for heldout K0 and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b}.
-#' \item \code{ksd}: (Only if \code{diagnostics} = \code{TRUE}) An estimated kernel Stein discrepancy based on the fitted model that can be used for diagnostic purposes. See South et al (2020) for further details.
+#' \item \code{a}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{a} as described in South et al (2022), where predictions are of the form \eqn{f_hat = K0*a + 1*b} for heldout K0 and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b}.
+#' \item \code{b}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{b} as described in South et al (2022), where predictions are of the form \eqn{f_hat = K0*a + 1*b} for heldout K0 and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b}.
+#' \item \code{ksd}: (Only if \code{diagnostics} = \code{TRUE}) An estimated kernel Stein discrepancy based on the fitted model that can be used for diagnostic purposes. See South et al (2022) for further details.
 #' \item \code{bound_const}: (Only if \code{diagnostics} = \code{TRUE} and \code{est_inds}=\code{NULL}) This is such that the absolute error for the estimator should be less than \eqn{ksd \times bound_const}.
 #' } 
 #'
@@ -184,7 +184,7 @@ aSECF <- function(integrands,samples,derivatives, polyorder = NULL, steinOrder =
 #' @references
 #' Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.
 #'
-#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
+#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2022). Semi-Exact Control Functionals From Sard's Method.  Biometrika, 109(2), 351–367.
 #'
 #' @author Leah F. South
 #' @seealso See \link{ZVCV} for examples and related functions. See \code{\link{CF_crossval}} for a function to choose between different kernels for this estimator.
@@ -257,9 +257,9 @@ CF <- function(integrands, samples, derivatives, steinOrder = NULL, kernel_funct
 #' \item \code{optinds}: The optimal indices from the list for each expectation.
 #' \item \code{f_true}: (Only if \code{est_inds} is not \code{NULL}) The integrands for the evaluation set. This should be the same as integrands[setdiff(1:N,est_inds),].
 #' \item \code{f_hat}: (Only if \code{est_inds} is not \code{NULL}) The fitted values for the integrands in the evaluation set. This can be used to help assess the performance of the Gaussian process model.
-#' \item \code{a}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{a} as described in South et al (2020), where predictions are of the form \eqn{f_hat = K0*a + 1*b} for heldout K0 and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b}.
-#' \item \code{b}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{b} as described in South et al (2020), where predictions are of the form \eqn{f_hat = K0*a + 1*b} for heldout K0 and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b}.
-#' \item \code{ksd}: (Only if \code{diagnostics} = \code{TRUE}) An estimated kernel Stein discrepancy based on the fitted model that can be used for diagnostic purposes. See South et al (2020) for further details.
+#' \item \code{a}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{a} as described in South et al (2022), where predictions are of the form \eqn{f_hat = K0*a + 1*b} for heldout K0 and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b}.
+#' \item \code{b}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{b} as described in South et al (2022), where predictions are of the form \eqn{f_hat = K0*a + 1*b} for heldout K0 and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b}.
+#' \item \code{ksd}: (Only if \code{diagnostics} = \code{TRUE}) An estimated kernel Stein discrepancy based on the fitted model that can be used for diagnostic purposes. See South et al (2022) for further details.
 #' \item \code{bound_const}: (Only if \code{diagnostics} = \code{TRUE} and \code{est_inds}=\code{NULL}) This is such that the absolute error for the estimator should be less than \eqn{ksd \times bound_const}.
 #' } 
 #'
@@ -271,7 +271,7 @@ CF <- function(integrands, samples, derivatives, steinOrder = NULL, kernel_funct
 #' @references
 #' Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.
 #'
-#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
+#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2022). Semi-Exact Control Functionals From Sard's Method.  Biometrika, 109(2), 351–367.
 #'
 #' @author Leah F. South
 #' @seealso See \link{ZVCV} for examples and related functions. See \code{\link{CF}} for a function to perform control functionals with fixed kernel specifications.
@@ -350,7 +350,7 @@ CF_crossval <- function(integrands, samples, derivatives, steinOrder = NULL, ker
 
 #' Semi-exact control functionals (SECF)
 #' 
-#' This function performs semi-exact control functionals as described in South et al (2020).
+#' This function performs semi-exact control functionals as described in South et al (2022).
 #' To choose between different kernels using cross-validation, use \code{\link{SECF_crossval}}.
 #'
 #' @inheritParams aSECF
@@ -360,9 +360,9 @@ CF_crossval <- function(integrands, samples, derivatives, steinOrder = NULL, ker
 #' \item \code{expectation}: The estimate(s) of the (\eqn{k}) expectation(s).
 #' \item \code{f_true}: (Only if \code{est_inds} is not \code{NULL}) The integrands for the evaluation set. This should be the same as integrands[setdiff(1:N,est_inds),].
 #' \item \code{f_hat}: (Only if \code{est_inds} is not \code{NULL}) The fitted values for the integrands in the evaluation set. This can be used to help assess the performance of the Gaussian process model.
-#' \item \code{a}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{a} as described in South et al (2020), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
-#' \item \code{b}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{b} as described in South et al (2020), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
-#' \item \code{ksd}: (Only if \code{diagnostics} = \code{TRUE}) An estimated kernel Stein discrepancy based on the fitted model that can be used for diagnostic purposes. See South et al (2020) for further details.
+#' \item \code{a}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{a} as described in South et al (2022), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
+#' \item \code{b}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{b} as described in South et al (2022), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
+#' \item \code{ksd}: (Only if \code{diagnostics} = \code{TRUE}) An estimated kernel Stein discrepancy based on the fitted model that can be used for diagnostic purposes. See South et al (2022) for further details.
 #' \item \code{bound_const}: (Only if \code{diagnostics} = \code{TRUE} and \code{est_inds}=\code{NULL}) This is such that the absolute error for the estimator should be less than \eqn{ksd \times bound_const}.
 #' }
 #'
@@ -370,7 +370,7 @@ CF_crossval <- function(integrands, samples, derivatives, steinOrder = NULL, ker
 #'
 #' @section Warning:
 #' Solving the linear system in SECF has \eqn{O(N^3+Q^3)} complexity where \eqn{N} is the sample size and \eqn{Q} is the number of terms in the polynomial.
-#' Standard SECF is therefore not suited to large \eqn{N}. The method aSECF is designed for larger \eqn{N} and details can be found at \code{\link{aSECF}} and in South et al (2020).
+#' Standard SECF is therefore not suited to large \eqn{N}. The method aSECF is designed for larger \eqn{N} and details can be found at \code{\link{aSECF}} and in South et al (2022).
 #' An alternative would be to use \eqn{est_inds} which has \eqn{O(N_0^3 + Q^3)} complexity in solving the linear system and \eqn{O((N-N_0)^2)} complexity in
 #' handling the remaining samples, where \eqn{N_0} is the length of \eqn{est_inds}. This can be much cheaper for small \eqn{N_0} but the estimation of the
 #' Gaussian process model is only done using \eqn{N_0} samples and the evaluation of the integral only uses \eqn{N-N_0} samples.
@@ -378,7 +378,7 @@ CF_crossval <- function(integrands, samples, derivatives, steinOrder = NULL, ker
 #' @references
 #' Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.
 #'
-#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
+#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2022). Semi-Exact Control Functionals From Sard's Method.  Biometrika, 109(2), 351–367.
 #'
 #' @author Leah F. South
 #' @seealso See \link{ZVCV} for examples and related functions. See \code{\link{SECF_crossval}} for a function to choose between different kernels for this estimator.
@@ -447,7 +447,7 @@ SECF <- function(integrands,samples,derivatives, polyorder = NULL, steinOrder = 
 #' Semi-exact control functionals (SECF) with cross-validation
 #' 
 #' This function chooses between a list of kernel tuning parameters (\code{sigma_list}) or a list of K0 matrices (\code{K0_list}) for
-#' the semi-exact control functionals method described in South et al (2020). The latter requires
+#' the semi-exact control functionals method described in South et al (2022). The latter requires
 #' calculating and storing kernel matrices using \code{\link{K0_fn}} but it is more flexible
 #' because it can be used to choose the Stein operator order and the kernel function, in addition
 #' to its parameters. It is also faster to pre-specify \code{\link{K0_fn}}.
@@ -465,9 +465,9 @@ SECF <- function(integrands,samples,derivatives, polyorder = NULL, steinOrder = 
 #' \item \code{optinds}: The optimal indices from the list for each expectation.
 #' \item \code{f_true}: (Only if \code{est_inds} is not \code{NULL}) The integrands for the evaluation set. This should be the same as integrands[setdiff(1:N,est_inds),].
 #' \item \code{f_hat}: (Only if \code{est_inds} is not \code{NULL}) The fitted values for the integrands in the evaluation set. This can be used to help assess the performance of the Gaussian process model.
-#' \item \code{a}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{a} as described in South et al (2020), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
-#' \item \code{b}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{b} as described in South et al (2020), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
-#' \item \code{ksd}: (Only if \code{diagnostics} = \code{TRUE}) An estimated kernel Stein discrepancy based on the fitted model that can be used for diagnostic purposes. See South et al (2020) for further details.
+#' \item \code{a}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{a} as described in South et al (2022), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
+#' \item \code{b}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{b} as described in South et al (2022), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
+#' \item \code{ksd}: (Only if \code{diagnostics} = \code{TRUE}) An estimated kernel Stein discrepancy based on the fitted model that can be used for diagnostic purposes. See South et al (2022) for further details.
 #' \item \code{bound_const}: (Only if \code{diagnostics} = \code{TRUE} and \code{est_inds}=\code{NULL}) This is such that the absolute error for the estimator should be less than \eqn{ksd \times bound_const}.
 #' } 
 #'
@@ -475,7 +475,7 @@ SECF <- function(integrands,samples,derivatives, polyorder = NULL, steinOrder = 
 #'
 #' @section Warning:
 #' Solving the linear system in SECF has \eqn{O(N^3+Q^3)} complexity where \eqn{N} is the sample size and \eqn{Q} is the number of terms in the polynomial.
-#' Standard SECF is therefore not suited to large \eqn{N}. The method aSECF is designed for larger \eqn{N} and details can be found at \code{\link{aSECF}} and in South et al (2020).
+#' Standard SECF is therefore not suited to large \eqn{N}. The method aSECF is designed for larger \eqn{N} and details can be found at \code{\link{aSECF}} and in South et al (2022).
 #' An alternative would be to use \eqn{est_inds} which has \eqn{O(N_0^3 + Q^3)} complexity in solving the linear system and \eqn{O((N-N_0)^2)} complexity in
 #' handling the remaining samples, where \eqn{N_0} is the length of \eqn{est_inds}. This can be much cheaper for large \eqn{N} but the estimation of the
 #' Gaussian process model is only done using \eqn{N_0} samples and the evaluation of the integral only uses \eqn{N-N_0} samples.
@@ -483,7 +483,7 @@ SECF <- function(integrands,samples,derivatives, polyorder = NULL, steinOrder = 
 #' @references
 #' Oates, C. J., Girolami, M. & Chopin, N. (2017). Control functionals for Monte Carlo integration. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 79(3), 695-718.
 #'
-#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
+#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2022). Semi-Exact Control Functionals From Sard's Method.  Biometrika, 109(2), 351–367.
 #'
 #' @author Leah F. South
 #' @seealso See \link{ZVCV} for examples and related functions. See \code{\link{SECF}} for a function to perform semi-exact control functionals with fixed kernel specifications.
@@ -606,7 +606,7 @@ aSECF_mse_linsolve <- function(integrands,samples,derivatives, polyorder = NULL,
 #' Approximate semi-exact control functionals (aSECF) with cross-validation
 #' 
 #' This function chooses between a list of kernel tuning parameters (\code{sigma_list}) or a list of K0 matrices (\code{K0_list}) for
-#' the approximate semi-exact control functionals method described in South et al (2020). The latter requires
+#' the approximate semi-exact control functionals method described in South et al (2022). The latter requires
 #' calculating and storing kernel matrices using \code{\link{K0_fn}} but it is more flexible
 #' because it can be used to choose the Stein operator order and the kernel function, in addition
 #' to its parameters. It is also faster to pre-specify \code{\link{K0_fn}}.
@@ -626,15 +626,15 @@ aSECF_mse_linsolve <- function(integrands,samples,derivatives, polyorder = NULL,
 #' \item \code{iter}: (Only if \code{conjugate_gradient} = \code{TRUE}) The number of conjugate gradient iterations
 #' \item \code{f_true}: (Only if \code{est_inds} is not \code{NULL}) The integrands for the evaluation set. This should be the same as integrands[setdiff(1:N,est_inds),].
 #' \item \code{f_hat}: (Only if \code{est_inds} is not \code{NULL}) The fitted values for the integrands in the evaluation set. This can be used to help assess the performance of the Gaussian process model.
-#' \item \code{a}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{a} as described in South et al (2020), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
-#' \item \code{b}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{b} as described in South et al (2020), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
+#' \item \code{a}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{a} as described in South et al (2022), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
+#' \item \code{b}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{b} as described in South et al (2022), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
 #' \item \code{ny_inds}: (Only if \code{diagnostics} = \code{TRUE}) The indices of the samples used in the nystrom approximation (this will match nystrom_inds if this argument was not \code{NULL}).
 #' } 
 #'
 #' @inheritSection K0_fn On the choice of \eqn{\sigma}, the kernel and the Stein order
 #' 
 #' @references
-#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
+#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2022). Semi-Exact Control Functionals From Sard's Method.  Biometrika, 109(2), 351–367.
 #'
 #' @author Leah F. South
 #' @seealso See \link{ZVCV} for examples and related functions. See \code{\link{aSECF_crossval}} for a function to choose between different kernels for this estimator.
@@ -772,7 +772,7 @@ aSECF_crossval <- function(integrands,samples,derivatives, polyorder = NULL, ste
 #' Phi matrix calculation
 #' 
 #' This function calculates the \eqn{\Phi} matrix, which is a second order Stein operator applied
-#' to a polynomial. See South et al (2020) for further details. This function is not required for
+#' to a polynomial. See South et al (2022) for further details. This function is not required for
 #' estimation but may be useful when evaluation samples are not initially available since
 #' estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]} where \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices.
 #' 
@@ -781,7 +781,7 @@ aSECF_crossval <- function(integrands,samples,derivatives, polyorder = NULL, ste
 #' @return An \eqn{N} by \eqn{Q} matrix (where Q is determined by the polynomial order and the apriori).
 #'
 #' @references
-#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
+#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2022). Semi-Exact Control Functionals From Sard's Method.  Biometrika, 109(2), 351–367.
 #'
 #' @author Leah F. South
 Phi_fn <- function(samples,derivatives,polyorder=NULL,apriori=NULL){

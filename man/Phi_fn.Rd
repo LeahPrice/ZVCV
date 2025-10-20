@@ -20,12 +20,12 @@ An \eqn{N} by \eqn{Q} matrix (where Q is determined by the polynomial order and 
 }
 \description{
 This function calculates the \eqn{\Phi} matrix, which is a second order Stein operator applied
-to a polynomial. See South et al (2020) for further details. This function is not required for
+to a polynomial. See South et al (2022) for further details. This function is not required for
 estimation but may be useful when evaluation samples are not initially available since
 estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]} where \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices.
 }
 \references{
-South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
+South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2022). Semi-Exact Control Functionals From Sard's Method.  Biometrika, 109(2), 351–367.
 }
 \author{
 Leah F. South

@@ -7,11 +7,11 @@
 #' You can evaluate posterior expectations of \eqn{k} functions.
 #'
 #' \itemize{
-#'      \item \code{\link{zvcv}}: For estimating expectations using (regularised) zero-variance control variates (ZV-CV, Mira et al, 2013; South et al, 2018).
+#'      \item \code{\link{zvcv}}: For estimating expectations using (regularised) zero-variance control variates (ZV-CV, Mira et al, 2013; South et al, 2023).
 #'      This function can also be used to choose between various versions of ZV-CV using cross-validation.
 #'      \item \code{\link{CF}}: For estimating expectations using control functionals (CF, Oates et al, 2017). 
-#'      \item \code{\link{SECF}}: For estimating expectations using semi-exact control functionals (SECF, South et al, 2020).
-#'      \item \code{\link{aSECF}}: For estimating expectations using approximate semi-exact control functionals (aSECF, South et al, 2020). 
+#'      \item \code{\link{SECF}}: For estimating expectations using semi-exact control functionals (SECF, South et al, 2022).
+#'      \item \code{\link{aSECF}}: For estimating expectations using approximate semi-exact control functionals (aSECF, South et al, 2022). 
 #'      \item \code{\link{CF_crossval}}: CF with cross-validation tuning.
 #'      \item \code{\link{SECF_crossval}}: SECF with cross-validation tuning.
 #'      \item \code{\link{aSECF_crossval}}: aSECF with cross-validation tuning.
@@ -39,7 +39,7 @@
 #'      }
 #' 
 #' @section Evidence estimation:
-#' The following functions are used to estimate the evidence (the normalisiing constant of the posterior) as described in South et al (2018). They are relevant when
+#' The following functions are used to estimate the evidence (the normalisiing constant of the posterior) as described in South et al (2023). They are relevant when
 #' sequential Monte Carlo with an annealing schedule has been used to collect the samples, and therefore are not of interest to those who are interested in
 #' variance reduction based on vanilla MCMC.
 #' \itemize{
@@ -54,7 +54,7 @@
 #' # This involves estimating posterior expectations and the evidence from SMC samples.
 #' 
 #' # The remainder of this section is duplicating (albeit with a different random
-#' # seed) Figure 2a of South et al. (2020).
+#' # seed) Figure 2a of South et al. (2022).
 #' 
 #' N_repeats <- 2 # For speed, the actual code uses 100 
 #' N_all <- 25 # For speed, the actual code uses c(10,25,50,100,250,500,1000) 
@@ -195,9 +195,9 @@
 #' @references
 #' Mira, A., Solgi, R., & Imparato, D. (2013). Zero variance Markov chain Monte Carlo for Bayesian estimators. Statistics and Computing, 23(5), 653-662.
 #' 
-#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
+#' South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2022). Semi-Exact Control Functionals From Sard's Method.  Biometrika, 109(2), 351–367.
 #'
-#' South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2018). Regularised zero-variance control variates for high-dimensional variance reduction. \url{https://arxiv.org/abs/1811.05073}
+#' South, L. F., Oates, C. J., Mira, A., & Drovandi, C. (2023). Regularised zero-variance control variates for high-dimensional variance reduction. Bayesian Analysis, 18(3), 865-888.
 #'
 #' @author Leah F. South
 #' @name ZVCV_package

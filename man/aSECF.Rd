@@ -30,7 +30,7 @@ aSECF(
 
 \item{polyorder}{(optional)        The order of the polynomial to be used in the parametric component, with a default of \eqn{1}. We recommend keeping this value low (e.g. only 1-2).}
 
-\item{steinOrder}{(optional)    This is the order of the Stein operator. The default is \code{1} in the control functionals paper (Oates et al, 2017) and \code{2} in the semi-exact control functionals paper (South et al, 2020).  The following values are currently available: \code{1} for all kernels and \code{2} for "gaussian", "matern" and "RQ". See below for further details.}
+\item{steinOrder}{(optional)    This is the order of the Stein operator. The default is \code{1} in the control functionals paper (Oates et al, 2017) and \code{2} in the semi-exact control functionals paper (South et al, 2022).  The following values are currently available: \code{1} for all kernels and \code{2} for "gaussian", "matern" and "RQ". See below for further details.}
 
 \item{kernel_function}{(optional)        Choose between "gaussian", "matern", "RQ", "product" or "prodsim". See below for further details.}
 
@@ -59,13 +59,13 @@ A list with the following elements:
 \item \code{iter}: (Only if \code{conjugate_gradient} = \code{TRUE}) The number of conjugate gradient iterations
 \item \code{f_true}: (Only if \code{est_inds} is not \code{NULL}) The integrands for the evaluation set. This should be the same as integrands[setdiff(1:N,est_inds),].
 \item \code{f_hat}: (Only if \code{est_inds} is not \code{NULL}) The fitted values for the integrands in the evaluation set. This can be used to help assess the performance of the Gaussian process model.
-\item \code{a}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{a} as described in South et al (2020), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
-\item \code{b}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{b} as described in South et al (2020), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
+\item \code{a}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{a} as described in South et al (2022), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
+\item \code{b}: (Only if \code{diagnostics} = \code{TRUE}) The value of \eqn{b} as described in South et al (2022), where predictions are of the form \eqn{f_hat = K0*a + Phi*b} for heldout K0 and Phi matrices and estimators using heldout samples are of the form \eqn{mean(f - f_hat) + b[1]}.
 \item \code{ny_inds}: (Only if \code{diagnostics} = \code{TRUE}) The indices of the samples used in the nystrom approximation (this will match nystrom_inds if this argument was not \code{NULL}).
 }
 }
 \description{
-This function performs approximate semi-exact control functionals as described in South et al (2020). It uses a nystrom approximation and conjugate gradient to speed up SECF.
+This function performs approximate semi-exact control functionals as described in South et al (2022). It uses a nystrom approximation and conjugate gradient to speed up SECF.
 This is faster than \code{\link{SECF}} for large \eqn{N}. If you would like to choose
 between different kernels using cross-validation, then you can use \code{\link{aSECF_crossval}}.
 }
@@ -76,7 +76,7 @@ The kernel in Stein-based kernel methods is \eqn{L_x L_y k(x,y)} where \eqn{L_x}
 The Stein operators for distribution \eqn{p(x)} are defined as:
 \itemize{
 \item \strong{\code{steinOrder=1}}: \eqn{L_x g(x) = \nabla_x^T g(x) + \nabla_x \log p(x)^T g(x)} (see e.g. Oates el al (2017))
-\item \strong{\code{steinOrder=2}}: \eqn{L_x g(x) = \Delta_x g(x) + \nabla_x log p(x)^T \nabla_x g(x)} (see e.g. South el al (2020))
+\item \strong{\code{steinOrder=2}}: \eqn{L_x g(x) = \Delta_x g(x) + \nabla_x log p(x)^T \nabla_x g(x)} (see e.g. South el al (2022))
 }
 Here \eqn{\nabla_x} is the first order derivative wrt \eqn{x} and \eqn{\Delta_x = \nabla_x^T \nabla_x} is the Laplacian operator.
 
@@ -90,14 +90,14 @@ The generic kernels which are implemented in this package are listed below.  Not
 \deqn{k(x,y) = (1+\sigma^{-2}z(x,y))^{-1}}
 \item \strong{\code{"product"}}: The product kernel that appears in Oates et al (2017) with \eqn{\sigma = (a,b)}
 \deqn{k(x,y) = (1+a z(x) + a z(y))^{-1} exp(-0.5 b^{-2} z(x,y)) }
-\item \strong{\code{"prodsim"}}: A slightly different product kernel with \eqn{\sigma = (a,b)},
+\item \strong{\code{"prodsim"}}: A slightly different product kernel with \eqn{\sigma = (a,b)} (see e.g. \url{https://www.imperial.ac.uk/inference-group/projects/monte-carlo-methods/control-functionals/}),
 \deqn{k(x,y) = (1+a z(x))^{-1}(1 + a z(y))^{-1} exp(-0.5 b^{-2} z(x,y)) }
 }
-In the above equations, \eqn{z(x) = \sum_j x[j]^2} and \eqn{z(x,y) = \sum_j (x[j] - y[j])^2}. For the last two kernels, the code only has implementations for \code{steinOrder}=\code{1}. Each combination of \code{steinOrder} and \code{kernel_function} above is currently hard-coded but it may be possible to extend this to other kernels in future versions using autodiff. The calculations for the first three kernels above are detailed in South et al (2020).
+In the above equations, \eqn{z(x) = \sum_j x[j]^2} and \eqn{z(x,y) = \sum_j (x[j] - y[j])^2}. For the last two kernels, the code only has implementations for \code{steinOrder}=\code{1}. Each combination of \code{steinOrder} and \code{kernel_function} above is currently hard-coded but it may be possible to extend this to other kernels in future versions using autodiff. The calculations for the first three kernels above are detailed in South et al (2022).
 }
 
 \references{
-South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2020). Semi-Exact Control Functionals From Sard's Method.  \url{https://arxiv.org/abs/2002.00033}
+South, L. F., Karvonen, T., Nemeth, C., Girolami, M. and Oates, C. J. (2022). Semi-Exact Control Functionals From Sard's Method.  Biometrika, 109(2), 351–367.
 }
 \seealso{
 See \link{ZVCV} for examples and related functions. See \code{\link{aSECF_crossval}} for a function to choose between different kernels for this estimator.

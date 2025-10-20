@@ -4,4 +4,6 @@
 ^README\.html$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.git$
+^\.github$
 deprecated
